@@ -6,6 +6,7 @@ import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.techhounds.houndutil.houndlib.MotorHoldMode;
 import com.techhounds.houndutil.houndlib.subsystems.BaseSwerveDrive;
+import com.techhounds.houndutil.houndlib.swerve.KrakenCoaxialSwerveModule;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -17,6 +18,18 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class Drivetrain implements BaseSwerveDrive {
+    private KrakenCoaxialSwerveModule frontLeft = new KrakenCoaxialSwerveModule(0, 0, 0, null, false, false, false, 0,
+            null);
+
+    private KrakenCoaxialSwerveModule frontRight = new KrakenCoaxialSwerveModule(0, 0, 0, null, false, false, false, 0,
+            null);
+
+    private KrakenCoaxialSwerveModule backLeft = new KrakenCoaxialSwerveModule(0, 0, 0, null, false, false, false, 0,
+            null);
+
+    private KrakenCoaxialSwerveModule backRight = new KrakenCoaxialSwerveModule(0, 0, 0, null, false, false, false, 0,
+            null);
+
     public DriveMode getDriveMode() {
     }
 
