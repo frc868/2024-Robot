@@ -57,7 +57,8 @@ public class Drivetrain implements BaseSwerveDrive {
     public void resetPoseEstimator(Pose2d pose) {
     }
 
-    public void resetGyro();
+    public void resetGyro() {
+    }
 
     public void setMotorHoldModes(MotorHoldMode motorHoldMode) {
     }
