@@ -18,17 +18,24 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class Drivetrain implements BaseSwerveDrive {
-    private KrakenCoaxialSwerveModule frontLeft = new KrakenCoaxialSwerveModule(0, 0, 0, null, false, false, false, 0,
+    private KrakenCoaxialSwerveModule frontLeft = new KrakenCoaxialSwerveModule(0, 0, 0, null, false, false, false,
+            0,
             null);
 
-    private KrakenCoaxialSwerveModule frontRight = new KrakenCoaxialSwerveModule(0, 0, 0, null, false, false, false, 0,
+    private KrakenCoaxialSwerveModule frontRight = new KrakenCoaxialSwerveModule(0, 0, 0, null, false, false, false,
+            0,
             null);
 
-    private KrakenCoaxialSwerveModule backLeft = new KrakenCoaxialSwerveModule(0, 0, 0, null, false, false, false, 0,
+    private KrakenCoaxialSwerveModule backLeft = new KrakenCoaxialSwerveModule(0, 0, 0, null, false, false, false,
+            0,
             null);
 
-    private KrakenCoaxialSwerveModule backRight = new KrakenCoaxialSwerveModule(0, 0, 0, null, false, false, false, 0,
+    private KrakenCoaxialSwerveModule backRight = new KrakenCoaxialSwerveModule(0, 0, 0, null, false, false, false,
+            0,
             null);
+
+    public Drivetrain() {
+    }
 
     public DriveMode getDriveMode() {
     }
