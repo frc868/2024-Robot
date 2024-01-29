@@ -68,8 +68,12 @@ public class ShooterTilt extends SubsystemBase implements BaseElevator<ElevatorP
      *  units radians and meters
      */
 
-    public double getAngleFromLength(double length){
-        double theta = Math.acos((LEAD_SCREW_RADIUS_METERS*LEAD_SCREW_RADIUS_METERS + length*length - SHOOTER_LENGTH_METERS*SHOOTER_LENGTH_METERS - BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS*BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS) / (2*SHOOTER_LENGTH_METERS*BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS)); 
+    public double getAngleFromLength(double length){ //TODO account for angle offset and length offset
+        double theta = Math.acos((LEAD_SCREW_RADIUS_METERS*LEAD_SCREW_RADIUS_METERS + 
+            length*length - SHOOTER_LENGTH_METERS*SHOOTER_LENGTH_METERS - 
+            BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS*BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS) 
+            / (-2*SHOOTER_LENGTH_METERS*BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS)); 
+
         theta += SHOOTER_OFFSET_ANGLE_RADIANS;
         return theta;
     }
@@ -78,9 +82,14 @@ public class ShooterTilt extends SubsystemBase implements BaseElevator<ElevatorP
      * get the lead screw length approximately based on shooter angle
      *  units meters and radians
      */
-    public double getLengthFromAngle(double angle){
+    public double getLengthFromAngle(double angle){ //TODO account for angle offset and length offset
         //inverse of get angle from length or something 
-        return 1337;
+        double length = Math.sqrt(-2*BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS*SHOOTER_LENGTH_METERS*Math.cos(angle) +
+            BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS*BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS +
+            SHOOTER_LENGTH_METERS*SHOOTER_LENGTH_METERS - 
+            LEAD_SCREW_RADIUS_METERS*LEAD_SCREW_RADIUS_METERS);
+        
+        return length;
     }
 
 
