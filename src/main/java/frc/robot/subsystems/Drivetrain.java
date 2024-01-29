@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import java.util.function.DoubleSupplier;
 
+import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.techhounds.houndutil.houndlib.MotorHoldMode;
@@ -33,6 +34,8 @@ public class Drivetrain implements BaseSwerveDrive {
     private KrakenCoaxialSwerveModule backRight = new KrakenCoaxialSwerveModule(0, 0, 0, null, false, false, false,
             0,
             null);
+
+    private Pigeon2 gyro = new Pigeon2(0);
 
     private SwerveDrivePoseEstimator poseEstimator;
 
