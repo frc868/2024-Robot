@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import java.util.function.Supplier;
 
+import com.techhounds.houndutil.houndlib.AprilTagPhotonCamera;
 import com.techhounds.houndutil.houndlib.subsystems.BaseVision;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -9,6 +10,10 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 
 public class Vision implements BaseVision {
+    private AprilTagPhotonCamera camera1 = new AprilTagPhotonCamera(null, null, null, 0, 0);
+    private AprilTagPhotonCamera camera2 = new AprilTagPhotonCamera(null, null, null, 0, 0);
+    private AprilTagPhotonCamera camera3 = new AprilTagPhotonCamera(null, null, null, 0, 0);
+
     public Vision() {
     }
 
