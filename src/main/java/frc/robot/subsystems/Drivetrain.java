@@ -45,6 +45,7 @@ public class Drivetrain implements BaseSwerveDrive {
     }
 
     public DriveMode getDriveMode() {
+        return driveMode;
     }
 
     public Pose2d getPose() {
@@ -72,6 +73,7 @@ public class Drivetrain implements BaseSwerveDrive {
     }
 
     public void resetGyro() {
+        gyro.reset();
     }
 
     public void setMotorHoldModes(MotorHoldMode motorHoldMode) {
@@ -81,6 +83,10 @@ public class Drivetrain implements BaseSwerveDrive {
     }
 
     public void stop() {
+        frontLeft.stop();
+        frontRight.stop();
+        backLeft.stop();
+        backRight.stop();
     }
 
     public void setStates(SwerveModuleState[] state) {
