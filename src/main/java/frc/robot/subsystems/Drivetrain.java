@@ -39,6 +39,8 @@ public class Drivetrain implements BaseSwerveDrive {
 
     private SwerveDrivePoseEstimator poseEstimator;
 
+    private DriveMode driveMode = DriveMode.FIELD_ORIENTED;
+
     public Drivetrain() {
     }
 
