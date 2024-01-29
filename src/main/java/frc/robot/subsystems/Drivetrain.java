@@ -34,6 +34,8 @@ public class Drivetrain implements BaseSwerveDrive {
             0,
             null);
 
+    private SwerveDrivePoseEstimator poseEstimator;
+
     public Drivetrain() {
     }
 
