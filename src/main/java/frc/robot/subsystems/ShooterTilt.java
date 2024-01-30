@@ -8,6 +8,7 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.techhounds.houndutil.houndlib.SparkConfigurator;
 import com.techhounds.houndutil.houndlib.subsystems.BaseElevator;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
+import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
 
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 
@@ -20,8 +21,9 @@ import frc.robot.Constants.ShooterTilt.ElevatorPosition;
 
 import static frc.robot.Constants.ShooterTilt.*;
 
+@LoggedObject
 public class ShooterTilt extends SubsystemBase implements BaseElevator<ElevatorPosition>{
-    
+    /** The primary motor responsible for lead screw movement. */
     @Log
     private CANSparkFlex Primary;
 
@@ -36,6 +38,10 @@ public class ShooterTilt extends SubsystemBase implements BaseElevator<ElevatorP
     @Log(groups = "control")
     private double feedforwardVoltage = 0;
 
+    /** 
+     * Initializes ShooterTilt
+    */
+
     public ShooterTilt() {
 
         Primary = SparkConfigurator.createSparkFlex(
@@ -46,13 +52,14 @@ public class ShooterTilt extends SubsystemBase implements BaseElevator<ElevatorP
                 (s) -> s.getEncoder().setVelocityConversionFactor(ENCODER_ROTATIONS_TO_METERS / 60.0));
         PIDController.setTolerance(TOLERANCE);
         setDefaultCommand(moveToCurrentGoalCommand());
+
         
     }
   
 
     @Override
     public void periodic(){
-        //do odometry
+        //simulation stuff
     }
 
 
@@ -126,7 +133,7 @@ public class ShooterTilt extends SubsystemBase implements BaseElevator<ElevatorP
     }
     @Override
     public Command moveToPositionCommand(Supplier<ElevatorPosition> goalPositionSupplier){ //what's even the point of this?
-        return Commands.sequence(
+        return Commands.sequence(                                                          //for this year at least
             runOnce(() -> PIDController.reset(getPosition())),
             runOnce(() -> PIDController.setGoal(goalPositionSupplier.get().value)), 
             moveToCurrentGoalCommand().until(PIDController::atGoal)
@@ -154,12 +161,15 @@ public class ShooterTilt extends SubsystemBase implements BaseElevator<ElevatorP
     public Command resetPositionCommand(){
         return runOnce(() -> resetPosition());
     }
+
+    /*These ones im not exactly sure about */
     @Override
     public Command setOverridenSpeedCommand(Supplier<Double> speed){
         return run(() -> setVoltage(12.0 * speed.get()))
                 .withName("Set Overridden Elevator Speed");
 
     }
+
     @Override
     public Command coastMotorsCommand(){
         return runOnce(() -> Primary.stopMotor())
@@ -169,4 +179,5 @@ public class ShooterTilt extends SubsystemBase implements BaseElevator<ElevatorP
             PIDController.reset(getPosition());
         }).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
     }
+
 }
