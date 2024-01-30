@@ -50,7 +50,9 @@ public class ShooterTilt extends SubsystemBase implements BaseElevator<ElevatorP
                 (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
                 (s) -> s.getEncoder().setPositionConversionFactor(ENCODER_ROTATIONS_TO_METERS),
                 (s) -> s.getEncoder().setVelocityConversionFactor(ENCODER_ROTATIONS_TO_METERS / 60.0));
+        
         PIDController.setTolerance(TOLERANCE);
+        
         setDefaultCommand(moveToCurrentGoalCommand());
 
         
@@ -77,9 +79,9 @@ public class ShooterTilt extends SubsystemBase implements BaseElevator<ElevatorP
 
     public double getAngleFromLength(double length){ //TODO account for angle offset and length offset
         double theta = Math.acos((LEAD_SCREW_RADIUS_METERS*LEAD_SCREW_RADIUS_METERS + 
-            length*length - SHOOTER_LENGTH_METERS*SHOOTER_LENGTH_METERS - 
+            length*length - SHOOTER_PIVOT_TO_ENDPOINT_PIVOT_LENGTH_METERS*SHOOTER_PIVOT_TO_ENDPOINT_PIVOT_LENGTH_METERS - 
             BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS*BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS) 
-            / (-2*SHOOTER_LENGTH_METERS*BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS)); 
+            / (-2*SHOOTER_PIVOT_TO_ENDPOINT_PIVOT_LENGTH_METERS*BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS)); 
 
         theta += SHOOTER_OFFSET_ANGLE_RADIANS;
         return theta;
@@ -91,9 +93,9 @@ public class ShooterTilt extends SubsystemBase implements BaseElevator<ElevatorP
      */
     public double getLengthFromAngle(double angle){ //TODO account for angle offset and length offset
         //inverse of get angle from length or something 
-        double length = Math.sqrt(-2*BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS*SHOOTER_LENGTH_METERS*Math.cos(angle) +
+        double length = Math.sqrt(-2*BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS*SHOOTER_PIVOT_TO_ENDPOINT_PIVOT_LENGTH_METERS*Math.cos(angle) +
             BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS*BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS +
-            SHOOTER_LENGTH_METERS*SHOOTER_LENGTH_METERS - 
+            SHOOTER_PIVOT_TO_ENDPOINT_PIVOT_LENGTH_METERS*SHOOTER_PIVOT_TO_ENDPOINT_PIVOT_LENGTH_METERS - 
             LEAD_SCREW_RADIUS_METERS*LEAD_SCREW_RADIUS_METERS);
         
         return length;
