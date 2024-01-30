@@ -58,8 +58,14 @@ public class Drivetrain implements BaseSwerveDrive {
     }
 
     public SwerveModuleState[] getModuleStates() {
+        return new SwerveModuleState[] {
+                frontLeft.getState(),
+                backLeft.getState(),
+                frontRight.getState(),
+                backRight.getState()
+        };
     }
-
+    
     public ChassisSpeeds getChassisSpeeds() {
     }
 
@@ -133,6 +139,8 @@ public class Drivetrain implements BaseSwerveDrive {
     }
 
     public Command resetGyroCommand() {
+
+
     }
 
     public Command setDriveCurrentLimitCommand(int currentLimit) {
