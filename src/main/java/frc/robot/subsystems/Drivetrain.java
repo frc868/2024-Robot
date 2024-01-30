@@ -54,9 +54,25 @@ public class Drivetrain implements BaseSwerveDrive {
     public Rotation2d getRotation() {
     }
 
+    /**
+     * Gets the current swerve module positions
+     * 
+     * @return the current swerve module positions
+     */
     public SwerveModulePosition[] getModulePositions() {
+        return new SwerveModulePosition[] {
+                frontLeft.getPosition(),
+                backLeft.getPosition(),
+                frontRight.getPosition(),
+                backRight.getPosition()
+        };
     }
 
+    /**
+     * Get the current swerve module states (encoder velocities).
+     * 
+     * @return the current swerve module states
+     */
     public SwerveModuleState[] getModuleStates() {
         return new SwerveModuleState[] {
                 frontLeft.getState(),
@@ -65,7 +81,7 @@ public class Drivetrain implements BaseSwerveDrive {
                 backRight.getState()
         };
     }
-    
+
     public ChassisSpeeds getChassisSpeeds() {
     }
 
@@ -139,7 +155,6 @@ public class Drivetrain implements BaseSwerveDrive {
     }
 
     public Command resetGyroCommand() {
-
 
     }
 
