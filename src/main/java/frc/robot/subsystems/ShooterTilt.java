@@ -21,6 +21,19 @@ import frc.robot.Constants.ShooterTilt.ElevatorPosition;
 
 import static frc.robot.Constants.ShooterTilt.*;
 
+class ShooterPositionData //honestly dont even really consider this, its just a far out idea
+{
+    public double xPosition;
+    public double yPosition;
+    public double angle;
+    public ShooterPositionData(double xPosition, double yPosition, double angle){
+        this.xPosition = xPosition;
+        this.yPosition = yPosition;
+        this.angle = angle;
+    }
+};
+
+
 @LoggedObject
 public class ShooterTilt extends SubsystemBase implements BaseElevator<ElevatorPosition>{
     /** The primary motor responsible for lead screw movement. */
@@ -83,7 +96,6 @@ public class ShooterTilt extends SubsystemBase implements BaseElevator<ElevatorP
             BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS*BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS) 
             / (-2*SHOOTER_PIVOT_TO_ENDPOINT_PIVOT_LENGTH_METERS*BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS)); 
 
-        theta += SHOOTER_OFFSET_ANGLE_RADIANS;
         return theta;
     }
 
@@ -106,8 +118,17 @@ public class ShooterTilt extends SubsystemBase implements BaseElevator<ElevatorP
      * get the shooter's pivot position offset approximately based on lead screw length (since thats the only thing we know)
      *  ill figure this out later lmfao
      */
-    public double adjustPositionalOffset(double length){
-        return 1337;
+    public ShooterPositionData findEndpointPosition(double length){ // I don't know whether or not we'd want a custom class or something
+        
+        //given that the endpoint position is on the path of a circle,
+        //and being able to find the angle of something...
+        //
+        double angle = getAngleFromLength(length);
+        double actualX = (SHOOTER_PIVOT_TO_ENDPOINT_PIVOT_LENGTH_METERS+ENDPOINT_PIVOT_TO_ENDPOINT_DX)*Math.cos(angle+SHOOTER_PIVOT_TO_ENDPOINT_ANGLE);
+        double actualY = (SHOOTER_PIVOT_TO_ENDPOINT_PIVOT_LENGTH_METERS+ENDPOINT_PIVOT_TO_ENDPOINT_DX)*Math.sin(angle+SHOOTER_PIVOT_TO_ENDPOINT_ANGLE);
+        double actualFiringAngle = angle + SHOOTER_OFFSET_ANGLE_RADIANS;
+        ShooterPositionData spd = new ShooterPositionData(actualX,actualY,actualFiringAngle);
+        return spd;
     }
 
     @Override
