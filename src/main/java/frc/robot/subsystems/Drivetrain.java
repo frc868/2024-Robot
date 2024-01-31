@@ -17,8 +17,9 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Drivetrain implements BaseSwerveDrive {
+public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     private KrakenCoaxialSwerveModule frontLeft = new KrakenCoaxialSwerveModule(0, 0, 0, null, false, false, false,
             0,
             null);
@@ -117,7 +118,7 @@ public class Drivetrain implements BaseSwerveDrive {
         backRight.stop();
     }
 
-    //Sets the state for each swerve module
+    // Sets the state for each swerve module
     public void setStates(SwerveModuleState[] state) {
         frontLeft.setState(states[0]);
         frontRight.setState(states[1]);
@@ -150,7 +151,7 @@ public class Drivetrain implements BaseSwerveDrive {
     public Command wheelLockCommand() {
     }
 
-    //Creates the command to make all wheels turn to an angle
+    // Creates the command to make all wheels turn to an angle
     public Command turnWheelsToAngleCommand(double angle) {
         return Commmand.runOnce(()->{
                 setModuleStates(new SwerveModuleState[] {
@@ -182,11 +183,11 @@ public class Drivetrain implements BaseSwerveDrive {
 
     public Command setDriveCurrentLimitCommand(int currentLimit) {
         return Commands.runOnce(() -> {
-                frontLeft.setDriveCurrentLimit(currentLimit);
-                frontRight.setDriveCurrentLimit(currentLimit);
-                backLeft.setDriveCurrentLimit(currentLimit);
-                backRight.setDriveCurrentLimit(currentLimit);
-            });
+            frontLeft.setDriveCurrentLimit(currentLimit);
+            frontRight.setDriveCurrentLimit(currentLimit);
+            backLeft.setDriveCurrentLimit(currentLimit);
+            backRight.setDriveCurrentLimit(currentLimit);
+        });
     }
 
     public Command coastMotorsCommand() {
