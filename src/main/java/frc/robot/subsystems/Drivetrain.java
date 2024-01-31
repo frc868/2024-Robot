@@ -43,9 +43,6 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     private DriveMode driveMode = DriveMode.FIELD_ORIENTED;
 
     public Drivetrain() {
-        resetGyro();
-
-        poseEstimator = new SwerveDrivePoseEstimator(null, getRotation(), getModulePositions(), new Pose2d());
     }
 
     public DriveMode getDriveMode() {
@@ -53,6 +50,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     public Pose2d getPose() {
+        return poseEstimator.getEstimatedPosition();
     }
 
     /**
@@ -96,12 +94,15 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     public SwerveDrivePoseEstimator getPoseEstimator() {
+        return poseEstimator;
     }
 
     public void updatePoseEstimator() {
+        poseEstimator.update(getGyroRotation2d(), getModulePositions());
     }
 
     public void resetPoseEstimator(Pose2d pose) {
+        poseEstimator.resetPosition(getGyroRotation2d(), getModulePositions(), pose);
     }
 
     public void resetGyro() {
@@ -129,12 +130,14 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
         backRight.stop();
     }
 
-    // Sets the state for each swerve module
+    /*
+     * Set states for the swerve modules
+     */
     public void setStates(SwerveModuleState[] state) {
-        frontLeft.setState(states[0]);
-        frontRight.setState(states[1]);
-        backLeft.setState(states[2]);
-        backRight.setState(states[3]);
+        frontLeft.setState(state[0]);
+        frontRight.setState(state[1]);
+        backLeft.setState(state[2]);
+        backRight.setState(state[3]);
     }
 
     public void setStatesClosedLoop(SwerveModuleState[] state) {
@@ -162,7 +165,9 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     public Command wheelLockCommand() {
     }
 
-    // Creates the command to make all wheels turn to an angle
+    /* 
+     * Creates the command to make all wheels turn to an angle
+    */
     public Command turnWheelsToAngleCommand(double angle) {
         return Commmand.runOnce(()->{
                 setModuleStates(new SwerveModuleState[] {
@@ -184,14 +189,26 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     public Command driveDeltaCommand(Transform2d delta, PathConstraints constraints) {
     }
 
+    /*
+     * Sets the drive mode as a command
+     */
     public Command setDriveModeCommand(DriveMode driveMode) {
         return runOnce(() -> this.driveMode = driveMode);
     }
 
+    /*
+     * resets the  gyro command                                                        
+     */
     public Command resetGyroCommand() {
+        return Commands.runOnce(()->{
+                gyro.reset();
+        });
 
     }
 
+    /*
+     * Sets the drive current limits for each swerve modules
+     */
     public Command setDriveCurrentLimitCommand(int currentLimit) {
         return Commands.runOnce(() -> {
             frontLeft.setDriveCurrentLimit(currentLimit);
