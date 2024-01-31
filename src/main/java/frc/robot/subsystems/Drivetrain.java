@@ -43,6 +43,9 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     private DriveMode driveMode = DriveMode.FIELD_ORIENTED;
 
     public Drivetrain() {
+        resetGyro();
+
+        poseEstimator = new SwerveDrivePoseEstimator(null, getRotation(), getModulePositions(), new Pose2d());
     }
 
     public DriveMode getDriveMode() {
