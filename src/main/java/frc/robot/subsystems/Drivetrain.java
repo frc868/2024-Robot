@@ -81,10 +81,10 @@ public class Drivetrain implements BaseSwerveDrive {
      */
     public SwerveModuleState[] getModuleStates() {
         return new SwerveModuleState[] {
-                frontLeft.getState(),
-                backLeft.getState(),
-                frontRight.getState(),
-                backRight.getState()
+                frontLeft.getState(states[0]);
+                frontRight.getState(states[1]);
+                backLeft.getState(states[2]);
+                backRight.getState(states[3]);
         };
     }
 
@@ -117,7 +117,12 @@ public class Drivetrain implements BaseSwerveDrive {
         backRight.stop();
     }
 
+    //Sets the state for each swerve module
     public void setStates(SwerveModuleState[] state) {
+        frontLeft.setState(states[0]);
+        frontRight.setState(states[1]);
+        backLeft.setState(states[2]);
+        backRight.setState(states[3]);
     }
 
     public void setStatesClosedLoop(SwerveModuleState[] state) {
@@ -145,7 +150,17 @@ public class Drivetrain implements BaseSwerveDrive {
     public Command wheelLockCommand() {
     }
 
+    //Creates the command to make all wheels turn to an angle
     public Command turnWheelsToAngleCommand(double angle) {
+        return Commmand.runOnce(()->{
+                setModuleStates(new SwerveModuleState[] {
+                        new SwerveModuleState(0, new Rotation2d(angle)),
+                        new SwerveModuleState(0, new Rotation2d(angle)),
+                        new SwerveModuleState(0, new Rotation2d(angle)),
+                        new SwerveModuleState(0, new Rotation2d(angle))
+                
+                });
+        })
     }
 
     public Command driveToPoseCommand(Pose2d pose) {
