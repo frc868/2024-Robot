@@ -16,22 +16,25 @@ public class shooter extends SubsystemBase implements BaseShooter {
     //example velocity variable
     public double velocity;
 
+    PIDController PID = new PIDController(kP, kI, kD);
+
     @Override
-    public double getVelocity() {
-        yay.getEncoder();
-        velocity = 1.23; //somehow find the speed (probably something with the encoder) ¯\_(ツ)_/¯
+    public double getVelocity() { //in RPM
+        velocity = yay.getEncoder().getVelocity();
         return(velocity);
     }
 
     @Override
-    public void setVoltage(double voltage) {
+    public void setVoltage(double voltage) { //2
         yay.setVoltage(voltage);
     }
 
     @Override
-    public Command spinAtVelocityCommand(Supplier<Double> goalVelocitySupplier) {
-        //I still think it's going to be more complex than this
-        return runOnce(() -> yay.setVoltage(12)); //gets voltage from PD or something
+    public Command spinAtVelocityCommand(Supplier<Double> goalVelocitySupplier) { //1
+        return run(() ->
+            double calculatedSpeed = PID.calculate(getVelocity(), goalVelocitySupplier.get()); //change 1 to desired RPM to shoot
+            yay.setVoltage(12 * calculatedSpeed);
+        );
     }
 
     @Override
