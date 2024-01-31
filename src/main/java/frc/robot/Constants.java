@@ -53,7 +53,8 @@ public class Constants {
         public static final double ENDPOINT_PIVOT_TO_ENDPOINT_DX = 1337;
         public static final double ENDPOINT_PIVOT_TO_ENDPOINT_DY = 1337;
         public static final double SHOOTER_PIVOT_TO_ENDPOINT_ANGLE = Math.atan(ENDPOINT_PIVOT_TO_ENDPOINT_DY/(SHOOTER_PIVOT_TO_ENDPOINT_PIVOT_LENGTH_METERS+ENDPOINT_PIVOT_TO_ENDPOINT_DX));
-
+        public static final double LEAD_SCREW_MIN_LENGTH_METERS = 1337;
+        public static final double HORIZONTAL_ANGLE_OFFSET_RADIANS = 1337;
 
 
         
