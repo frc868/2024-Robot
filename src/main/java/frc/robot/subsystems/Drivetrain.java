@@ -173,6 +173,7 @@ public class Drivetrain implements BaseSwerveDrive {
     }
 
     public Command setDriveModeCommand(DriveMode driveMode) {
+        return runOnce(() -> this.driveMode = driveMode);
     }
 
     public Command resetGyroCommand() {
@@ -180,6 +181,12 @@ public class Drivetrain implements BaseSwerveDrive {
     }
 
     public Command setDriveCurrentLimitCommand(int currentLimit) {
+        return Commands.runOnce(() -> {
+                frontLeft.setDriveCurrentLimit(currentLimit);
+                frontRight.setDriveCurrentLimit(currentLimit);
+                backLeft.setDriveCurrentLimit(currentLimit);
+                backRight.setDriveCurrentLimit(currentLimit);
+            });
     }
 
     public Command coastMotorsCommand() {
