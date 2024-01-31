@@ -8,8 +8,9 @@ import com.techhounds.houndutil.houndlib.subsystems.BaseVision;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Vision implements BaseVision {
+public class Vision extends SubsystemBase implements BaseVision {
     private AprilTagPhotonCamera camera1 = new AprilTagPhotonCamera(null, null, null, 0, 0);
     private AprilTagPhotonCamera camera2 = new AprilTagPhotonCamera(null, null, null, 0, 0);
     private AprilTagPhotonCamera camera3 = new AprilTagPhotonCamera(null, null, null, 0, 0);
