@@ -51,7 +51,13 @@ public class Drivetrain implements BaseSwerveDrive {
     public Pose2d getPose() {
     }
 
+    /**
+     * Gets the current heading of the gyro
+     * 
+     * @return the heading of the robot as a Rotation2d object
+     */
     public Rotation2d getRotation() {
+        return gyro.getRotation2d();
     }
 
     /**
