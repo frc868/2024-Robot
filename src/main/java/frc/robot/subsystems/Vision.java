@@ -14,6 +14,8 @@ public class Vision implements BaseVision {
     private AprilTagPhotonCamera camera2 = new AprilTagPhotonCamera(null, null, null, 0, 0);
     private AprilTagPhotonCamera camera3 = new AprilTagPhotonCamera(null, null, null, 0, 0);
 
+    private SwerveDrivePoseEstimator poseEstimator;
+
     public Vision() {
     }
 
