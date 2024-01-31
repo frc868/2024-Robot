@@ -111,7 +111,15 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     public void setMotorHoldModes(MotorHoldMode motorHoldMode) {
     }
 
+    /**
+     * Set the swerve module current limits to the argument supplied.
+     * 
+     */
     public void setDriveCurrentLimit(int currentLimit) {
+        frontLeft.setDriveCurrentLimit(currentLimit);
+        frontRight.setDriveCurrentLimit(currentLimit);
+        backLeft.setDriveCurrentLimit(currentLimit);
+        backRight.setDriveCurrentLimit(currentLimit);
     }
 
     public void stop() {
