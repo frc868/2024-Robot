@@ -41,6 +41,8 @@ public class Constants {
         public static final double BACK_LEFT_OFFSET = -4.4377;
         public static final double BACK_RIGHT_OFFSET = -6.2019;
 
+        public static final String CAN_BUS = "canivore";
+
         /** Distance between left and right wheels. */
         public static final double TRACK_WIDTH_METERS = Units.inchesToMeters(22.75);
         /** Distance between front and back wheels. */
@@ -115,7 +117,6 @@ public class Constants {
         public static final double BALANCE_kD = 0.004;
         public static final double BALANCE_TOLERANCE = 3;
         public static final double BALANCE_MAX_VALUE = 0.6;
-        
 
     }
 

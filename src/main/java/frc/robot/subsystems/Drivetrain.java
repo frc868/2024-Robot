@@ -80,25 +80,25 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     // canbus empty for now, unsure.
     private KrakenCoaxialSwerveModule frontLeft = new KrakenCoaxialSwerveModule(FRONT_LEFT_DRIVE_MOTOR_ID,
             FRONT_LEFT_STEER_MOTOR_ID,
-            FRONT_LEFT_STEER_ENCODER_ID, null, false, true, false,
+            FRONT_LEFT_STEER_ENCODER_ID, CAN_BUS, false, true, false,
             FRONT_LEFT_OFFSET,
             SWERVE_CONSTANTS);
 
     private KrakenCoaxialSwerveModule frontRight = new KrakenCoaxialSwerveModule(FRONT_RIGHT_DRIVE_MOTOR_ID,
             FRONT_RIGHT_STEER_MOTOR_ID,
-            FRONT_RIGHT_STEER_ENCODER_ID, null, false, true, false,
+            FRONT_RIGHT_STEER_ENCODER_ID, CAN_BUS, false, true, false,
             FRONT_RIGHT_OFFSET,
             SWERVE_CONSTANTS);
 
     private KrakenCoaxialSwerveModule backLeft = new KrakenCoaxialSwerveModule(BACK_LEFT_DRIVE_MOTOR_ID,
             BACK_LEFT_STEER_MOTOR_ID,
-            BACK_LEFT_STEER_ENCODER_ID, null, false, true, false,
+            BACK_LEFT_STEER_ENCODER_ID, CAN_BUS, false, true, false,
             BACK_LEFT_OFFSET,
             SWERVE_CONSTANTS);
 
     private KrakenCoaxialSwerveModule backRight = new KrakenCoaxialSwerveModule(BACK_RIGHT_DRIVE_MOTOR_ID,
             BACK_RIGHT_STEER_MOTOR_ID,
-            BACK_RIGHT_STEER_ENCODER_ID, null, false, true, false,
+            BACK_RIGHT_STEER_ENCODER_ID, CAN_BUS, false, true, false,
             BACK_RIGHT_OFFSET,
             SWERVE_CONSTANTS);
 
