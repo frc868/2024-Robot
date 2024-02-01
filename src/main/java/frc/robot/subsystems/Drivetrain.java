@@ -98,11 +98,11 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     public void updatePoseEstimator() {
-        poseEstimator.update(getGyroRotation2d(), getModulePositions());
+        poseEstimator.update(getRotation(), getModulePositions());
     }
 
     public void resetPoseEstimator(Pose2d pose) {
-        poseEstimator.resetPosition(getGyroRotation2d(), getModulePositions(), pose);
+        poseEstimator.resetPosition(getRotation(), getModulePositions(), pose);
     }
 
     public void resetGyro() {
@@ -169,7 +169,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
      * Creates the command to make all wheels turn to an angle
     */
     public Command turnWheelsToAngleCommand(double angle) {
-        return Commmand.runOnce(()->{
+        return runOnce(()->{
                 setModuleStates(new SwerveModuleState[] {
                         new SwerveModuleState(0, new Rotation2d(angle)),
                         new SwerveModuleState(0, new Rotation2d(angle)),
@@ -200,7 +200,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
      * resets the  gyro command                                                        
      */
     public Command resetGyroCommand() {
-        return Commands.runOnce(()->{
+        return runOnce(()->{
                 gyro.reset();
         });
 
@@ -210,7 +210,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
      * Sets the drive current limits for each swerve modules
      */
     public Command setDriveCurrentLimitCommand(int currentLimit) {
-        return Commands.runOnce(() -> {
+        return runOnce(() -> {
             frontLeft.setDriveCurrentLimit(currentLimit);
             frontRight.setDriveCurrentLimit(currentLimit);
             backLeft.setDriveCurrentLimit(currentLimit);
