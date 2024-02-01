@@ -28,6 +28,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
             0,
             null);
 
+
     private KrakenCoaxialSwerveModule backLeft = new KrakenCoaxialSwerveModule(0, 0, 0, null, false, false, false,
             0,
             null);
@@ -36,6 +37,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
             0,
             null);
 
+    //initiate pigeon gyro -- Jake
     private Pigeon2 gyro = new Pigeon2(0);
 
     private SwerveDrivePoseEstimator poseEstimator;
