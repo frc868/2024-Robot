@@ -8,18 +8,46 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import com.techhounds.houndutil.houndlib.MotorHoldMode;
 import com.techhounds.houndutil.houndlib.subsystems.BaseSwerveDrive;
 import com.techhounds.houndutil.houndlib.swerve.KrakenCoaxialSwerveModule;
+import com.techhounds.houndutil.houndlog.interfaces.Log;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import static frc.robot.Constants.Drivetrain.*;
+import static frc.robot.Constants.Teleop.*;
+
 public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
+
+    /**
+     * Whether to override the inputs of the driver for maintaining or turning to a
+     * specific angle.
+     */
+    private boolean isControlledRotationEnabled = false;
+
+    /**
+     * The controller that allows the drivetrain to maintain or turn to a specific
+     * angle
+     */
+    @Log(name = "Rotation Controller")
+    private ProfiledPIDController rotationController = new ProfiledPIDController(SWERVE_CONSTANTS.STEER_kP,
+            SWERVE_CONSTANTS.STEER_kI,
+            SWERVE_CONSTANTS.STEER_kD,
+            new TrapezoidProfile.Constraints(20 * Math.PI,
+                    20 * Math.PI));
+
     private KrakenCoaxialSwerveModule frontLeft = new KrakenCoaxialSwerveModule(0, 0, 0, null, false, false, false,
             0,
             null);
@@ -27,7 +55,6 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     private KrakenCoaxialSwerveModule frontRight = new KrakenCoaxialSwerveModule(0, 0, 0, null, false, false, false,
             0,
             null);
-
 
     private KrakenCoaxialSwerveModule backLeft = new KrakenCoaxialSwerveModule(0, 0, 0, null, false, false, false,
             0,
@@ -37,7 +64,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
             0,
             null);
 
-    //initiate pigeon gyro -- Jake
+    // initiate pigeon gyro -- Jake
     private Pigeon2 gyro = new Pigeon2(0);
 
     private SwerveDrivePoseEstimator poseEstimator;
@@ -93,6 +120,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     public ChassisSpeeds getChassisSpeeds() {
+        return KINEMATICS.toChassisSpeeds(getModuleStates());
     }
 
     public SwerveDrivePoseEstimator getPoseEstimator() {
@@ -156,20 +184,79 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
     public Command teleopDriveCommand(DoubleSupplier xSpeedSupplier, DoubleSupplier ySpeedSupplier,
             DoubleSupplier thetaSpeedSupplier) {
+        SlewRateLimiter xSpeedLimiter = new SlewRateLimiter(JOYSTICK_INPUT_RATE_LIMIT);
+        SlewRateLimiter ySpeedLimiter = new SlewRateLimiter(JOYSTICK_INPUT_RATE_LIMIT);
+        SlewRateLimiter thetaSpeedLimiter = new SlewRateLimiter(JOYSTICK_INPUT_RATE_LIMIT);
+
+        return run(() -> {
+            double xSpeed = xSpeedSupplier.getAsDouble();
+            double ySpeed = ySpeedSupplier.getAsDouble();
+            double thetaSpeed = thetaSpeedSupplier.getAsDouble();
+
+            xSpeed = MathUtil.applyDeadband(xSpeed, 0.01);
+            ySpeed = MathUtil.applyDeadband(ySpeed, 0.01);
+            thetaSpeed = MathUtil.applyDeadband(thetaSpeed, 0.01);
+
+            xSpeed = Math.copySign(Math.pow(xSpeed, JOYSTICK_CURVE_EXP), xSpeed);
+            ySpeed = Math.copySign(Math.pow(ySpeed, JOYSTICK_CURVE_EXP), ySpeed);
+            thetaSpeed = Math.copySign(Math.pow(thetaSpeed, JOYSTICK_CURVE_EXP), thetaSpeed);
+
+            xSpeed = xSpeedLimiter.calculate(xSpeed);
+            ySpeed = ySpeedLimiter.calculate(ySpeed);
+            thetaSpeed = thetaSpeedLimiter.calculate(thetaSpeed);
+
+            if (isControlledRotationEnabled) {
+                thetaSpeed = rotationController.calculate(getRotation().getRadians());
+            }
+
+            // the speeds are initially values from -1.0 to 1.0, so we multiply by the max
+            // physical velocity to output in m/s.
+            xSpeed *= SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND;
+            ySpeed *= SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND;
+            thetaSpeed *= SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND;
+
+
+            driveClosedLoop(new ChassisSpeeds(xSpeed, ySpeed, thetaSpeed), driveMode);
+
+
+        }).withName("Teleop Drive Command");
     }
 
+    /**
+     * Creates a command that allows for rotation to any angle.
+     * 
+     * Map this to a button input to rotate while still translating.
+     * 
+     * @return the command
+     */
     public Command controlledRotateCommand(double angle, DriveMode driveMode) {
+        return startEnd(() -> {
+            if (!isControlledRotationEnabled) {
+                rotationController.reset((getRotation()).getRadians());
+            }
+            isControlledRotationEnabled = true;
+            if (driveMode == DriveMode.FIELD_ORIENTED && DriverStation.getAlliance().get() == Alliance.Red) {
+                rotationController.setGoal(angle + Math.PI);
+            } else {
+                rotationController.setGoal(angle);
+            }
+        }, () -> {
+            isControlledRotationEnabled = false;
+        }).withName("Turn While Moving");
     }
 
     public Command disableControlledRotateCommand() {
+        return runOnce(() -> {
+            isControlledRotationEnabled = false;
+        });
     }
 
     public Command wheelLockCommand() {
     }
 
-    /* 
+    /*
      * Creates the command to make all wheels turn to an angle
-    */
+     */
     public Command turnWheelsToAngleCommand(double angle) {
         return runOnce(()->{
                 setStates(new SwerveModuleState[] {
@@ -199,11 +286,11 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     /*
-     * resets the  gyro command                                                        
+     * resets the gyro command
      */
     public Command resetGyroCommand() {
-        return runOnce(()->{
-                gyro.reset();
+        return runOnce(() -> {
+            gyro.reset();
         });
 
     }
