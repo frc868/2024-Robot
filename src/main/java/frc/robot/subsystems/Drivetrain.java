@@ -178,6 +178,10 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     public void setMotorHoldModes(MotorHoldMode motorHoldMode) {
+        frontLeft.setMotorHoldMode(motorHoldMode);
+        frontRight.setMotorHoldMode(motorHoldMode);
+        backLeft.setMotorHoldMode(motorHoldMode);
+        backRight.setMotorHoldMode(motorHoldMode);
     }
 
     /**
