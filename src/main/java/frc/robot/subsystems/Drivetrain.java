@@ -170,7 +170,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     */
     public Command turnWheelsToAngleCommand(double angle) {
         return runOnce(()->{
-                setModuleStates(new SwerveModuleState[] {
+                setStates(new SwerveModuleState[] {
                         new SwerveModuleState(0, new Rotation2d(angle)),
                         new SwerveModuleState(0, new Rotation2d(angle)),
                         new SwerveModuleState(0, new Rotation2d(angle)),
