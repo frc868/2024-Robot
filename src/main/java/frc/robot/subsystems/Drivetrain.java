@@ -1,12 +1,20 @@
 package frc.robot.subsystems;
 
+import java.util.Set;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.pathplanner.lib.commands.FollowPathHolonomic;
+import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
 import com.techhounds.houndutil.houndlib.MotorHoldMode;
 import com.techhounds.houndutil.houndlib.subsystems.BaseSwerveDrive;
+import com.techhounds.houndutil.houndlib.subsystems.BaseSwerveDrive.DriveMode;
 import com.techhounds.houndutil.houndlib.swerve.KrakenCoaxialSwerveModule;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
 
@@ -24,6 +32,8 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static frc.robot.Constants.Drivetrain.*;
@@ -47,6 +57,18 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
             SWERVE_CONSTANTS.STEER_kD,
             new TrapezoidProfile.Constraints(20 * Math.PI,
                     20 * Math.PI));
+
+    @Log
+    private ProfiledPIDController xPositionController = new ProfiledPIDController(
+            XY_kP, XY_kI, XY_kD, XY_CONSTRAINTS);
+
+    @Log
+    private ProfiledPIDController yPositionController = new ProfiledPIDController(
+            XY_kP, XY_kI, XY_kD, XY_CONSTRAINTS);
+
+    @Log
+    private ProfiledPIDController thetaPositionController = new ProfiledPIDController(
+            THETA_kP, THETA_kI, THETA_kD, THETA_CONSTRAINTS);
 
     private KrakenCoaxialSwerveModule frontLeft = new KrakenCoaxialSwerveModule(0, 0, 0, null, false, false, false,
             0,
@@ -215,9 +237,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
             ySpeed *= SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND;
             thetaSpeed *= SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND;
 
-
             driveClosedLoop(new ChassisSpeeds(xSpeed, ySpeed, thetaSpeed), driveMode);
-
 
         }).withName("Teleop Drive Command");
     }
@@ -229,21 +249,6 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
      * 
      * @return the command
      */
-    public Command controlledRotateCommand(double angle, DriveMode driveMode) {
-        return startEnd(() -> {
-            if (!isControlledRotationEnabled) {
-                rotationController.reset((getRotation()).getRadians());
-            }
-            isControlledRotationEnabled = true;
-            if (driveMode == DriveMode.FIELD_ORIENTED && DriverStation.getAlliance().get() == Alliance.Red) {
-                rotationController.setGoal(angle + Math.PI);
-            } else {
-                rotationController.setGoal(angle);
-            }
-        }, () -> {
-            isControlledRotationEnabled = false;
-        }).withName("Turn While Moving");
-    }
 
     public Command disableControlledRotateCommand() {
         return runOnce(() -> {
@@ -252,30 +257,68 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     public Command wheelLockCommand() {
+        return run(() -> {
+            setStates(new SwerveModuleState[] {
+                    new SwerveModuleState(0, Rotation2d.fromDegrees(45)),
+                    new SwerveModuleState(0, Rotation2d.fromDegrees(-45)),
+                    new SwerveModuleState(0, Rotation2d.fromDegrees(-45)),
+                    new SwerveModuleState(0, Rotation2d.fromDegrees(45))
+            });
+        }).withName("Wheel Lock");
     }
 
     /*
      * Creates the command to make all wheels turn to an angle
      */
     public Command turnWheelsToAngleCommand(double angle) {
-        return runOnce(()->{
-                setStates(new SwerveModuleState[] {
-                        new SwerveModuleState(0, new Rotation2d(angle)),
-                        new SwerveModuleState(0, new Rotation2d(angle)),
-                        new SwerveModuleState(0, new Rotation2d(angle)),
-                        new SwerveModuleState(0, new Rotation2d(angle))
-                
-                });
-        })
+        return runOnce(() -> {
+            setStates(new SwerveModuleState[] {
+                    new SwerveModuleState(0, new Rotation2d(angle)),
+                    new SwerveModuleState(0, new Rotation2d(angle)),
+                    new SwerveModuleState(0, new Rotation2d(angle)),
+                    new SwerveModuleState(0, new Rotation2d(angle))
+
+            });
+        });
     }
 
     public Command driveToPoseCommand(Pose2d pose) {
+        return runOnce(() -> {
+            xPositionController.reset(getPose().getX());
+            yPositionController.reset(getPose().getY());
+            thetaPositionController.reset(getPose().getRotation().getRadians());
+        }).andThen(run(() -> {
+            driveClosedLoop(
+                    new ChassisSpeeds(
+                            xPositionController.calculate(getPose().getX(), pose.getX()),
+                            yPositionController.calculate(getPose().getX(), pose.getY()),
+                            thetaPositionController.calculate(getPose().getX(), pose.getRotation().getRadians())),
+                    DriveMode.FIELD_ORIENTED);
+        }));
     }
 
     public Command followPathCommand(PathPlannerPath path) {
+        return new FollowPathHolonomic(path, this::getPose, this::getChassisSpeeds,
+                (speeds) -> driveClosedLoop(speeds, DriveMode.ROBOT_RELATIVE),
+                new HolonomicPathFollowerConfig(
+                        new PIDConstants(PATH_FOLLOWING_TRANSLATION_kP, 0, 0),
+                        new PIDConstants(PATH_FOLLOWING_ROTATION_kP, 0, 0),
+                        SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND,
+                        0.41,
+                        new ReplanningConfig()),
+                () -> (driveMode == DriveMode.FIELD_ORIENTED
+                        && DriverStation.getAlliance().get() == Alliance.Red),
+                this);
     }
 
     public Command driveDeltaCommand(Transform2d delta, PathConstraints constraints) {
+        return new DeferredCommand(() -> followPathCommand(
+                new PathPlannerPath(
+                        PathPlannerPath.bezierFromPoses(
+                                getPose(), getPose().plus(delta)),
+                        constraints,
+                        new GoalEndState(0, delta.getRotation().plus(getRotation())))),
+                Set.of());
     }
 
     /*
@@ -308,5 +351,26 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     public Command coastMotorsCommand() {
+        return runOnce(this::stop)
+                .andThen(() -> setMotorHoldModes(MotorHoldMode.COAST))
+                .finallyDo((d) -> setMotorHoldModes(MotorHoldMode.BRAKE))
+                .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
+    }
+
+    @Override
+    public Command controlledRotateCommand(DoubleSupplier angle, DriveMode driveMode) {
+        return startEnd(() -> {
+            if (!isControlledRotationEnabled) {
+                rotationController.reset((getRotation()).getRadians());
+            }
+            isControlledRotationEnabled = true;
+            if (driveMode == DriveMode.FIELD_ORIENTED && DriverStation.getAlliance().get() == Alliance.Red) {
+                rotationController.setGoal(angle.getAsDouble() + Math.PI);
+            } else {
+                rotationController.setGoal(angle.getAsDouble());
+            }
+        }, () -> {
+            isControlledRotationEnabled = false;
+        }).withName("Turn While Moving");
     }
 }
