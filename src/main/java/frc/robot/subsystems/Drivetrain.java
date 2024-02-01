@@ -83,10 +83,10 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
      */
     public SwerveModuleState[] getModuleStates() {
         return new SwerveModuleState[] {
-                frontLeft.getState(states[0]);
-                frontRight.getState(states[1]);
-                backLeft.getState(states[2]);
-                backRight.getState(states[3]);
+                frontLeft.getState(),
+                frontRight.getState(),
+                backLeft.getState(),
+                backRight.getState()
         };
     }
 
