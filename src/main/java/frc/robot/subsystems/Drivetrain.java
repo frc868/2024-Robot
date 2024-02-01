@@ -1,7 +1,6 @@
 package frc.robot.subsystems;
 
 import java.util.Set;
-import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
@@ -26,6 +25,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -69,6 +69,13 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     @Log
     private ProfiledPIDController thetaPositionController = new ProfiledPIDController(
             THETA_kP, THETA_kI, THETA_kD, THETA_CONSTRAINTS);
+
+    @Log(groups = "control")
+    private SwerveModuleState[] commandedModuleStates = new SwerveModuleState[] { new SwerveModuleState(),
+            new SwerveModuleState(), new SwerveModuleState(), new SwerveModuleState() };
+
+    @Log(groups = "control")
+    private ChassisSpeeds commandedChassisSpeeds = new ChassisSpeeds();
 
     private KrakenCoaxialSwerveModule frontLeft = new KrakenCoaxialSwerveModule(0, 0, 0, null, false, false, false,
             0,
@@ -193,15 +200,84 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     public void setStatesClosedLoop(SwerveModuleState[] state) {
+        frontLeft.setStateClosedLoop(state[0]);
+        frontRight.setStateClosedLoop(state[1]);
+        backLeft.setStateClosedLoop(state[2]);
+        backRight.setStateClosedLoop(state[3]);
     }
 
     public void drive(ChassisSpeeds speeds) {
+        drive(speeds, this.driveMode);
     }
 
     public void drive(ChassisSpeeds speeds, DriveMode driveMode) {
+        if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red
+                && driveMode == DriveMode.FIELD_ORIENTED) {
+            speeds.vxMetersPerSecond *= -1;
+            speeds.vyMetersPerSecond *= -1;
+        }
+
+        commandedChassisSpeeds = speeds;
+        ChassisSpeeds adjustedChassisSpeeds = null;
+        switch (driveMode) {
+            case ROBOT_RELATIVE:
+                adjustedChassisSpeeds = speeds;
+                break;
+            case FIELD_ORIENTED:
+                adjustedChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds.vxMetersPerSecond,
+                        speeds.vyMetersPerSecond,
+                        speeds.omegaRadiansPerSecond, getRotation());
+                break;
+        }
+
+        SwerveModuleState[] states = KINEMATICS.toSwerveModuleStates(adjustedChassisSpeeds);
+        SwerveDriveKinematics.desaturateWheelSpeeds(states,
+                SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND);
+
+        states = new SwerveModuleState[] {
+                SwerveModuleState.optimize(states[0], frontLeft.getWheelAngle()),
+                SwerveModuleState.optimize(states[1], frontRight.getWheelAngle()),
+                SwerveModuleState.optimize(states[2], backLeft.getWheelAngle()),
+                SwerveModuleState.optimize(states[3], backRight.getWheelAngle()),
+        };
+
+        commandedModuleStates = states;
+        setStates(states);
     }
 
     public void driveClosedLoop(ChassisSpeeds speeds, DriveMode driveMode) {
+        if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red
+                && driveMode == DriveMode.FIELD_ORIENTED) {
+            speeds.vxMetersPerSecond *= -1;
+            speeds.vyMetersPerSecond *= -1;
+        }
+
+        commandedChassisSpeeds = speeds;
+        ChassisSpeeds adjustedChassisSpeeds = null;
+        switch (driveMode) {
+            case ROBOT_RELATIVE:
+                adjustedChassisSpeeds = speeds;
+                break;
+            case FIELD_ORIENTED:
+                adjustedChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds.vxMetersPerSecond,
+                        speeds.vyMetersPerSecond,
+                        speeds.omegaRadiansPerSecond, getRotation());
+                break;
+        }
+
+        SwerveModuleState[] states = KINEMATICS.toSwerveModuleStates(adjustedChassisSpeeds);
+        SwerveDriveKinematics.desaturateWheelSpeeds(states,
+                SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND);
+
+        states = new SwerveModuleState[] {
+                SwerveModuleState.optimize(states[0], frontLeft.getWheelAngle()),
+                SwerveModuleState.optimize(states[1], frontRight.getWheelAngle()),
+                SwerveModuleState.optimize(states[2], backLeft.getWheelAngle()),
+                SwerveModuleState.optimize(states[3], backRight.getWheelAngle()),
+        };
+
+        commandedModuleStates = states;
+        setStatesClosedLoop(states);
     }
 
     public Command teleopDriveCommand(DoubleSupplier xSpeedSupplier, DoubleSupplier ySpeedSupplier,
