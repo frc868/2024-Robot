@@ -23,7 +23,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import frc.robot.*;
+import static frc.robot.Constants.Vision.*;
 
 public class Vision extends SubsystemBase implements BaseVision {
     private AprilTagPhotonCamera camera1 = new AprilTagPhotonCamera(null, null, null, 0, 0);
@@ -52,7 +52,7 @@ public class Vision extends SubsystemBase implements BaseVision {
             if (result.isPresent()) {
                 EstimatedRobotPose estPose = result.get();
                 Matrix<N3, N1> stddevs = photonCamera.getEstimationStdDevs(estPose.estimatedPose.toPose2d(),
-                        Constants.Vision.SINGLE_TAG_STD_DEVS, Constants.Vision.MULTI_TAG_STD_DEVS);
+                        SINGLE_TAG_STD_DEVS, MULTI_TAG_STD_DEVS);
                 poseEstimator.addVisionMeasurement(estPose.estimatedPose.toPose2d(),
                         estPose.timestampSeconds, stddevs);
             }
@@ -62,7 +62,7 @@ public class Vision extends SubsystemBase implements BaseVision {
     @Log
     public Pose3d[] getCameraPoses() {
         List<Pose3d> poses = new ArrayList<Pose3d>();
-        for (Transform3d transform : Constants.Vision.ROBOT_TO_CAMS) {
+        for (Transform3d transform : ROBOT_TO_CAMS) {
             poses.add(new Pose3d(poseEstimator.getEstimatedPosition()).plus(transform)
                     .plus(new Transform3d(0, 0, 0, new Rotation3d(0, 0, Math.PI))));
         }
