@@ -15,18 +15,17 @@ import static frc.robot.Constants.Climber.*;
 
 public class Climber extends SubsystemBase implements BaseElevator {
 
-    private CANSparkFlex climberMotor = new CANSparkFlex(Constants.CLIMBER_MOTOR_ID, MotorType.kBrushless);
+    private CANSparkFlex climberMotor = new CANSparkFlex(CLIMBER_MOTOR_ID, MotorType.kBrushless);
     //private CANSparkFlex  noteLiftMotor = new CANSparkFlex(Constants.CAN.ELEVATOR_LEFT_MOTOR_ID, MotorType.kBrushless);
 
     @Override
     public double getPosition(){
-        return climberMotor.getEncoder().getPosition();
+        return 0;
     }
 
     @Override
     public void resetPosition() {
-        climberMotor.getEncoder().setPosition(0);
-        noteLiftMotor.getEncoder().setPostion(0);
+        
     }
 
     @Override
