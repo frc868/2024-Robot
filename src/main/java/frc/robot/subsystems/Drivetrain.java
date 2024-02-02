@@ -110,6 +110,12 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     private DriveMode driveMode = DriveMode.FIELD_ORIENTED;
 
     public Drivetrain() {
+        resetGyro();
+
+        poseEstimator = new SwerveDrivePoseEstimator(KINEMATICS, getRotation(), getModulePositions(), new Pose2d());
+
+        thetaPositionController.setTolerance(0.05);
+        thetaPositionController.enableContinuousInput(0, 2 * Math.PI);
     }
 
     public DriveMode getDriveMode() {
