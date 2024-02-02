@@ -78,13 +78,13 @@ public class ShooterTilt extends SubsystemBase implements BaseElevator<ElevatorP
      *  units radians and meters
      */
 
-    public double getAngleFromLength(double length){ //TODO account for angle offset and length offset
+    public double getAngleFromLength(double length){ 
         length += LEAD_SCREW_MIN_LENGTH_METERS;
         double theta = Math.acos((LEAD_SCREW_RADIUS_METERS*LEAD_SCREW_RADIUS_METERS + 
             length*length - SHOOTER_PIVOT_TO_ENDPOINT_PIVOT_LENGTH_METERS*SHOOTER_PIVOT_TO_ENDPOINT_PIVOT_LENGTH_METERS - 
             BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS*BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS) 
             / (-2*SHOOTER_PIVOT_TO_ENDPOINT_PIVOT_LENGTH_METERS*BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS)); 
-        theta+=HORIZONTAL_ANGLE_OFFSET_RADIANS;
+        theta+=HORIZONTAL_ANGLE_OFFSET_RADIANS; //to include or not to include...
         return theta;
     }
 
@@ -92,14 +92,13 @@ public class ShooterTilt extends SubsystemBase implements BaseElevator<ElevatorP
      * get the lead screw length approximately based on shooter angle
      *  units meters and radians
      */
-    public double getLengthFromAngle(double angle){ //TODO account for angle offset and length offset
-        //inverse of get angle from length or something 
-        angle+=HORIZONTAL_ANGLE_OFFSET_RADIANS;
+    public double getLengthFromAngle(double angle){
+        angle+=HORIZONTAL_ANGLE_OFFSET_RADIANS; // angle to the horizontal + that offset that we need
         double length = Math.sqrt(-2*BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS*SHOOTER_PIVOT_TO_ENDPOINT_PIVOT_LENGTH_METERS*Math.cos(angle) +
             BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS*BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS +
             SHOOTER_PIVOT_TO_ENDPOINT_PIVOT_LENGTH_METERS*SHOOTER_PIVOT_TO_ENDPOINT_PIVOT_LENGTH_METERS - 
             LEAD_SCREW_RADIUS_METERS*LEAD_SCREW_RADIUS_METERS);
-        length-=LEAD_SCREW_MIN_LENGTH_METERS;
+        length-=LEAD_SCREW_MIN_LENGTH_METERS; // include or...
         return length;
     }
 
