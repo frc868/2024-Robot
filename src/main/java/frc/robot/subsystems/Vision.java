@@ -26,6 +26,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static frc.robot.Constants.Vision.*;
 
 public class Vision extends SubsystemBase implements BaseVision {
+
+    /** The PhotonVision cameras, used to detect the AprilTags. */
     private AprilTagPhotonCamera camera1 = new AprilTagPhotonCamera(null, null, null, 0, 0);
     private AprilTagPhotonCamera camera2 = new AprilTagPhotonCamera(null, null, null, 0, 0);
     private AprilTagPhotonCamera camera3 = new AprilTagPhotonCamera(null, null, null, 0, 0);
@@ -39,6 +41,7 @@ public class Vision extends SubsystemBase implements BaseVision {
     public Vision() {
     }
 
+    // calculates robot location
     public void updatePoseEstimator() {
         if (poseEstimator == null) {
             return;
@@ -59,6 +62,7 @@ public class Vision extends SubsystemBase implements BaseVision {
         }
     }
 
+    // calculates poses for cameras
     @Log
     public Pose3d[] getCameraPoses() {
         List<Pose3d> poses = new ArrayList<Pose3d>();
@@ -70,6 +74,7 @@ public class Vision extends SubsystemBase implements BaseVision {
         return poses.toArray(poseArray);
     }
 
+    // calculates poses for detected apriltags
     @Log
     public Pose3d[] getAprilTagPoses() {
         List<Pose3d> poses = new ArrayList<Pose3d>();
