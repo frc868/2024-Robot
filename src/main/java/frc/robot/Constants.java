@@ -45,8 +45,10 @@ public class Constants {
 
         //TODO i need to actually make sure these are right
         public static final double LEAD_SCREW_RADIUS_METERS = 0.613*0.0254;
-        public static final double SHOOTER_PIVOT_RADIUS_METERS = 1.625*0.0254;
+        public static final double SHOOTER_PIVOT_RADIUS_METERS = 1.625*0.0254; //not useful
         public static final double SHOOTER_OFFSET_ANGLE_RADIANS = 1337;
+        public static final double ANGLE_ALPHA = 1337; //not useful
+
         public static final double BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS = 7.843*0.0254;
         public static final double SHOOTER_PIVOT_TO_ENDPOINT_PIVOT_LENGTH_METERS =  10.725*0.0254;
         
