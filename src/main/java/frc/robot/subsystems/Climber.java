@@ -3,29 +3,26 @@ package frc.robot.subsystems;
 import java.util.function.Supplier;
 
 import com.revrobotics.CANSparkFlex;
-import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.techhounds.houndutil.houndlib.subsystems.BaseElevator;
-import com.techhounds.houndutil.houndlib.swerve.KrakenCoaxialSwerveModule;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import static frc.robot.Constants.Climber.*;
 
 public class Climber extends SubsystemBase implements BaseElevator {
 
     private CANSparkFlex climberMotor = new CANSparkFlex(CLIMBER_MOTOR_ID, MotorType.kBrushless);
-    //private CANSparkFlex  noteLiftMotor = new CANSparkFlex(Constants.CAN.ELEVATOR_LEFT_MOTOR_ID, MotorType.kBrushless);
+    // private CANSparkFlex noteLiftMotor = new
+    // CANSparkFlex(Constants.CAN.ELEVATOR_LEFT_MOTOR_ID, MotorType.kBrushless);
 
     @Override
-    public double getPosition(){
+    public double getPosition() {
         return 0;
     }
 
     @Override
     public void resetPosition() {
-        
+
     }
 
     @Override
@@ -81,5 +78,5 @@ public class Climber extends SubsystemBase implements BaseElevator {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'coastMotorsCommand'");
     }
-    
+
 }
