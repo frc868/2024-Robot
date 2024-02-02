@@ -61,6 +61,8 @@ public class Shooter extends SubsystemBase implements BaseShooter {
         return (Left.getEncoder().getPosition() + Right.getEncoder().getPosition()) / 2;
     }
 
+    PIDController PID = new PIDController(kP, kI, kD);
+
     @Override
     public double getVelocity() {
         return (Left.getEncoder().getVelocity() + Right.getEncoder().getVelocity()) / 2;
