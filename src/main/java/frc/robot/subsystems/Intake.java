@@ -21,22 +21,24 @@ import static frc.robot.Constants.Intake.*;
  */
 public class Intake extends SubsystemBase {
     private DigitalInput beamBreak;
+    private CANSparkFlex leftMotor, rightMotor, frontMotor;
 
     // Function<CANSparkBase, REVLibError> frontMotor2 =
     // frontMotor2::setSmartCurrentLimit;
     public Intake() {
-        SparkConfigurator.createSparkFlex(INTAKE_MOTOR_ID, MotorType.kBrushless, false,
+        leftMotor = SparkConfigurator.createSparkFlex(INTAKE_MOTOR_ID, MotorType.kBrushless, false,
                 (s) -> s.setIdleMode(IdleMode.kBrake), (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
                 (s) -> s.getEncoder().setPositionConversionFactor(ENCODER_ROTATIONS_TO_RADIANS),
                 (s) -> s.getEncoder().setVelocityConversionFactor(ENCODER_ROTATIONS_TO_RADIANS / 60.0));
-        SparkConfigurator.createSparkFlex(LIFTING_MOTOR_1_ID, MotorType.kBrushless, false,
+        rightMotor = SparkConfigurator.createSparkFlex(LIFTING_MOTOR_1_ID, MotorType.kBrushless, false,
                 (s) -> s.setIdleMode(IdleMode.kBrake), (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
                 (s) -> s.getEncoder().setPositionConversionFactor(ENCODER_ROTATIONS_TO_RADIANS),
                 (s) -> s.getEncoder().setVelocityConversionFactor(ENCODER_ROTATIONS_TO_RADIANS / 60.0));
-        SparkConfigurator.createSparkFlex(LIFTING_MOTOR_2_ID, MotorType.kBrushless, false,
+        frontMotor = SparkConfigurator.createSparkFlex(LIFTING_MOTOR_2_ID, MotorType.kBrushless, false,
                 (s) -> s.setIdleMode(IdleMode.kBrake), (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
                 (s) -> s.getEncoder().setPositionConversionFactor(ENCODER_ROTATIONS_TO_RADIANS),
                 (s) -> s.getEncoder().setVelocityConversionFactor(ENCODER_ROTATIONS_TO_RADIANS / 60.0));
+        SparkConfigurator.safeBurnFlash();
         beamBreak = new DigitalInput(BEAM_BREAK_CHANNEL);
     }
 
@@ -66,6 +68,18 @@ public class Intake extends SubsystemBase {
 
     public Command reverseMotors() {
 
+    }
+
+    public Command intakeGround() {
+
+    }
+
+    public Command intakeAmp() {
+
+    }
+
+    public Command intakeVertical() {
+        resetPose(leftMotor, rightMotor);
     }
 
     public double getIntakePosition(CANSparkFlex motor) {
