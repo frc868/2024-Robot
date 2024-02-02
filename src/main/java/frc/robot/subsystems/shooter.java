@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.Subsystems;
 
 import java.util.function.Supplier;
 
@@ -60,8 +60,6 @@ public class Shooter extends SubsystemBase implements BaseShooter {
     public double getPosition(){
         return (Left.getEncoder().getPosition() + Right.getEncoder().getPosition()) / 2;
     }
-
-    PIDController PID = new PIDController(kP, kI, kD);
 
     @Override
     public double getVelocity() {
