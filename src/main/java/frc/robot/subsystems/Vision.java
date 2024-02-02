@@ -34,6 +34,8 @@ public class Vision extends SubsystemBase implements BaseVision {
 
     private SwerveDrivePoseEstimator poseEstimator;
 
+    private Supplier<Pose2d> simPoseSupplier;
+
     public Vision() {
     }
 
