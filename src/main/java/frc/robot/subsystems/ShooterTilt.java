@@ -21,6 +21,10 @@ import frc.robot.Constants.ShooterTilt.ElevatorPosition;
 
 import static frc.robot.Constants.ShooterTilt.*;
 
+/**
+ * The subsystem for the lead screw, only uses one motor
+ * 
+ */
 
 @LoggedObject
 public class ShooterTilt extends SubsystemBase implements BaseElevator<ElevatorPosition>{
@@ -42,7 +46,6 @@ public class ShooterTilt extends SubsystemBase implements BaseElevator<ElevatorP
     /** 
      * Initializes ShooterTilt
     */
-
     public ShooterTilt() {
 
         Primary = SparkConfigurator.createSparkFlex(
@@ -74,8 +77,10 @@ public class ShooterTilt extends SubsystemBase implements BaseElevator<ElevatorP
 
 
     /*
-     * get the shooter's angle approximately based on lead screw length
-     *  units radians and meters
+     * By treating the shooter + shooter tilt as a triangle with vertices
+     * at the 3 pivot points, we can use trig to get the shooter's approximate 
+     * angle based on lead screw length
+     * units are radians and meters
      */
 
     public double getAngleFromLength(double length){ 
@@ -89,8 +94,8 @@ public class ShooterTilt extends SubsystemBase implements BaseElevator<ElevatorP
     }
 
      /*
-     * get the lead screw length approximately based on shooter angle
-     *  units meters and radians
+     * The inverse equation of the method above 
+     * units are meters and radians
      */
     public double getLengthFromAngle(double angle){
         angle+=HORIZONTAL_ANGLE_OFFSET_RADIANS; // angle to the horizontal + that offset that we need
@@ -107,6 +112,8 @@ public class ShooterTilt extends SubsystemBase implements BaseElevator<ElevatorP
      * this does effectively nothing except for account for miniscule positional changes 
      * in the entry point of the shooter, but it was fun to figure this out so im going
      * to keep this in
+     * dx and dy are the target's horizontal and vertical distances from the shooter pivot
+     * units in meters and radians
      */
     public double mathematicallyPerfectLengthFromTarget(double dx, double dy){ 
        
@@ -115,6 +122,7 @@ public class ShooterTilt extends SubsystemBase implements BaseElevator<ElevatorP
         return getLengthFromAngle(desiredAngle);
     }
 
+    
     @Override
     public void resetPosition(){
         Primary.getEncoder().setPosition(0);
@@ -128,6 +136,11 @@ public class ShooterTilt extends SubsystemBase implements BaseElevator<ElevatorP
             Primary.setVoltage(0);
         }
     }
+
+    /*
+     * Combines PID and feedfoward voltages by setting voltage to their sum
+     */
+
     @Override
     public Command moveToCurrentGoalCommand(){
         return run(() -> {
@@ -147,6 +160,12 @@ public class ShooterTilt extends SubsystemBase implements BaseElevator<ElevatorP
         );
 
     }
+
+    /*
+     * Resets all current information in PID and sets the goal to the supplied position
+     * then moves there
+     */
+
     @Override
     public Command moveToArbitraryPositionCommand(Supplier<Double> goalPositionSupplier){
         return Commands.sequence(
@@ -156,10 +175,19 @@ public class ShooterTilt extends SubsystemBase implements BaseElevator<ElevatorP
         );
 
     }
+
+    /*
+     * esssentially sets a new goal midway a distance away from the current goal
+     */
+
     @Override
     public Command movePositionDeltaCommand(Supplier<Double> delta){
         return moveToArbitraryPositionCommand(() -> PIDController.getGoal().position + delta.get());
     }
+
+    /*
+     * sets the new goal to the current position
+     */
     @Override
     public Command holdCurrentPositionCommand(){
         return runOnce(() -> moveToArbitraryPositionCommand(() -> getPosition()));
@@ -170,12 +198,19 @@ public class ShooterTilt extends SubsystemBase implements BaseElevator<ElevatorP
     }
 
     /*These ones im not exactly sure about */
+    /*
+     * allows us to set the motor voltage in terms of speed from -1.0 to 1.0
+     */
     @Override
     public Command setOverridenSpeedCommand(Supplier<Double> speed){
         return run(() -> setVoltage(12.0 * speed.get()))
                 .withName("Set Overridden Elevator Speed");
 
     }
+
+    /*
+     * coaasts motors then stops them (safety i assume)
+     */
 
     @Override
     public Command coastMotorsCommand(){
