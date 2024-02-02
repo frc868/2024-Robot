@@ -41,7 +41,7 @@ public class Vision extends SubsystemBase implements BaseVision {
     public Vision() {
     }
 
-    // calculates robot location
+    /** Calculates robot location **/
     public void updatePoseEstimator() {
         if (poseEstimator == null) {
             return;
@@ -62,7 +62,11 @@ public class Vision extends SubsystemBase implements BaseVision {
         }
     }
 
-    // calculates poses for cameras
+    /**
+     * Gets the current camera poses
+     * 
+     * @return the current camera poses
+     */
     @Log
     public Pose3d[] getCameraPoses() {
         List<Pose3d> poses = new ArrayList<Pose3d>();
@@ -74,7 +78,11 @@ public class Vision extends SubsystemBase implements BaseVision {
         return poses.toArray(poseArray);
     }
 
-    // calculates poses for detected apriltags
+    /**
+     * Gets the current apriltag poses
+     * 
+     * @return the current apriltag poses
+     */
     @Log
     public Pose3d[] getAprilTagPoses() {
         List<Pose3d> poses = new ArrayList<Pose3d>();
