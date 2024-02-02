@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.photonvision.EstimatedRobotPose;
+import org.photonvision.simulation.VisionSystemSim;
 
 import com.techhounds.houndutil.houndlib.AprilTagPhotonCamera;
 import com.techhounds.houndutil.houndlib.subsystems.BaseVision;
@@ -36,9 +37,21 @@ public class Vision extends SubsystemBase implements BaseVision {
 
     private SwerveDrivePoseEstimator poseEstimator;
 
+    private final VisionSystemSim visionSim = new VisionSystemSim("main");
+
     private Supplier<Pose2d> simPoseSupplier;
 
     public Vision() {
+    }
+
+    @Override
+    public void periodic() {
+        updatePoseEstimator();
+    }
+
+    @Override
+    public void simulationPeriodic() {
+        visionSim.update(simPoseSupplier.get());
     }
 
     /** Calculates robot location **/
