@@ -65,6 +65,7 @@ public class Intake extends SubsystemBase {
     }
 
     public Command reverseMotors() {
+        intakemotor.setvoltage(-1);
 
     }
 
