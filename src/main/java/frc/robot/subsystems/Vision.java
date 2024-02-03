@@ -13,6 +13,7 @@ import com.techhounds.houndutil.houndlib.subsystems.BaseVision;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
 
 import edu.wpi.first.apriltag.AprilTag;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -29,9 +30,9 @@ import static frc.robot.Constants.Vision.*;
 public class Vision extends SubsystemBase implements BaseVision {
 
     /** The PhotonVision cameras, used to detect the AprilTags. */
-    private AprilTagPhotonCamera camera1 = new AprilTagPhotonCamera(null, null, null, 0, 0);
-    private AprilTagPhotonCamera camera2 = new AprilTagPhotonCamera(null, null, null, 0, 0);
-    private AprilTagPhotonCamera camera3 = new AprilTagPhotonCamera(null, null, null, 0, 0);
+    private AprilTagPhotonCamera camera1 = new AprilTagPhotonCamera(null, ROBOT_TO_CAMS[0], CAMERA_CONSTANTS, 0, 0);
+    private AprilTagPhotonCamera camera2 = new AprilTagPhotonCamera(null, ROBOT_TO_CAMS[1], CAMERA_CONSTANTS, 0, 0);
+    private AprilTagPhotonCamera camera3 = new AprilTagPhotonCamera(null, ROBOT_TO_CAMS[2], CAMERA_CONSTANTS, 0, 0);
 
     private AprilTagPhotonCamera[] photonCameras = new AprilTagPhotonCamera[] { camera1, camera2, camera3 };
 
