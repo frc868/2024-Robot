@@ -15,6 +15,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ProfiledPIDCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import static frc.robot.Constants.Climber.*;
+
 public class Climber extends SubsystemBase implements BaseElevator {
 
     private ProfiledPIDController pidController = new ProfiledPIDController(kP, kI, kD);
