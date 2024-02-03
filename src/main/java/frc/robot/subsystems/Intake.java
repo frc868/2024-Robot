@@ -65,8 +65,7 @@ public class Intake extends SubsystemBase {
     }
 
     public Command reverseMotors() {
-        intakemotor.setvoltage(-1);
-
+        motor.setVoltage(-1);
     }
 
     public double getIntakePosition(CANSparkFlex motor) {
