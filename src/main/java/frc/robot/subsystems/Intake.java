@@ -4,6 +4,7 @@ import java.util.function.Function;
 
 import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkFlex;
+import com.revrobotics.CANSparkMax;
 import com.revrobotics.REVLibError;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
@@ -21,22 +22,26 @@ import static frc.robot.Constants.Intake.*;
  */
 public class Intake extends SubsystemBase {
     private DigitalInput beamBreak;
+    private CANSparkFlex intakemotor;
+    private CANSparkFlex leftmotor;
+    private CANSparkFlex rightmotor;
 
     // Function<CANSparkBase, REVLibError> frontMotor2 =
     // frontMotor2::setSmartCurrentLimit;
     public Intake() {
-        SparkConfigurator.createSparkFlex(INTAKE_MOTOR_ID, MotorType.kBrushless, false,
+        intakemotor = SparkConfigurator.createSparkFlex(INTAKE_MOTOR_ID, MotorType.kBrushless, false,
                 (s) -> s.setIdleMode(IdleMode.kBrake), (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
                 (s) -> s.getEncoder().setPositionConversionFactor(ENCODER_ROTATIONS_TO_RADIANS),
                 (s) -> s.getEncoder().setVelocityConversionFactor(ENCODER_ROTATIONS_TO_RADIANS / 60.0));
-        SparkConfigurator.createSparkFlex(LIFTING_MOTOR_1_ID, MotorType.kBrushless, false,
+        leftmotor = SparkConfigurator.createSparkFlex(LIFTING_MOTOR_1_ID, MotorType.kBrushless, false,
                 (s) -> s.setIdleMode(IdleMode.kBrake), (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
                 (s) -> s.getEncoder().setPositionConversionFactor(ENCODER_ROTATIONS_TO_RADIANS),
                 (s) -> s.getEncoder().setVelocityConversionFactor(ENCODER_ROTATIONS_TO_RADIANS / 60.0));
-        SparkConfigurator.createSparkFlex(LIFTING_MOTOR_2_ID, MotorType.kBrushless, false,
+        rightmotor = SparkConfigurator.createSparkFlex(LIFTING_MOTOR_2_ID, MotorType.kBrushless, false,
                 (s) -> s.setIdleMode(IdleMode.kBrake), (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
                 (s) -> s.getEncoder().setPositionConversionFactor(ENCODER_ROTATIONS_TO_RADIANS),
                 (s) -> s.getEncoder().setVelocityConversionFactor(ENCODER_ROTATIONS_TO_RADIANS / 60.0));
+
         beamBreak = new DigitalInput(BEAM_BREAK_CHANNEL);
     }
 
@@ -65,7 +70,9 @@ public class Intake extends SubsystemBase {
     }
 
     public Command reverseMotors() {
-        motor.setVoltage(-1);
+        return runOnce(() -> {
+            intakemotor.setVoltage(-1);
+        });
     }
 
     public double getIntakePosition(CANSparkFlex motor) {
