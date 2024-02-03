@@ -1,9 +1,10 @@
-package frc.robot.Subsystems;
+package frc.robot.subsystems;
 
 import java.util.function.Supplier;
 
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkFlex;
+
 import com.techhounds.houndutil.houndlib.SparkConfigurator;
 import com.techhounds.houndutil.houndlib.subsystems.BaseShooter;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
@@ -11,20 +12,15 @@ import com.techhounds.houndutil.houndlog.interfaces.Log;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 
-import com.revrobotics.CANSparkLowLevel;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 
-import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.math.controller.PIDController;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
+import static frc.robot.constants.Shooter.*;
 
-import static frc.robot.Constants.Shooter.*;
-
-public class Shooter extends SubsystemBase implements BaseShooter {
+public class shooter extends SubsystemBase implements BaseShooter {
 
     //example motor
     private CANSparkFlex Left;
@@ -40,21 +36,20 @@ public class Shooter extends SubsystemBase implements BaseShooter {
     private double feedforwardVoltage = 0;
 
 
-    public Shooter(){
+    public void Shooter(){
         Left = SparkConfigurator.createSparkFlex(
                 LEFT_MOTOR_ID, MotorType.kBrushless, false,
                 (s) -> s.setIdleMode(IdleMode.kBrake),
                 (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
                 (s) -> s.getEncoder().setPositionConversionFactor(ENCODER_ROTATIONS_TO_METERS),
                 (s) -> s.getEncoder().setVelocityConversionFactor(ENCODER_ROTATIONS_TO_METERS / 60.0));
+
         Right = SparkConfigurator.createSparkFlex(
                 RIGHT_MOTOR_ID, MotorType.kBrushless, false,
                 (s) -> s.setIdleMode(IdleMode.kBrake),
                 (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
                 (s) -> s.getEncoder().setPositionConversionFactor(ENCODER_ROTATIONS_TO_METERS),
                 (s) -> s.getEncoder().setVelocityConversionFactor(ENCODER_ROTATIONS_TO_METERS / 60.0));
-        
-
     }
 
     public double getPosition(){
