@@ -42,6 +42,11 @@ public class Vision extends SubsystemBase implements BaseVision {
     private Supplier<Pose2d> simPoseSupplier;
 
     public Vision() {
+        AprilTagFieldLayout tagLayout = AprilTagFields.kDefaultField.loadAprilTagLayoutField();
+        visionSim.addAprilTags(tagLayout);
+        for (AprilTagPhotonCamera photonCamera : photonCameras) {
+            visionSim.addCamera(photonCamera.getSim(), photonCamera.getRobotToCam());
+        }
     }
 
     @Override
