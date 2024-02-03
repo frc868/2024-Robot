@@ -21,7 +21,7 @@ import static frc.robot.Constants.Climber.*;
 
 public class Climber extends SubsystemBase implements BaseElevator {
 
-    private ProfiledPIDController pidController = new ProfiledPIDController(kP, kI, kD);
+    private ProfiledPIDController pidController = new ProfiledPIDController(kP, kI, kD, MOVEMENT_CONSTRAINTS);
     private ElevatorFeedforward feedforwardController = new ElevatorFeedforward(kS, kG, kV, kA);
 
     private double feedbackVoltage = 0;
@@ -56,12 +56,12 @@ public class Climber extends SubsystemBase implements BaseElevator {
 
     @Override
     public Command moveToPositionCommand(Supplier<ElevatorPosition> goalPositionSupplier) {
-        // TODO
+
     }
 
     @Override
     public Command moveToArbitraryPositionCommand(Supplier goalPositionSupplier) {
-        return Commands.sequence{
+        return Commands.sequence(){
             runOnce(()-> pidController.reset(getPosition())),
             runOnce(()-> pidController.setGoal(goalPositionSupplier.get())),
             moveToCurrentGoalCommand().until(pidController::atGoal)
@@ -70,8 +70,7 @@ public class Climber extends SubsystemBase implements BaseElevator {
 
     @Override
     public Command movePositionDeltaCommand(Supplier delta) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'movePositionDeltaCommand'");
+
     }
 
     @Override
@@ -85,7 +84,7 @@ public class Climber extends SubsystemBase implements BaseElevator {
     }
 
     @Override
-    public Command setOverridenSpeedCommand(Supplier<Double> speed) {
+    public Command setOverridenSpeedCommand(Supplier speed) {
         return run(() -> setVoltage(12.0 * speed.get()));
     }
 
