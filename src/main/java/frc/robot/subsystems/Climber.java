@@ -5,7 +5,9 @@ import static frc.robot.Constants.Climber.CLIMBER_MOTOR_ID;
 import java.util.function.Supplier;
 
 import com.revrobotics.CANSparkFlex;
+import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.techhounds.houndutil.houndlib.SparkConfigurator;
 import com.techhounds.houndutil.houndlib.subsystems.BaseElevator;
 
 import edu.wpi.first.math.controller.ElevatorFeedforward;
@@ -25,9 +27,8 @@ public class Climber extends SubsystemBase implements BaseElevator {
     private double feedbackVoltage = 0;
     private double feedforwardVoltage = 0;
 
-    private CANSparkFlex climberMotor = new CANSparkFlex(CLIMBER_MOTOR_ID, MotorType.kBrushless);
-    // private CANSparkFlex noteLiftMotor = new
-    // CANSparkFlex(Constants.CAN.ELEVATOR_LEFT_MOTOR_ID, MotorType.kBrushless);
+    private CANSparkFlex climberMotor = SparkConfigurator.createSparkFlex(CLIMBER_MOTOR_ID, MotorType.kBrushless,
+            false); // TODO: add configs
 
     @Override
     public double getPosition() {
@@ -84,7 +85,7 @@ public class Climber extends SubsystemBase implements BaseElevator {
     }
 
     @Override
-    public Command setOverridenSpeedCommand(Supplier speed) {
+    public Command setOverridenSpeedCommand(Supplier<Double> speed) {
         return run(() -> setVoltage(12.0 * speed.get()));
     }
 
