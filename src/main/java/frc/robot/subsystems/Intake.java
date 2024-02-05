@@ -55,30 +55,29 @@ public class Intake extends SubsystemBase {
         return runOnce(() -> {
             motor.setVoltage(0);
         });
-
     }
 
-    public CommandBase runPassoverMotorsCommand() {
+    public Command runFrontMotorCommand() {
         return startEnd(
-                () -> passoverMotors.setVoltage(6),
-                () -> passoverMotors.setVoltage(0))
+                () -> frontMotor.setVoltage(6),
+                () -> frontMotor.setVoltage(0))
                 .withName("Run Passover Motors");
     }
 
-    public CommandBase startPassoverMotorsCommand() {
-        return runOnce(() -> passoverMotors.setVoltage(6))
+    public Command startFrontMotorCommand() {
+        return runOnce(() -> frontMotor.setVoltage(6))
                 .withName("Start Passover Motors");
     }
 
-    public CommandBase stopPassoverMotorsCommand() {
-        return runOnce(() -> passoverMotors.setVoltage(0))
+    public Command stopFrontMotorCommand() {
+        return runOnce(() -> frontMotor.setVoltage(0))
                 .withName("Stop Passover Motors");
     }
 
-    public CommandBase reversePassoverMotorsCommand() {
+    public Command reverseFrontMotorCommand() {
         return startEnd(
-                () -> passoverMotors.setVoltage(-6),
-                () -> passoverMotors.setVoltage(0))
+                () -> frontMotor.setVoltage(-6),
+                () -> frontMotor.setVoltage(0))
                 .withName("Run Passover Motors");
     }
 
