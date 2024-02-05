@@ -12,6 +12,10 @@ public class Constants {
         public static final int LIFTING_MOTOR_2_ID = 2;
         public static final int BEAM_BREAK_ID = 0;
         public static final int BEAM_BREAK_CHANNEL = 0;
-
+        public static final double kP = 0.0;
+        public static final double kI = 0.0;
+        public static final double kD = 0.0;
+        public static final double maxVelocity = 0.0;
+        public static final double maxAcceleration = 0.0;
     }
 }
