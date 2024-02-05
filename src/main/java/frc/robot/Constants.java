@@ -13,5 +13,5 @@ public class Constants {
         public static final int BEAM_BREAK_ID = 0;
         public static final int BEAM_BREAK_CHANNEL = 0;
 
-    }    
+    }
 }

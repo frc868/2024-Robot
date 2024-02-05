@@ -4,7 +4,6 @@ import java.util.function.Function;
 
 import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkFlex;
-import com.revrobotics.CANSparkMax;
 import com.revrobotics.REVLibError;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
@@ -22,18 +21,11 @@ import static frc.robot.Constants.Intake.*;
  */
 public class Intake extends SubsystemBase {
     private DigitalInput beamBreak;
-<<<<<<< HEAD
     private CANSparkFlex leftMotor, rightMotor, frontMotor;
-=======
-    private CANSparkFlex intakemotor;
-    private CANSparkFlex leftmotor;
-    private CANSparkFlex rightmotor;
->>>>>>> c922054655cff22716038e6ecdff78f4a6ae88cd
 
     // Function<CANSparkBase, REVLibError> frontMotor2 =
     // frontMotor2::setSmartCurrentLimit;
     public Intake() {
-<<<<<<< HEAD
         leftMotor = SparkConfigurator.createSparkFlex(INTAKE_MOTOR_ID, MotorType.kBrushless, false,
                 (s) -> s.setIdleMode(IdleMode.kBrake), (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
                 (s) -> s.getEncoder().setPositionConversionFactor(ENCODER_ROTATIONS_TO_RADIANS),
@@ -47,21 +39,6 @@ public class Intake extends SubsystemBase {
                 (s) -> s.getEncoder().setPositionConversionFactor(ENCODER_ROTATIONS_TO_RADIANS),
                 (s) -> s.getEncoder().setVelocityConversionFactor(ENCODER_ROTATIONS_TO_RADIANS / 60.0));
         SparkConfigurator.safeBurnFlash();
-=======
-        intakemotor = SparkConfigurator.createSparkFlex(INTAKE_MOTOR_ID, MotorType.kBrushless, false,
-                (s) -> s.setIdleMode(IdleMode.kBrake), (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
-                (s) -> s.getEncoder().setPositionConversionFactor(ENCODER_ROTATIONS_TO_RADIANS),
-                (s) -> s.getEncoder().setVelocityConversionFactor(ENCODER_ROTATIONS_TO_RADIANS / 60.0));
-        leftmotor = SparkConfigurator.createSparkFlex(LIFTING_MOTOR_1_ID, MotorType.kBrushless, false,
-                (s) -> s.setIdleMode(IdleMode.kBrake), (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
-                (s) -> s.getEncoder().setPositionConversionFactor(ENCODER_ROTATIONS_TO_RADIANS),
-                (s) -> s.getEncoder().setVelocityConversionFactor(ENCODER_ROTATIONS_TO_RADIANS / 60.0));
-        rightmotor = SparkConfigurator.createSparkFlex(LIFTING_MOTOR_2_ID, MotorType.kBrushless, false,
-                (s) -> s.setIdleMode(IdleMode.kBrake), (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
-                (s) -> s.getEncoder().setPositionConversionFactor(ENCODER_ROTATIONS_TO_RADIANS),
-                (s) -> s.getEncoder().setVelocityConversionFactor(ENCODER_ROTATIONS_TO_RADIANS / 60.0));
-
->>>>>>> c922054655cff22716038e6ecdff78f4a6ae88cd
         beamBreak = new DigitalInput(BEAM_BREAK_CHANNEL);
     }
 
@@ -81,6 +58,30 @@ public class Intake extends SubsystemBase {
 
     }
 
+    public CommandBase runPassoverMotorsCommand() {
+        return startEnd(
+                () -> passoverMotors.setVoltage(6),
+                () -> passoverMotors.setVoltage(0))
+                .withName("Run Passover Motors");
+    }
+
+    public CommandBase startPassoverMotorsCommand() {
+        return runOnce(() -> passoverMotors.setVoltage(6))
+                .withName("Start Passover Motors");
+    }
+
+    public CommandBase stopPassoverMotorsCommand() {
+        return runOnce(() -> passoverMotors.setVoltage(0))
+                .withName("Stop Passover Motors");
+    }
+
+    public CommandBase reversePassoverMotorsCommand() {
+        return startEnd(
+                () -> passoverMotors.setVoltage(-6),
+                () -> passoverMotors.setVoltage(0))
+                .withName("Run Passover Motors");
+    }
+
     public Command liftIntake(double angle) {
 
     }
@@ -90,9 +91,7 @@ public class Intake extends SubsystemBase {
     }
 
     public Command reverseMotors() {
-        return runOnce(() -> {
-            intakemotor.setVoltage(-1);
-        });
+
     }
 
     public Command intakeGround() {
