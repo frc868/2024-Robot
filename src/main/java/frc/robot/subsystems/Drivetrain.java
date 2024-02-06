@@ -1,5 +1,37 @@
 package frc.robot.subsystems;
 
+import static frc.robot.Constants.Drivetrain.BACK_LEFT_DRIVE_MOTOR_ID;
+import static frc.robot.Constants.Drivetrain.BACK_LEFT_OFFSET;
+import static frc.robot.Constants.Drivetrain.BACK_LEFT_STEER_ENCODER_ID;
+import static frc.robot.Constants.Drivetrain.BACK_LEFT_STEER_MOTOR_ID;
+import static frc.robot.Constants.Drivetrain.BACK_RIGHT_DRIVE_MOTOR_ID;
+import static frc.robot.Constants.Drivetrain.BACK_RIGHT_OFFSET;
+import static frc.robot.Constants.Drivetrain.BACK_RIGHT_STEER_ENCODER_ID;
+import static frc.robot.Constants.Drivetrain.BACK_RIGHT_STEER_MOTOR_ID;
+import static frc.robot.Constants.Drivetrain.CAN_BUS;
+import static frc.robot.Constants.Drivetrain.FRONT_LEFT_DRIVE_MOTOR_ID;
+import static frc.robot.Constants.Drivetrain.FRONT_LEFT_OFFSET;
+import static frc.robot.Constants.Drivetrain.FRONT_LEFT_STEER_ENCODER_ID;
+import static frc.robot.Constants.Drivetrain.FRONT_LEFT_STEER_MOTOR_ID;
+import static frc.robot.Constants.Drivetrain.FRONT_RIGHT_DRIVE_MOTOR_ID;
+import static frc.robot.Constants.Drivetrain.FRONT_RIGHT_OFFSET;
+import static frc.robot.Constants.Drivetrain.FRONT_RIGHT_STEER_ENCODER_ID;
+import static frc.robot.Constants.Drivetrain.FRONT_RIGHT_STEER_MOTOR_ID;
+import static frc.robot.Constants.Drivetrain.KINEMATICS;
+import static frc.robot.Constants.Drivetrain.PATH_FOLLOWING_ROTATION_kP;
+import static frc.robot.Constants.Drivetrain.PATH_FOLLOWING_TRANSLATION_kP;
+import static frc.robot.Constants.Drivetrain.SWERVE_CONSTANTS;
+import static frc.robot.Constants.Drivetrain.THETA_CONSTRAINTS;
+import static frc.robot.Constants.Drivetrain.THETA_kD;
+import static frc.robot.Constants.Drivetrain.THETA_kI;
+import static frc.robot.Constants.Drivetrain.THETA_kP;
+import static frc.robot.Constants.Drivetrain.XY_CONSTRAINTS;
+import static frc.robot.Constants.Drivetrain.XY_kD;
+import static frc.robot.Constants.Drivetrain.XY_kI;
+import static frc.robot.Constants.Drivetrain.XY_kP;
+import static frc.robot.Constants.Teleop.JOYSTICK_CURVE_EXP;
+import static frc.robot.Constants.Teleop.JOYSTICK_INPUT_RATE_LIMIT;
+
 import java.util.Set;
 import java.util.function.DoubleSupplier;
 
@@ -13,8 +45,10 @@ import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 import com.techhounds.houndutil.houndlib.MotorHoldMode;
 import com.techhounds.houndutil.houndlib.subsystems.BaseSwerveDrive;
+import com.techhounds.houndutil.houndlib.subsystems.BaseSwerveDrive.DriveMode;
 import com.techhounds.houndutil.houndlib.swerve.KrakenCoaxialSwerveModule;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
+import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -35,15 +69,14 @@ import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import static frc.robot.Constants.Drivetrain.*;
-import static frc.robot.Constants.Teleop.*;
-
+@LoggedObject
 public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
     /**
      * Whether to override the inputs of the driver for maintaining or turning to a
      * specific angle.
      */
+    @Log
     private boolean isControlledRotationEnabled = false;
 
     /**
@@ -76,24 +109,28 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     @Log(groups = "control")
     private ChassisSpeeds commandedChassisSpeeds = new ChassisSpeeds();
 
+    @Log(groups = "modules")
     private KrakenCoaxialSwerveModule frontLeft = new KrakenCoaxialSwerveModule(FRONT_LEFT_DRIVE_MOTOR_ID,
             FRONT_LEFT_STEER_MOTOR_ID,
             FRONT_LEFT_STEER_ENCODER_ID, CAN_BUS, false, true, false,
             FRONT_LEFT_OFFSET,
             SWERVE_CONSTANTS);
 
+    @Log(groups = "modules")
     private KrakenCoaxialSwerveModule frontRight = new KrakenCoaxialSwerveModule(FRONT_RIGHT_DRIVE_MOTOR_ID,
             FRONT_RIGHT_STEER_MOTOR_ID,
             FRONT_RIGHT_STEER_ENCODER_ID, CAN_BUS, false, true, false,
             FRONT_RIGHT_OFFSET,
             SWERVE_CONSTANTS);
 
+    @Log(groups = "modules")
     private KrakenCoaxialSwerveModule backLeft = new KrakenCoaxialSwerveModule(BACK_LEFT_DRIVE_MOTOR_ID,
             BACK_LEFT_STEER_MOTOR_ID,
             BACK_LEFT_STEER_ENCODER_ID, CAN_BUS, false, true, false,
             BACK_LEFT_OFFSET,
             SWERVE_CONSTANTS);
 
+    @Log(groups = "moudules")
     private KrakenCoaxialSwerveModule backRight = new KrakenCoaxialSwerveModule(BACK_RIGHT_DRIVE_MOTOR_ID,
             BACK_RIGHT_STEER_MOTOR_ID,
             BACK_RIGHT_STEER_ENCODER_ID, CAN_BUS, false, true, false,
@@ -101,10 +138,13 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
             SWERVE_CONSTANTS);
 
     // initiate pigeon gyro -- Jake
+    @Log
     private Pigeon2 gyro = new Pigeon2(0);
 
+    @Log
     private SwerveDrivePoseEstimator poseEstimator;
 
+    @Log
     private DriveMode driveMode = DriveMode.FIELD_ORIENTED;
 
     public Drivetrain() {
@@ -121,6 +161,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
      * 
      * @return the current drive mode
      */
+    @Override
     public DriveMode getDriveMode() {
         return driveMode;
     }
@@ -130,6 +171,8 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
      * 
      * @return the current pose
      */
+    @Override
+    @Log
     public Pose2d getPose() {
         return poseEstimator.getEstimatedPosition();
     }
@@ -139,6 +182,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
      * 
      * @return the heading of the robot as a Rotation2d object
      */
+    @Override
     public Rotation2d getRotation() {
         return gyro.getRotation2d();
     }
@@ -148,6 +192,8 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
      * 
      * @return the current swerve module positions
      */
+    @Override
+    @Log(groups = "control")
     public SwerveModulePosition[] getModulePositions() {
         return new SwerveModulePosition[] {
                 frontLeft.getPosition(),
@@ -162,6 +208,8 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
      * 
      * @return the current swerve module states
      */
+    @Override
+    @Log(groups = "control")
     public SwerveModuleState[] getModuleStates() {
         return new SwerveModuleState[] {
                 frontLeft.getState(),
@@ -171,11 +219,13 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
         };
     }
 
-    /**
+    /*
      * Gets current chassis speed after calculating with kinematics
      * 
      * @return the current chassis speed
      */
+    @Override
+    @Log(groups = "control")
     public ChassisSpeeds getChassisSpeeds() {
         return KINEMATICS.toChassisSpeeds(getModuleStates());
     }
@@ -185,26 +235,31 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
      * 
      * @return the pose estimator
      */
+    @Override
     public SwerveDrivePoseEstimator getPoseEstimator() {
         return poseEstimator;
     }
 
     /** Update the pose estimator */
+    @Override
     public void updatePoseEstimator() {
         poseEstimator.update(getRotation(), getModulePositions());
     }
 
     /** ReSets the pose estimator */
+    @Override
     public void resetPoseEstimator(Pose2d pose) {
         poseEstimator.resetPosition(getRotation(), getModulePositions(), pose);
     }
 
-    /** ReSets gyro */
+    /** Resets gyro */
+    @Override
     public void resetGyro() {
         gyro.reset();
     }
 
     /** Sets the serve drive motor hold modes */
+    @Override
     public void setMotorHoldModes(MotorHoldMode motorHoldMode) {
         frontLeft.setMotorHoldMode(motorHoldMode);
         frontRight.setMotorHoldMode(motorHoldMode);
@@ -216,6 +271,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
      * Sets the swerve module current limits to the argument supplied.
      * 
      */
+    @Override
     public void setDriveCurrentLimit(int currentLimit) {
         frontLeft.setDriveCurrentLimit(currentLimit);
         frontRight.setDriveCurrentLimit(currentLimit);
@@ -224,6 +280,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     /** stop all swerve drives */
+    @Override
     public void stop() {
         frontLeft.stop();
         frontRight.stop();
@@ -234,6 +291,8 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     /**
      * Sets states for the swerve modules
      */
+    @Override
+
     public void setStates(SwerveModuleState[] state) {
         frontLeft.setState(state[0]);
         frontRight.setState(state[1]);
@@ -244,6 +303,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     /**
      * Sets closed loop states for the swerve modules
      */
+    @Override
     public void setStatesClosedLoop(SwerveModuleState[] state) {
         frontLeft.setStateClosedLoop(state[0]);
         frontRight.setStateClosedLoop(state[1]);
@@ -254,6 +314,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     /**
      * Drives at current drivemode
      */
+
     public void drive(ChassisSpeeds speeds) {
         drive(speeds, this.driveMode);
     }
@@ -261,6 +322,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     /**
      * Drives with inputted drivemode
      */
+    @Override
     public void drive(ChassisSpeeds speeds, DriveMode driveMode) {
         if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red
                 && driveMode == DriveMode.FIELD_ORIENTED) {
@@ -299,6 +361,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     /**
      * Drives at current drivemode with closed loop controls
      */
+    @Override
     public void driveClosedLoop(ChassisSpeeds speeds, DriveMode driveMode) {
         if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red
                 && driveMode == DriveMode.FIELD_ORIENTED) {
@@ -337,6 +400,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     /**
      * Drives with teleop
      */
+    @Override
     public Command teleopDriveCommand(DoubleSupplier xSpeedSupplier, DoubleSupplier ySpeedSupplier,
             DoubleSupplier thetaSpeedSupplier) {
         SlewRateLimiter xSpeedLimiter = new SlewRateLimiter(JOYSTICK_INPUT_RATE_LIMIT);
@@ -382,7 +446,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
      * 
      * @return the command
      */
-
+    @Override
     public Command disableControlledRotateCommand() {
         return runOnce(() -> {
             isControlledRotationEnabled = false;
@@ -392,6 +456,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     /**
      * Creates the command to lock all wheels
      */
+    @Override
     public Command wheelLockCommand() {
         return run(() -> {
             setStates(new SwerveModuleState[] {
@@ -406,6 +471,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     /*
      * Creates the command to make all wheels turn to an angle
      */
+    @Override
     public Command turnWheelsToAngleCommand(double angle) {
         return runOnce(() -> {
             setStates(new SwerveModuleState[] {
@@ -421,6 +487,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     /**
      * Drives to inputted pose
      */
+    @Override
     public Command driveToPoseCommand(Pose2d pose) {
         return runOnce(() -> {
             xPositionController.reset(getPose().getX());
@@ -439,6 +506,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     /**
      * Drives by following the command
      */
+    @Override
     public Command followPathCommand(PathPlannerPath path) {
         return new FollowPathHolonomic(path, this::getPose, this::getChassisSpeeds,
                 (speeds) -> driveClosedLoop(speeds, DriveMode.ROBOT_RELATIVE),
@@ -456,6 +524,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     /**
      * Drive based on the delta (change)
      */
+    @Override
     public Command driveDeltaCommand(Transform2d delta, PathConstraints constraints) {
         return new DeferredCommand(() -> followPathCommand(
                 new PathPlannerPath(
@@ -469,6 +538,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     /*
      * Sets the drive mode as a command
      */
+    @Override
     public Command setDriveModeCommand(DriveMode driveMode) {
         return runOnce(() -> this.driveMode = driveMode);
     }
@@ -476,6 +546,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     /*
      * resets the gyro command
      */
+    @Override
     public Command resetGyroCommand() {
         return runOnce(() -> {
             gyro.reset();
@@ -486,6 +557,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     /*
      * Creates a command that sets the drive current limits for each swerve modules
      */
+    @Override
     public Command setDriveCurrentLimitCommand(int currentLimit) {
         return runOnce(() -> {
             frontLeft.setDriveCurrentLimit(currentLimit);
@@ -498,6 +570,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     /*
      * Creates a command that sets motors to coast for the duration of the command
      */
+    @Override
     public Command coastMotorsCommand() {
         return runOnce(this::stop)
                 .andThen(() -> setMotorHoldModes(MotorHoldMode.COAST))
