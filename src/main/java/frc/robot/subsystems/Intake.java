@@ -9,8 +9,12 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.techhounds.houndutil.houndlib.SparkConfigurator;
 
+import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static frc.robot.Constants.Intake.*;
@@ -22,6 +26,8 @@ import static frc.robot.Constants.Intake.*;
 public class Intake extends SubsystemBase {
     private DigitalInput beamBreak;
     private CANSparkFlex leftMotor, rightMotor, frontMotor;
+    private ProfiledPIDController pidController;
+    private ArmFeedforward intakeFeedForward;
 
     // Function<CANSparkBase, REVLibError> frontMotor2 =
     // frontMotor2::setSmartCurrentLimit;
@@ -40,6 +46,10 @@ public class Intake extends SubsystemBase {
                 (s) -> s.getEncoder().setVelocityConversionFactor(ENCODER_ROTATIONS_TO_RADIANS / 60.0));
         SparkConfigurator.safeBurnFlash();
         beamBreak = new DigitalInput(BEAM_BREAK_CHANNEL);
+        pidController = new ProfiledPIDController(kP, kI, kD,
+                new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration));
+        intakeFeedForward = new ArmFeedforward(kS, kG, kV, kA);
+
     }
 
     private double velocity;
@@ -48,7 +58,6 @@ public class Intake extends SubsystemBase {
         return runOnce(() -> {
             motor.setVoltage(1);
         });
-
     }
 
     public Command stopIntake(CANSparkFlex motor) {
@@ -61,27 +70,40 @@ public class Intake extends SubsystemBase {
         return startEnd(
                 () -> frontMotor.setVoltage(6),
                 () -> frontMotor.setVoltage(0))
-                .withName("Run Passover Motors");
+                .withName("Run Front Motors");
     }
 
     public Command startFrontMotorCommand() {
         return runOnce(() -> frontMotor.setVoltage(6))
-                .withName("Start Passover Motors");
+                .withName("Start Front Motors");
     }
 
     public Command stopFrontMotorCommand() {
         return runOnce(() -> frontMotor.setVoltage(0))
-                .withName("Stop Passover Motors");
+                .withName("Stop Front Motors");
     }
 
     public Command reverseFrontMotorCommand() {
         return startEnd(
                 () -> frontMotor.setVoltage(-6),
                 () -> frontMotor.setVoltage(0))
-                .withName("Run Passover Motors");
+                .withName("Run Front Motors");
+    }
+
+    public Command moveToCurrentGoalCommand() {
+        double feedback = pidController.calculate(getIntakePosition());
+        double feedforward = intakeFeedForward.calculate(pidController.getSetpoint().position,
+                pidController.getSetpoint().velocity);
     }
 
     public Command liftIntake(double angle) {
+        return Commands.sequence(
+                runOnce(() -> pidController.reset(getIntakePosition())),
+                runOnce(() -> pidController.setGoal(angle)),
+                moveToCurrentGoalCommand().until(pidController::atGoal)).withTimeout(2)
+                .finallyDo((d) -> .stopLiftingMotors())
+                .withName("Move to Position");
+    
 
     }
 
@@ -105,8 +127,14 @@ public class Intake extends SubsystemBase {
         resetPose(leftMotor, rightMotor);
     }
 
-    public double getIntakePosition(CANSparkFlex motor) {
-        return motor.getEncoder().getPosition();
+    public Command moveToPosition() {
+        return Commands.sequence(
+            runOnce(pidController = new ProfiledPIDController(CURRENT_LIMIT, BEAM_BREAK_ID, BEAM_BREAK_CHANNEL, null));
+        );
+    }
+
+    public double getIntakePosition() {
+        return leftMotor.getEncoder().getPosition();
     }
 
     public double getVelocity(CANSparkFlex motor) {
@@ -121,6 +149,11 @@ public class Intake extends SubsystemBase {
 
     public void setVoltage(double voltage, CANSparkFlex motor) {
         motor.setVoltage(voltage);
+    }
+
+    public void stopLiftingMotors() {
+        leftMotor.stopMotor();
+        rightMotor.stopMotor();
     }
 
 }
