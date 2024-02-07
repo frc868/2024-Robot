@@ -63,7 +63,7 @@ public class Shooter extends SubsystemBase implements BaseShooter {
     @Override
     public Command spinAtVelocityCommand(Supplier<Double> goalVelocitySupplier) { // idk lol
         return run(() -> {
-            feedbackVoltage = pidController.calculate(goalVelocitySupplier.get()); //?
+            feedbackVoltage = pidController.calculate(getVelocity(), goalVelocitySupplier.get()); //?
             feedforwardVoltage = feedforwardController.calculate(goalVelocitySupplier.get());
             setVoltage(feedbackVoltage + feedforwardVoltage);
         });
