@@ -51,6 +51,12 @@ public class Constants {
             return length;
         }
 
+        public double aimingRegression(double angle) {
+            //there's going to be a regression function here once we test the shooter
+            double fudgeFactor = 65537; 
+            return fudgeFactor;
+        }
+
         /*
          * this does effectively nothing except for account for miniscule positional
          * changes in the entry point of the shooter, but it was fun to figure this out
