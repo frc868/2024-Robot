@@ -88,7 +88,7 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
     }
 
     @Override
-    public Command setOverridenSpeedCommand(Supplier speed) {
+    public Command setOverridenSpeedCommand(Supplier<Double> speed) {
         return run(() -> setVoltage(12.0 * speed.get()));
     }
 
