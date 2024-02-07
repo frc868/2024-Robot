@@ -73,8 +73,8 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
     }
 
     @Override
-    public Command movePositionDeltaCommand(Supplier delta) {
-
+    public Command movePositionDeltaCommand(Supplier<Double> delta) {
+        return moveToArbitraryPositionCommand(() -> pidController.getGoal().position + delta.get());
     }
 
     @Override
