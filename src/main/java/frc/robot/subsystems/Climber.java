@@ -65,12 +65,11 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
     }
 
     @Override
-    public Command moveToArbitraryPositionCommand(Supplier goalPositionSupplier) {
-        return Commands.sequence(){
-            runOnce(()-> pidController.reset(getPosition())),
-            runOnce(()-> pidController.setGoal(goalPositionSupplier.get())),
-            moveToCurrentGoalCommand().until(pidController::atGoal)
-        }
+    public Command moveToArbitraryPositionCommand(Supplier<Double> goalPositionSupplier) {
+        return Commands.sequence(
+                runOnce(() -> pidController.reset(getPosition())),
+                runOnce(() -> pidController.setGoal(goalPositionSupplier.get())),
+                moveToCurrentGoalCommand().until(pidController::atGoal));
     }
 
     @Override
