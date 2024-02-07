@@ -20,45 +20,43 @@ public class Constants {
     public static final ControllerType CONTROLLER_TYPE = ControllerType.FlightStick;
 
     public static final class Drivetrain {
+        public static final int FRONT_LEFT_DRIVE_MOTOR_ID = 0; // Untested
+        public static final int FRONT_LEFT_STEER_MOTOR_ID = 0; // Untested
+        public static final int FRONT_RIGHT_DRIVE_MOTOR_ID = 0; // Untested
+        public static final int FRONT_RIGHT_STEER_MOTOR_ID = 0; // Untested
+        public static final int BACK_LEFT_DRIVE_MOTOR_ID = 0; // Untested
+        public static final int BACK_LEFT_STEER_MOTOR_ID = 0; // Untested
+        public static final int BACK_RIGHT_DRIVE_MOTOR_ID = 0; // Untested
+        public static final int BACK_RIGHT_STEER_MOTOR_ID = 0; // Untested
 
-        /** Distance between centers of right and left wheels on robot. */
-        public static final int FRONT_LEFT_DRIVE_MOTOR_ID = 1;
-        public static final int FRONT_LEFT_STEER_MOTOR_ID = 2;
-        public static final int FRONT_RIGHT_DRIVE_MOTOR_ID = 3;
-        public static final int FRONT_RIGHT_STEER_MOTOR_ID = 4;
-        public static final int BACK_LEFT_DRIVE_MOTOR_ID = 5;
-        public static final int BACK_LEFT_STEER_MOTOR_ID = 6;
-        public static final int BACK_RIGHT_DRIVE_MOTOR_ID = 7;
-        public static final int BACK_RIGHT_STEER_MOTOR_ID = 8;
+        public static final int FRONT_LEFT_STEER_ENCODER_ID = 0; // Untested
+        public static final int FRONT_RIGHT_STEER_ENCODER_ID = 0; // Untested
+        public static final int BACK_LEFT_STEER_ENCODER_ID = 0; // Untested
+        public static final int BACK_RIGHT_STEER_ENCODER_ID = 0; // Untested
 
-        public static final int FRONT_LEFT_STEER_ENCODER_ID = 0;
-        public static final int FRONT_RIGHT_STEER_ENCODER_ID = 1;
-        public static final int BACK_LEFT_STEER_ENCODER_ID = 2;
-        public static final int BACK_RIGHT_STEER_ENCODER_ID = 3;
-
-        public static final double FRONT_LEFT_OFFSET = -4.63107;
-        public static final double FRONT_RIGHT_OFFSET = -3.5587;
-        public static final double BACK_LEFT_OFFSET = -4.4377;
-        public static final double BACK_RIGHT_OFFSET = -6.2019;
+        public static final double FRONT_LEFT_OFFSET = 0; // Untested
+        public static final double FRONT_RIGHT_OFFSET = 0; // Untested
+        public static final double BACK_LEFT_OFFSET = 0; // Untested
+        public static final double BACK_RIGHT_OFFSET = 0; // Untested
 
         public static final String CAN_BUS = "canivore";
 
         /** Distance between left and right wheels. */
-        public static final double TRACK_WIDTH_METERS = Units.inchesToMeters(22.75);
+        public static final double TRACK_WIDTH_METERS = Units.inchesToMeters(0); // Untested
         /** Distance between front and back wheels. */
-        public static final double WHEEL_BASE_METERS = Units.inchesToMeters(22.75);
+        public static final double WHEEL_BASE_METERS = Units.inchesToMeters(0); // Untested
 
         public static final NEOCoaxialSwerveModule.SwerveConstants SWERVE_CONSTANTS = new NEOCoaxialSwerveModule.SwerveConstants();
         static {
-            SWERVE_CONSTANTS.DRIVE_kP = 2.9646;
-            SWERVE_CONSTANTS.DRIVE_kI = 0.0;
-            SWERVE_CONSTANTS.DRIVE_kD = 0.0;
-            SWERVE_CONSTANTS.DRIVE_kS = 0.0;
-            SWERVE_CONSTANTS.DRIVE_kV = 2.8024;
-            SWERVE_CONSTANTS.DRIVE_kA = 0.057223;
-            SWERVE_CONSTANTS.STEER_kP = 6.0;
-            SWERVE_CONSTANTS.STEER_kI = 0.0;
-            SWERVE_CONSTANTS.STEER_kD = 0.1;
+            SWERVE_CONSTANTS.DRIVE_kP = 0; // Untested
+            SWERVE_CONSTANTS.DRIVE_kI = 0; // Untested
+            SWERVE_CONSTANTS.DRIVE_kD = 0; // Untested
+            SWERVE_CONSTANTS.DRIVE_kS = 0; // Untested
+            SWERVE_CONSTANTS.DRIVE_kV = 0; // Untested
+            SWERVE_CONSTANTS.DRIVE_kA = 0; // Untested
+            SWERVE_CONSTANTS.STEER_kP = 0; // Untested
+            SWERVE_CONSTANTS.STEER_kI = 0; // Untested
+            SWERVE_CONSTANTS.STEER_kD = 0; // Untested
 
             SWERVE_CONSTANTS.DRIVE_GEARING = 6.75;
             SWERVE_CONSTANTS.STEER_GEARING = 150.0 / 7.0;
@@ -77,11 +75,11 @@ public class Constants {
             SWERVE_CONSTANTS.STEER_CURRENT_LIMIT = 20;
             SWERVE_CONSTANTS.DRIVE_GEARBOX_REPR = DCMotor.getNEO(1);
             SWERVE_CONSTANTS.STEER_GEARBOX_REPR = DCMotor.getNEO(1);
-            SWERVE_CONSTANTS.DRIVE_MOI = 0.04;
-            SWERVE_CONSTANTS.STEER_MOI = 0.025;
+            SWERVE_CONSTANTS.DRIVE_MOI = 0; // Untested
+            SWERVE_CONSTANTS.STEER_MOI = 0; // Untested
         }
 
-        public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = Math.PI / 4;
+        public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = Math.PI / 4; // Untested
         public static final double MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 2 * Math.PI;
 
         public static final Translation2d[] SWERVE_MODULE_LOCATIONS = new Translation2d[] {
@@ -111,13 +109,6 @@ public class Constants {
 
         public static final double PATH_FOLLOWING_TRANSLATION_kP = 7;
         public static final double PATH_FOLLOWING_ROTATION_kP = 7;
-
-        public static final double BALANCE_kP = 0.035;
-        public static final double BALANCE_kI = 0;
-        public static final double BALANCE_kD = 0.004;
-        public static final double BALANCE_TOLERANCE = 3;
-        public static final double BALANCE_MAX_VALUE = 0.6;
-
     }
 
     public static final class Teleop {

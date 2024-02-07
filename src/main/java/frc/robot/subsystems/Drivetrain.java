@@ -1,36 +1,7 @@
 package frc.robot.subsystems;
 
-import static frc.robot.Constants.Drivetrain.BACK_LEFT_DRIVE_MOTOR_ID;
-import static frc.robot.Constants.Drivetrain.BACK_LEFT_OFFSET;
-import static frc.robot.Constants.Drivetrain.BACK_LEFT_STEER_ENCODER_ID;
-import static frc.robot.Constants.Drivetrain.BACK_LEFT_STEER_MOTOR_ID;
-import static frc.robot.Constants.Drivetrain.BACK_RIGHT_DRIVE_MOTOR_ID;
-import static frc.robot.Constants.Drivetrain.BACK_RIGHT_OFFSET;
-import static frc.robot.Constants.Drivetrain.BACK_RIGHT_STEER_ENCODER_ID;
-import static frc.robot.Constants.Drivetrain.BACK_RIGHT_STEER_MOTOR_ID;
-import static frc.robot.Constants.Drivetrain.CAN_BUS;
-import static frc.robot.Constants.Drivetrain.FRONT_LEFT_DRIVE_MOTOR_ID;
-import static frc.robot.Constants.Drivetrain.FRONT_LEFT_OFFSET;
-import static frc.robot.Constants.Drivetrain.FRONT_LEFT_STEER_ENCODER_ID;
-import static frc.robot.Constants.Drivetrain.FRONT_LEFT_STEER_MOTOR_ID;
-import static frc.robot.Constants.Drivetrain.FRONT_RIGHT_DRIVE_MOTOR_ID;
-import static frc.robot.Constants.Drivetrain.FRONT_RIGHT_OFFSET;
-import static frc.robot.Constants.Drivetrain.FRONT_RIGHT_STEER_ENCODER_ID;
-import static frc.robot.Constants.Drivetrain.FRONT_RIGHT_STEER_MOTOR_ID;
-import static frc.robot.Constants.Drivetrain.KINEMATICS;
-import static frc.robot.Constants.Drivetrain.PATH_FOLLOWING_ROTATION_kP;
-import static frc.robot.Constants.Drivetrain.PATH_FOLLOWING_TRANSLATION_kP;
-import static frc.robot.Constants.Drivetrain.SWERVE_CONSTANTS;
-import static frc.robot.Constants.Drivetrain.THETA_CONSTRAINTS;
-import static frc.robot.Constants.Drivetrain.THETA_kD;
-import static frc.robot.Constants.Drivetrain.THETA_kI;
-import static frc.robot.Constants.Drivetrain.THETA_kP;
-import static frc.robot.Constants.Drivetrain.XY_CONSTRAINTS;
-import static frc.robot.Constants.Drivetrain.XY_kD;
-import static frc.robot.Constants.Drivetrain.XY_kI;
-import static frc.robot.Constants.Drivetrain.XY_kP;
-import static frc.robot.Constants.Teleop.JOYSTICK_CURVE_EXP;
-import static frc.robot.Constants.Teleop.JOYSTICK_INPUT_RATE_LIMIT;
+import static frc.robot.Constants.Drivetrain.*;
+import static frc.robot.Constants.Teleop.*;
 
 import java.util.Set;
 import java.util.function.DoubleSupplier;
@@ -157,9 +128,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     /**
-     * Gets current drive mode
-     * 
-     * @return the current drive mode
+     * Gets current drive mode.
      */
     @Override
     public DriveMode getDriveMode() {
@@ -167,9 +136,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     /**
-     * Gets current pose
-     * 
-     * @return the current pose
+     * Gets current pose.
      */
     @Override
     @Log
@@ -178,9 +145,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     /**
-     * Gets the current heading of the gyro
-     * 
-     * @return the heading of the robot as a Rotation2d object
+     * Gets the current heading of the gyro.
      */
     @Override
     public Rotation2d getRotation() {
@@ -188,9 +153,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     /**
-     * Gets the current swerve module positions
-     * 
-     * @return the current swerve module positions
+     * Gets the current swerve module positions.
      */
     @Override
     @Log(groups = "control")
@@ -205,8 +168,6 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
     /**
      * Gets the current swerve module states (encoder velocities).
-     * 
-     * @return the current swerve module states
      */
     @Override
     @Log(groups = "control")
@@ -220,9 +181,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     /*
-     * Gets current chassis speed after calculating with kinematics
-     * 
-     * @return the current chassis speed
+     * Gets current chassis speed after calculating with kinematics.
      */
     @Override
     @Log(groups = "control")
@@ -231,34 +190,32 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     /**
-     * Gets pose estimator
-     * 
-     * @return the pose estimator
+     * Gets pose estimator.
      */
     @Override
     public SwerveDrivePoseEstimator getPoseEstimator() {
         return poseEstimator;
     }
 
-    /** Update the pose estimator */
+    /** Update the pose estimator. */
     @Override
     public void updatePoseEstimator() {
         poseEstimator.update(getRotation(), getModulePositions());
     }
 
-    /** ReSets the pose estimator */
+    /** ReSets the pose estimator. */
     @Override
     public void resetPoseEstimator(Pose2d pose) {
         poseEstimator.resetPosition(getRotation(), getModulePositions(), pose);
     }
 
-    /** Resets gyro */
+    /** Resets gyro. */
     @Override
     public void resetGyro() {
         gyro.reset();
     }
 
-    /** Sets the serve drive motor hold modes */
+    /** Sets the serve drive motor hold modes. */
     @Override
     public void setMotorHoldModes(MotorHoldMode motorHoldMode) {
         frontLeft.setMotorHoldMode(motorHoldMode);
@@ -269,7 +226,6 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
     /**
      * Sets the swerve module current limits to the argument supplied.
-     * 
      */
     @Override
     public void setDriveCurrentLimit(int currentLimit) {
@@ -279,7 +235,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
         backRight.setDriveCurrentLimit(currentLimit);
     }
 
-    /** stop all swerve drives */
+    /** stop all swerve drives. */
     @Override
     public void stop() {
         frontLeft.stop();
@@ -289,10 +245,9 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     /**
-     * Sets states for the swerve modules
+     * Sets states for the swerve modules.
      */
     @Override
-
     public void setStates(SwerveModuleState[] state) {
         frontLeft.setState(state[0]);
         frontRight.setState(state[1]);
@@ -301,7 +256,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     /**
-     * Sets closed loop states for the swerve modules
+     * Sets closed loop states for the swerve modules.
      */
     @Override
     public void setStatesClosedLoop(SwerveModuleState[] state) {
@@ -312,7 +267,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     /**
-     * Drives at current drivemode
+     * Drives at current drivemode.
      */
 
     public void drive(ChassisSpeeds speeds) {
@@ -320,7 +275,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     /**
-     * Drives with inputted drivemode
+     * Drives with inputted drivemode.
      */
     @Override
     public void drive(ChassisSpeeds speeds, DriveMode driveMode) {
@@ -359,7 +314,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     /**
-     * Drives at current drivemode with closed loop controls
+     * Drives at current drivemode with closed loop controls.
      */
     @Override
     public void driveClosedLoop(ChassisSpeeds speeds, DriveMode driveMode) {
@@ -398,7 +353,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     /**
-     * Drives with teleop
+     * Drives with teleop.
      */
     @Override
     public Command teleopDriveCommand(DoubleSupplier xSpeedSupplier, DoubleSupplier ySpeedSupplier,
@@ -412,9 +367,9 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
             double ySpeed = ySpeedSupplier.getAsDouble();
             double thetaSpeed = thetaSpeedSupplier.getAsDouble();
 
-            xSpeed = MathUtil.applyDeadband(xSpeed, 0.01);
-            ySpeed = MathUtil.applyDeadband(ySpeed, 0.01);
-            thetaSpeed = MathUtil.applyDeadband(thetaSpeed, 0.01);
+            xSpeed = MathUtil.applyDeadband(xSpeed, 0); // Untested
+            ySpeed = MathUtil.applyDeadband(ySpeed, 0); // Untested
+            thetaSpeed = MathUtil.applyDeadband(thetaSpeed, 0); // Untested
 
             xSpeed = Math.copySign(Math.pow(xSpeed, JOYSTICK_CURVE_EXP), xSpeed);
             ySpeed = Math.copySign(Math.pow(ySpeed, JOYSTICK_CURVE_EXP), ySpeed);
@@ -443,8 +398,6 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
      * Creates a command that allows for rotation to any angle.
      * 
      * Map this to a button input to rotate while still translating.
-     * 
-     * @return the command
      */
     @Override
     public Command disableControlledRotateCommand() {
@@ -454,7 +407,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     /**
-     * Creates the command to lock all wheels
+     * Creates the command to lock all wheels.
      */
     @Override
     public Command wheelLockCommand() {
@@ -469,7 +422,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     /*
-     * Creates the command to make all wheels turn to an angle
+     * Creates the command to make all wheels turn to an angle.
      */
     @Override
     public Command turnWheelsToAngleCommand(double angle) {
@@ -485,7 +438,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     /**
-     * Drives to inputted pose
+     * Drives to inputted pose.
      */
     @Override
     public Command driveToPoseCommand(Pose2d pose) {
@@ -504,7 +457,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     /**
-     * Drives by following the command
+     * Drives by following the command.
      */
     @Override
     public Command followPathCommand(PathPlannerPath path) {
@@ -522,7 +475,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     /**
-     * Drive based on the delta (change)
+     * Drive based on the delta (change).
      */
     @Override
     public Command driveDeltaCommand(Transform2d delta, PathConstraints constraints) {
@@ -536,7 +489,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     /*
-     * Sets the drive mode as a command
+     * Sets the drive mode as a command.
      */
     @Override
     public Command setDriveModeCommand(DriveMode driveMode) {
@@ -544,7 +497,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     /*
-     * resets the gyro command
+     * resets the gyro command.
      */
     @Override
     public Command resetGyroCommand() {
@@ -555,7 +508,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     /*
-     * Creates a command that sets the drive current limits for each swerve modules
+     * Creates a command that sets the drive current limits for each swerve modules.
      */
     @Override
     public Command setDriveCurrentLimitCommand(int currentLimit) {
@@ -568,7 +521,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     /*
-     * Creates a command that sets motors to coast for the duration of the command
+     * Creates a command that sets motors to coast for the duration of the command.
      */
     @Override
     public Command coastMotorsCommand() {
@@ -579,7 +532,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     /*
-     * Creates a command to rotate in a controlled manner to the target angle
+     * Creates a command to rotate in a controlled manner to the target angle.
      */
     @Override
     public Command controlledRotateCommand(DoubleSupplier angle, DriveMode driveMode) {
