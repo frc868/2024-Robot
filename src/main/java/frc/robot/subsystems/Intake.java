@@ -111,12 +111,8 @@ public class Intake extends SubsystemBase {
 
     }
 
-    public Command reverseMotors() {
-
-    }
-
     public Command intakeGround() {
-
+        
     }
 
     public Command intakeAmp() {
