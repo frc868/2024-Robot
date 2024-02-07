@@ -1,7 +1,5 @@
 package frc.robot.subsystems;
 
-import static frc.robot.Constants.Climber.CLIMBER_MOTOR_ID;
-
 import java.util.function.Supplier;
 
 import com.revrobotics.CANSparkFlex;
@@ -16,7 +14,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.Climber.ClimberPosition;
 
 import static frc.robot.Constants.Climber.*;
 
