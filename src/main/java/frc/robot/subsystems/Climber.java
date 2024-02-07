@@ -48,11 +48,12 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
 
     @Override
     public Command moveToCurrentGoalCommand() {
-        return run(()->{
+        return run(() -> {
             feedbackVoltage = pidController.calculate(getPosition());
-            feedforwardVoltage = feedforwardController.calculate(pidController.getSetpoint().position, pidController.getSetpoint().velocity);
+            feedforwardVoltage = feedforwardController.calculate(pidController.getSetpoint().position,
+                    pidController.getSetpoint().velocity);
             setVoltage(feedbackVoltage + feedforwardVoltage);
-        })
+        });
     }
 
     @Override
