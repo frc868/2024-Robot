@@ -81,7 +81,7 @@ public class Intake extends SubsystemBase {
     }
 
     /*
-     * Creates a startEndCommand (requiring this subsystem) to run the passover
+     * Creates a startEndCommand (requiring this subsystem) to run the intake
      * motor.
      * This will run the motors until the command is interrupted/cancelled.
      * 
@@ -95,18 +95,32 @@ public class Intake extends SubsystemBase {
     }
 
     /*
-     * ?
+     * Runs the front intake motor. 
+     * This will continue to run unless stopFrontMotorCommand is called.
+     * 
+     * @return the command
      */
     public Command startFrontMotorCommand() {
         return runOnce(() -> frontMotor.setVoltage(6))
                 .withName("Start Front Motors");
     }
 
+    /*
+     * Stops the front intake motor. 
+     * 
+     * @return the command
+     */
     public Command stopFrontMotorCommand() {
         return runOnce(() -> frontMotor.setVoltage(0))
                 .withName("Stop Front Motors");
     }
 
+    /*
+     * Creates a startEndCommand to run the intake motors in reverse.
+     * This will run the motors until the command is interrupted/cancelled.
+     * 
+     * @return the command
+     */
     public Command reverseFrontMotorCommand() {
         return startEnd(
                 () -> frontMotor.setVoltage(-6),
@@ -114,6 +128,12 @@ public class Intake extends SubsystemBase {
                 .withName("Run Front Motors");
     }
 
+    /*
+     * Runs the two motors that lift the intake to move.
+     * Used in the liftIntake command to lift to an angle at a smooth rate.
+     * 
+     * @return the command
+     */
     public Command moveToCurrentGoalCommand() {
         return run(() -> {
             double feedback = pidController.calculate(getIntakePosition());
@@ -123,6 +143,13 @@ public class Intake extends SubsystemBase {
         }).withName("Move to curerent goal");
     }
 
+    /*
+     * Command that will lift the intake to a specific angle.
+     * 
+     * @param angle, the angle for the intake to move to
+     * 
+     * @return the command
+     */
     public Command liftIntake(double angle) {
         return Commands.sequence(
                 runOnce(() -> pidController.reset(getIntakePosition())),
@@ -137,6 +164,11 @@ public class Intake extends SubsystemBase {
 
     }
 
+    /*
+     * Moves the intake to the ground position.
+     * 
+     * @return the command
+     */
     public Command intakeGround() {
         // set angle later
         double targetAngle = 0;
@@ -151,6 +183,11 @@ public class Intake extends SubsystemBase {
 
     }
 
+    /*
+     * Moves the intake to the amp scoring position
+     * 
+     * @return the command
+     */
     public Command intakeAmp() {
         // set angle later
         double targetAngleAmp = 0;
@@ -165,6 +202,11 @@ public class Intake extends SubsystemBase {
 
     }
 
+    /*
+     * Move the intake to the verticle up position
+     * 
+     * @return the command
+     */
     public Command intakeVertical() {
         // set angle later
         double targetAngleVertical = 0;
@@ -200,6 +242,8 @@ public class Intake extends SubsystemBase {
     /*
      * Gets the current velocity of the motor inputted as the parameter
      * 
+     * @param motor, the motor wanting the velocity
+     * 
      * @return the current velocity of the motor as a double
      */
     public double getVelocity(CANSparkFlex motor) {
@@ -210,22 +254,36 @@ public class Intake extends SubsystemBase {
     /*
      * Gets the current velocity of the motor inputted as the parameter
      * 
-     * @return the current velocity of the motor as a double
+     * @param motor1, the first side motor
+     * @param motor2, the second side motor
      */
-    public void resetPose(CANSparkFlex motor1, CANSparkFlex motor2) {
+    public void resetSidePose(CANSparkFlex motor1, CANSparkFlex motor2) {
         motor1.getEncoder().setPosition(RESET_POSITION);
         motor2.getEncoder().setPosition(RESET_POSITION);
     }
 
+    /*
+     * Set the front motor's voltage
+     * 
+     * @param voltage, the new voltage
+     */
     public void setFrontVoltage(double voltage) {
         frontMotor.setVoltage(voltage);
     }
 
+    /*
+     * Set the side motor's voltage
+     * 
+     * @param voltage, the new voltage
+     */
     public void setSideVoltage(double voltage) {
         rightMotor.setVoltage(voltage);
         leftMotor.setVoltage(voltage);
     }
 
+    /*
+     * Stop the side motors from moving
+     */
     public void stopLiftingMotors() {
         leftMotor.stopMotor();
         rightMotor.stopMotor();
