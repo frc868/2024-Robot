@@ -112,7 +112,17 @@ public class Intake extends SubsystemBase {
     }
 
     public Command intakeGround() {
-        
+        //set angle later
+        double targetAngle = 0
+        //runs runOnce() in order
+        return Commands.sequence(
+            runOnce(() -> pidController.reset(getIntakePosition()));
+            runOnce(() -> pidController.setGoal(targetAngle));
+            moveToCurrentGoalCommand().until(pidController::atGoal);
+            .withTimeout(2);
+            .finallyDo((d) -> stopLiftingMotors());
+            .withName("Move intake ground");
+        )
     }
 
     public Command intakeAmp() {
