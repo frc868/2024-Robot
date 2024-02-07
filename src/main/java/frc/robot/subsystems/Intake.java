@@ -103,8 +103,6 @@ public class Intake extends SubsystemBase {
                 moveToCurrentGoalCommand().until(pidController::atGoal)).withTimeout(2)
                 .finallyDo((d) -> .stopLiftingMotors())
                 .withName("Move to Position");
-    
-
     }
 
     public Command intakeHold(DigitalInput beamBreak) {
@@ -117,7 +115,7 @@ public class Intake extends SubsystemBase {
         //runs runOnce() in order
         return Commands.sequence(
             runOnce(() -> pidController.reset(getIntakePosition()));
-            runOnce(() -> pidController.setGoal(targetAngle));
+            runOnce(() -> pidController.setGoalp(targetAngle));
             moveToCurrentGoalCommand().until(pidController::atGoal);
             .withTimeout(2);
             .finallyDo((d) -> stopLiftingMotors());
