@@ -90,7 +90,14 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
 
     @Override
     public Command coastMotorsCommand() {
-
+        return runOnce(() -> climberMotor.stopMotor())
+                .andThen(() -> {
+                    climberMotor.setIdleMode(IdleMode.kCoast);
+                })
+                .finallyDo((d) -> {
+                    climberMotor.setIdleMode(IdleMode.kBrake);
+                    pidController.reset(getPosition());
+                }).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
     }
 
 }
