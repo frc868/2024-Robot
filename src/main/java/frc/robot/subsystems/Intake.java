@@ -54,18 +54,39 @@ public class Intake extends SubsystemBase {
 
     private double velocity;
 
+    /*
+     * Starts running the motor that is inputted in the parameter.
+     * 
+     * @param CANSparkFlex motor
+     * 
+     * @return the command
+     */
     public Command startIntake(CANSparkFlex motor) {
         return runOnce(() -> {
             motor.setVoltage(1);
         });
     }
 
+    /*
+     * Stops the motor that is inputted in the parameter.
+     * 
+     * @param CANSparkFlex motor
+     * 
+     * @return the command
+     */
     public Command stopIntake(CANSparkFlex motor) {
         return runOnce(() -> {
             motor.setVoltage(0);
         });
     }
 
+    /*
+     * Creates a startEndCommand (requiring this subsystem) to run the passover
+     * motor.
+     * This will run the motors until the command is interrupted/cancelled.
+     * 
+     * @return the command
+     */
     public Command runFrontMotorCommand() {
         return startEnd(
                 () -> frontMotor.setVoltage(6),
@@ -73,6 +94,9 @@ public class Intake extends SubsystemBase {
                 .withName("Run Front Motors");
     }
 
+    /*
+     * ?
+     */
     public Command startFrontMotorCommand() {
         return runOnce(() -> frontMotor.setVoltage(6))
                 .withName("Start Front Motors");
@@ -163,15 +187,31 @@ public class Intake extends SubsystemBase {
      * );
      * }
      */
+
+    /*
+     * Gets the current position from the leftMotor
+     * 
+     * @return the current position of the motor as a double
+     */
     public double getIntakePosition() {
         return leftMotor.getEncoder().getPosition();
     }
 
+    /*
+     * Gets the current velocity of the motor inputted as the parameter
+     * 
+     * @return the current velocity of the motor as a double
+     */
     public double getVelocity(CANSparkFlex motor) {
         velocity = motor.getEncoder().getVelocity();
         return (velocity);
     }
 
+    /*
+     * Gets the current velocity of the motor inputted as the parameter
+     * 
+     * @return the current velocity of the motor as a double
+     */
     public void resetPose(CANSparkFlex motor1, CANSparkFlex motor2) {
         motor1.getEncoder().setPosition(RESET_POSITION);
         motor2.getEncoder().setPosition(RESET_POSITION);
