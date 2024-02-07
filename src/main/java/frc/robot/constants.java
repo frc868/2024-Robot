@@ -2,8 +2,8 @@ package frc.robot;
 
 public class Constants {
     public static final class Shooter{
-        public static final int LEFT_MOTOR_ID = 1337;
-        public static final int RIGHT_MOTOR_ID = 1337;
+        public static final int PRIMARY_MOTOR_ID = 1337;
+        public static final int SECONDARY_MOTOR_ID = 1337;
         public static final int CURRENT_LIMIT = 1337;
         public static final double ENCODER_ROTATIONS_TO_METERS = 1337;
         public static final double kS = 1337;
