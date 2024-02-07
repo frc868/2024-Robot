@@ -4,6 +4,17 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 public class Constants {
     public static final class Climber {
+        public static enum ClimberPosition {
+            TOP(0),
+            BOTTOM(0);
+
+            public final double position;
+
+            private ClimberPosition(double position) {
+                this.position = position;
+            }
+        }
+
         public static final int CLIMBER_MOTOR_ID = 0;
 
         public static final double kP = 0;

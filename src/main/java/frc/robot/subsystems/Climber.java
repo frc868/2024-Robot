@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static frc.robot.Constants.Climber.*;
 
-public class Climber extends SubsystemBase implements BaseElevator {
+public class Climber extends SubsystemBase implements BaseElevator<ClimberPosition> {
 
     private ProfiledPIDController pidController = new ProfiledPIDController(kP, kI, kD, MOVEMENT_CONSTRAINTS);
     private ElevatorFeedforward feedforwardController = new ElevatorFeedforward(kS, kG, kV, kA);
@@ -55,7 +55,7 @@ public class Climber extends SubsystemBase implements BaseElevator {
     }
 
     @Override
-    public Command moveToPositionCommand(Supplier<ElevatorPosition> goalPositionSupplier) {
+    public Command moveToPositionCommand(Supplier<ClimberPosition> goalPositionSupplier) {
 
     }
 
