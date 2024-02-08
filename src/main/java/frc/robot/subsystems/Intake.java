@@ -159,7 +159,11 @@ public class Intake extends SubsystemBase {
                 .withName("Move to Position");
     }
 
-    public Command intakeHold(DigitalInput beamBreak) {
+    public Command intakeHold() {
+        return startEnd(
+                () -> setFrontVoltageHold(6),
+                () -> setFrontVoltageHold(0))
+                .withName("Run Front Motors");
 
     }
 
