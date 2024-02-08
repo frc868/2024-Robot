@@ -157,12 +157,7 @@ public class Intake extends SubsystemBase {
                 moveToCurrentGoalCommand().until(pidController::atGoal)).withTimeout(2)
                 .finallyDo((d) -> stopLiftingMotors())
                 .withName("Move to Position");
-<<<<<<< HEAD
-=======
-
->>>>>>> 3ea6b89f45817ab3e3a40374e359a1dc716e3dd8
     }
-
     public Command intakeHold(DigitalInput beamBreak) {
 
     }
@@ -177,23 +172,12 @@ public class Intake extends SubsystemBase {
         double targetAngle = 0;
         // runs runOnce() in order
         return Commands.sequence(
-<<<<<<< HEAD
-            runOnce(() -> pidController.reset(getIntakePosition()));
-            runOnce(() -> pidController.setGoalp(targetAngle));
-            moveToCurrentGoalCommand().until(pidController::atGoal);
-            .withTimeout(2);
-            .finallyDo((d) -> stopLiftingMotors());
-            .withName("Move intake ground");
-        )
-=======
                 runOnce(() -> pidController.reset(getIntakePosition())),
                 runOnce(() -> pidController.setGoal(targetAngle)),
                 moveToCurrentGoalCommand().until(pidController::atGoal))
                 .withTimeout(2)
                 .finallyDo((d) -> stopLiftingMotors())
                 .withName("Move intake ground");
-
->>>>>>> 3ea6b89f45817ab3e3a40374e359a1dc716e3dd8
     }
 
     /*
