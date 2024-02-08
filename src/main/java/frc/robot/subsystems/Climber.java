@@ -26,7 +26,10 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
     private double feedforwardVoltage = 0;
 
     private CANSparkFlex motor = SparkConfigurator.createSparkFlex(MOTOR_ID, MotorType.kBrushless,
-            MOTOR_INVERTED); // TODO: add configs
+            MOTOR_INVERTED, (motor) -> motor.setIdleMode(IdleMode.kBrake),
+            (motor) -> motor.setSmartCurrentLimit(CURRENT_LIMIT),
+            (motor) -> motor.getEncoder().setPositionConversionFactor(ENCODER_ROTATIONS_TO_METERS),
+            (motor) -> motor.getEncoder().setVelocityConversionFactor(ENCODER_ROTATIONS_TO_METERS / 60.0));
 
     @Override
     public double getPosition() {
