@@ -18,7 +18,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static frc.robot.Constants.Climber.*;
 
 public class Climber extends SubsystemBase implements BaseElevator<ClimberPosition> {
-
     private ProfiledPIDController pidController = new ProfiledPIDController(kP, kI, kD, MOVEMENT_CONSTRAINTS);
     private ElevatorFeedforward feedforwardController = new ElevatorFeedforward(kS, kG, kV, kA);
 
@@ -53,7 +52,7 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
             feedforwardVoltage = feedforwardController.calculate(pidController.getSetpoint().position,
                     pidController.getSetpoint().velocity);
             setVoltage(feedbackVoltage + feedforwardVoltage);
-        });
+        }).withName("Move to Current Goal");
     }
 
     @Override
@@ -61,7 +60,7 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
         return Commands.sequence(
                 runOnce(() -> pidController.reset(getPosition())),
                 runOnce(() -> pidController.setGoal(goalPositionSupplier.get().position)),
-                moveToCurrentGoalCommand().until(pidController::atGoal));
+                moveToCurrentGoalCommand().until(pidController::atGoal)).withName("Move to Position");
     }
 
     @Override
@@ -69,27 +68,29 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
         return Commands.sequence(
                 runOnce(() -> pidController.reset(getPosition())),
                 runOnce(() -> pidController.setGoal(goalPositionSupplier.get())),
-                moveToCurrentGoalCommand().until(pidController::atGoal));
+                moveToCurrentGoalCommand().until(pidController::atGoal)).withName("Move to Arbitrary Position");
     }
 
     @Override
     public Command movePositionDeltaCommand(Supplier<Double> delta) {
-        return moveToArbitraryPositionCommand(() -> pidController.getGoal().position + delta.get());
+        return moveToArbitraryPositionCommand(() -> pidController.getGoal().position + delta.get())
+                .withName("Move Position Delta");
     }
 
     @Override
     public Command holdCurrentPositionCommand() {
-        return runOnce(() -> pidController.setGoal(getPosition())).andThen(moveToCurrentGoalCommand());
+        return runOnce(() -> pidController.setGoal(getPosition())).andThen(moveToCurrentGoalCommand())
+                .withName("Hold Current Position");
     }
 
     @Override
     public Command resetPositionCommand() {
-        return runOnce(this::resetPosition);
+        return runOnce(this::resetPosition).withName("Reset Position");
     }
 
     @Override
     public Command setOverridenSpeedCommand(Supplier<Double> speed) {
-        return run(() -> setVoltage(12.0 * speed.get()));
+        return run(() -> setVoltage(12.0 * speed.get())).withName("Set Overridden Speed");
     }
 
     @Override
@@ -101,7 +102,7 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
                 .finallyDo((d) -> {
                     motor.setIdleMode(IdleMode.kBrake);
                     pidController.reset(getPosition());
-                }).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
+                }).withInterruptBehavior(InterruptionBehavior.kCancelIncoming).withName("Coast Motors");
     }
 
 }
