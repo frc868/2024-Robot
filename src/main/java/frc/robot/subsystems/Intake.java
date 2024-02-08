@@ -1,10 +1,6 @@
 package frc.robot.subsystems;
 
-import java.util.function.Function;
-
-import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkFlex;
-import com.revrobotics.REVLibError;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.techhounds.houndutil.houndlib.SparkConfigurator;
