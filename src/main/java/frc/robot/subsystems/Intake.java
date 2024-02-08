@@ -95,7 +95,7 @@ public class Intake extends SubsystemBase {
     }
 
     /*
-     * Runs the front intake motor. 
+     * Runs the front intake motor.
      * This will continue to run unless stopFrontMotorCommand is called.
      * 
      * @return the command
@@ -106,7 +106,7 @@ public class Intake extends SubsystemBase {
     }
 
     /*
-     * Stops the front intake motor. 
+     * Stops the front intake motor.
      * 
      * @return the command
      */
@@ -158,6 +158,7 @@ public class Intake extends SubsystemBase {
                 .finallyDo((d) -> stopLiftingMotors())
                 .withName("Move to Position");
     }
+
     public Command intakeHold(DigitalInput beamBreak) {
 
     }
@@ -171,13 +172,18 @@ public class Intake extends SubsystemBase {
         // set angle later
         double targetAngle = 0;
         // runs runOnce() in order
-        return Commands.sequence(
-                runOnce(() -> pidController.reset(getIntakePosition())),
-                runOnce(() -> pidController.setGoal(targetAngle)),
-                moveToCurrentGoalCommand().until(pidController::atGoal))
-                .withTimeout(2)
-                .finallyDo((d) -> stopLiftingMotors())
-                .withName("Move intake ground");
+        /*
+         * return Commands.sequence(
+         * runOnce(() -> pidController.reset(getIntakePosition())),
+         * runOnce(() -> pidController.setGoal(targetAngle)),
+         * moveToCurrentGoalCommand().until(pidController::atGoal))
+         * .withTimeout(2)
+         * .finallyDo((d) -> stopLiftingMotors())
+         * .withName("Move intake ground");
+         */
+        return runOnce(() -> {
+            liftIntake(targetAngle);
+        });
     }
 
     /*
@@ -189,13 +195,9 @@ public class Intake extends SubsystemBase {
         // set angle later
         double targetAngleAmp = 0;
         // runs runOnce() in order
-        return Commands.sequence(
-                runOnce(() -> pidController.reset(getIntakePosition())),
-                runOnce(() -> pidController.setGoal(targetAngleAmp)),
-                moveToCurrentGoalCommand().until(pidController::atGoal))
-                .withTimeout(2)
-                .finallyDo((d) -> stopLiftingMotors())
-                .withName("Move intake ground");
+        return runOnce(() -> {
+            liftIntake(targetAngleAmp);
+        });
 
     }
 
@@ -208,13 +210,9 @@ public class Intake extends SubsystemBase {
         // set angle later
         double targetAngleVertical = 0;
         // runs runOnce() in order
-        return Commands.sequence(
-                runOnce(() -> pidController.reset(getIntakePosition())),
-                runOnce(() -> pidController.setGoal(targetAngleVertical)),
-                moveToCurrentGoalCommand().until(pidController::atGoal))
-                .withTimeout(2)
-                .finallyDo((d) -> stopLiftingMotors())
-                .withName("Move intake ground");
+        return runOnce(() -> {
+            liftIntake(targetAngleVertical);
+        });
 
     }
 
@@ -252,6 +250,7 @@ public class Intake extends SubsystemBase {
      * Gets the current velocity of the motor inputted as the parameter
      * 
      * @param motor1, the first side motor
+     * 
      * @param motor2, the second side motor
      */
     public void resetSidePose(CANSparkFlex motor1, CANSparkFlex motor2) {
