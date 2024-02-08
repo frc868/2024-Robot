@@ -91,9 +91,12 @@ public class Intake extends SubsystemBase {
     }
 
     public Command moveToCurrentGoalCommand() {
-        double feedback = pidController.calculate(getIntakePosition());
-        double feedforward = intakeFeedForward.calculate(pidController.getSetpoint().position,
-                pidController.getSetpoint().velocity);
+        return run(() -> {
+            double feedback = pidController.calculate(getIntakePosition());
+            double feedforward = intakeFeedForward.calculate(pidController.getSetpoint().position,
+                    pidController.getSetpoint().velocity);
+            setSideVoltage(feedback + feedforward);
+        }).withName("Move to curerent goal");
     }
 
     public Command liftIntake(double angle) {
@@ -101,8 +104,12 @@ public class Intake extends SubsystemBase {
                 runOnce(() -> pidController.reset(getIntakePosition())),
                 runOnce(() -> pidController.setGoal(angle)),
                 moveToCurrentGoalCommand().until(pidController::atGoal)).withTimeout(2)
-                .finallyDo((d) -> .stopLiftingMotors())
+                .finallyDo((d) -> stopLiftingMotors())
                 .withName("Move to Position");
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3ea6b89f45817ab3e3a40374e359a1dc716e3dd8
     }
 
     public Command intakeHold(DigitalInput beamBreak) {
@@ -110,10 +117,11 @@ public class Intake extends SubsystemBase {
     }
 
     public Command intakeGround() {
-        //set angle later
-        double targetAngle = 0
-        //runs runOnce() in order
+        // set angle later
+        double targetAngle = 0;
+        // runs runOnce() in order
         return Commands.sequence(
+<<<<<<< HEAD
             runOnce(() -> pidController.reset(getIntakePosition()));
             runOnce(() -> pidController.setGoalp(targetAngle));
             moveToCurrentGoalCommand().until(pidController::atGoal);
@@ -121,22 +129,53 @@ public class Intake extends SubsystemBase {
             .finallyDo((d) -> stopLiftingMotors());
             .withName("Move intake ground");
         )
+=======
+                runOnce(() -> pidController.reset(getIntakePosition())),
+                runOnce(() -> pidController.setGoal(targetAngle)),
+                moveToCurrentGoalCommand().until(pidController::atGoal))
+                .withTimeout(2)
+                .finallyDo((d) -> stopLiftingMotors())
+                .withName("Move intake ground");
+
+>>>>>>> 3ea6b89f45817ab3e3a40374e359a1dc716e3dd8
     }
 
     public Command intakeAmp() {
+        // set angle later
+        double targetAngleAmp = 0;
+        // runs runOnce() in order
+        return Commands.sequence(
+                runOnce(() -> pidController.reset(getIntakePosition())),
+                runOnce(() -> pidController.setGoal(targetAngleAmp)),
+                moveToCurrentGoalCommand().until(pidController::atGoal))
+                .withTimeout(2)
+                .finallyDo((d) -> stopLiftingMotors())
+                .withName("Move intake ground");
 
     }
 
     public Command intakeVertical() {
-        resetPose(leftMotor, rightMotor);
-    }
-
-    public Command moveToPosition() {
+        // set angle later
+        double targetAngleVertical = 0;
+        // runs runOnce() in order
         return Commands.sequence(
-            runOnce(pidController = new ProfiledPIDController(CURRENT_LIMIT, BEAM_BREAK_ID, BEAM_BREAK_CHANNEL, null));
-        );
+                runOnce(() -> pidController.reset(getIntakePosition())),
+                runOnce(() -> pidController.setGoal(targetAngleVertical)),
+                moveToCurrentGoalCommand().until(pidController::atGoal))
+                .withTimeout(2)
+                .finallyDo((d) -> stopLiftingMotors())
+                .withName("Move intake ground");
+
     }
 
+    /*
+     * public Command moveToPosition() {
+     * return Commands.sequence(
+     * runOnce(pidController = new ProfiledPIDController(kP, kI, kD, new
+     * TrapezoidProfile.Constraints(maxVelocity, maxAcceleration)));
+     * );
+     * }
+     */
     public double getIntakePosition() {
         return leftMotor.getEncoder().getPosition();
     }
@@ -151,8 +190,13 @@ public class Intake extends SubsystemBase {
         motor2.getEncoder().setPosition(RESET_POSITION);
     }
 
-    public void setVoltage(double voltage, CANSparkFlex motor) {
-        motor.setVoltage(voltage);
+    public void setFrontVoltage(double voltage) {
+        frontMotor.setVoltage(voltage);
+    }
+
+    public void setSideVoltage(double voltage) {
+        rightMotor.setVoltage(voltage);
+        leftMotor.setVoltage(voltage);
     }
 
     public void stopLiftingMotors() {
