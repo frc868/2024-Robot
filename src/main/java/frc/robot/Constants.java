@@ -15,8 +15,10 @@ public class Constants {
             }
         }
 
-        public static final int MOTOR_ID = 0;
+        public static final int MOTOR_ID = 0; // untested
         public static final boolean MOTOR_INVERTED = false; // untested
+        public static final int CURRENT_LIMIT = 0; // untested
+        public static final double ENCODER_ROTATIONS_TO_METERS = 0; // untested
 
         public static final double kP = 0; // untested
         public static final double kI = 0; // untested
