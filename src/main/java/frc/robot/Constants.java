@@ -20,6 +20,21 @@ public class Constants {
     public static final ControllerType CONTROLLER_TYPE = ControllerType.FlightStick;
 
     public static final class Drivetrain {
+        public static final int GYRO_DEVICE_ID = 0; // Untested
+
+        public static final boolean FRONT_LEFT_DRIVE_INVERTED = false; // Untested
+        public static final boolean FRONT_LEFT_STEER_INVERTED = true; // Untested
+        public static final boolean FRONT_LEFT_CANCODER_INVERTED = true; // Untested
+        public static final boolean FRONT_RIGHT_DRIVE_INVERTED = false; // Untested
+        public static final boolean FRONT_RIGHT_STEER_INVERTED = true; // Untested
+        public static final boolean FRONT_RIGHT_CANCODER_INVERTED = true; // Untested
+        public static final boolean BACK_LEFT_DRIVE_INVERTED = false; // Untested
+        public static final boolean BACK_LEFT_STEER_INVERTED = true; // Untested
+        public static final boolean BACK_LEFT_CANCODER_INVERTED = true; // Untested
+        public static final boolean BACK_RIGHT_DRIVE_INVERTED = false; // Untested
+        public static final boolean BACK_RIGHT_STEER_INVERTED = true; // Untested
+        public static final boolean BACK_RIGHT_CANCODER_INVERTED = true; // Untested
+
         public static final int FRONT_LEFT_DRIVE_MOTOR_ID = 0; // Untested
         public static final int FRONT_LEFT_STEER_MOTOR_ID = 0; // Untested
         public static final int FRONT_RIGHT_DRIVE_MOTOR_ID = 0; // Untested
@@ -58,9 +73,9 @@ public class Constants {
             SWERVE_CONSTANTS.STEER_kI = 0; // Untested
             SWERVE_CONSTANTS.STEER_kD = 0; // Untested
 
-            SWERVE_CONSTANTS.DRIVE_GEARING = 6.75;
-            SWERVE_CONSTANTS.STEER_GEARING = 150.0 / 7.0;
-            SWERVE_CONSTANTS.WHEEL_CIRCUMFERENCE = 2.0 * Math.PI * 0.0478;
+            SWERVE_CONSTANTS.DRIVE_GEARING = 0; // Untested
+            SWERVE_CONSTANTS.STEER_GEARING = 0; // Untested
+            SWERVE_CONSTANTS.WHEEL_CIRCUMFERENCE = 2.0 * Math.PI * 0; // Untested
             SWERVE_CONSTANTS.DRIVE_ENCODER_ROTATIONS_TO_METERS = SWERVE_CONSTANTS.WHEEL_CIRCUMFERENCE
                     / SWERVE_CONSTANTS.DRIVE_GEARING;
             SWERVE_CONSTANTS.STEER_ENCODER_ROTATIONS_TO_RADIANS = 2 * Math.PI / SWERVE_CONSTANTS.STEER_GEARING;
@@ -73,8 +88,8 @@ public class Constants {
 
             SWERVE_CONSTANTS.DRIVE_CURRENT_LIMIT = 50;
             SWERVE_CONSTANTS.STEER_CURRENT_LIMIT = 20;
-            SWERVE_CONSTANTS.DRIVE_GEARBOX_REPR = DCMotor.getNEO(1);
-            SWERVE_CONSTANTS.STEER_GEARBOX_REPR = DCMotor.getNEO(1);
+            SWERVE_CONSTANTS.DRIVE_GEARBOX_REPR = DCMotor.getKrakenX60(1);
+            SWERVE_CONSTANTS.STEER_GEARBOX_REPR = DCMotor.getKrakenX60(1);
             SWERVE_CONSTANTS.DRIVE_MOI = 0; // Untested
             SWERVE_CONSTANTS.STEER_MOI = 0; // Untested
         }

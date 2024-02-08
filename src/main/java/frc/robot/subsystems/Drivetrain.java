@@ -43,12 +43,37 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 @LoggedObject
 public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
-    /**
-     * Whether to override the inputs of the driver for maintaining or turning to a
-     * specific angle.
-     */
-    @Log
-    private boolean isControlledRotationEnabled = false;
+    @Log(groups = "modules")
+    private KrakenCoaxialSwerveModule frontLeft = new KrakenCoaxialSwerveModule(FRONT_LEFT_DRIVE_MOTOR_ID,
+            FRONT_LEFT_STEER_MOTOR_ID,
+            FRONT_LEFT_STEER_ENCODER_ID, CAN_BUS, FRONT_LEFT_DRIVE_INVERTED, FRONT_LEFT_STEER_INVERTED,
+            FRONT_LEFT_CANCODER_INVERTED,
+            FRONT_LEFT_OFFSET,
+            SWERVE_CONSTANTS); // Inverts Untested
+
+    @Log(groups = "modules")
+    private KrakenCoaxialSwerveModule frontRight = new KrakenCoaxialSwerveModule(FRONT_RIGHT_DRIVE_MOTOR_ID,
+            FRONT_RIGHT_STEER_MOTOR_ID,
+            FRONT_RIGHT_STEER_ENCODER_ID, CAN_BUS, FRONT_RIGHT_DRIVE_INVERTED, FRONT_RIGHT_STEER_INVERTED,
+            FRONT_RIGHT_CANCODER_INVERTED,
+            FRONT_RIGHT_OFFSET,
+            SWERVE_CONSTANTS); // Inverts Untested
+
+    @Log(groups = "modules")
+    private KrakenCoaxialSwerveModule backLeft = new KrakenCoaxialSwerveModule(BACK_LEFT_DRIVE_MOTOR_ID,
+            BACK_LEFT_STEER_MOTOR_ID,
+            BACK_LEFT_STEER_ENCODER_ID, CAN_BUS, BACK_LEFT_DRIVE_INVERTED, BACK_LEFT_STEER_INVERTED,
+            BACK_LEFT_CANCODER_INVERTED,
+            BACK_LEFT_OFFSET,
+            SWERVE_CONSTANTS); // Inverts Untested
+
+    @Log(groups = "moudules")
+    private KrakenCoaxialSwerveModule backRight = new KrakenCoaxialSwerveModule(BACK_RIGHT_DRIVE_MOTOR_ID,
+            BACK_RIGHT_STEER_MOTOR_ID,
+            BACK_RIGHT_STEER_ENCODER_ID, CAN_BUS, BACK_RIGHT_DRIVE_INVERTED, BACK_RIGHT_STEER_INVERTED,
+            BACK_RIGHT_CANCODER_INVERTED,
+            BACK_RIGHT_OFFSET,
+            SWERVE_CONSTANTS); // Inverts Untested
 
     /**
      * The controller that allows the drivetrain to maintain or turn to a specific
@@ -77,40 +102,19 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     private SwerveModuleState[] commandedModuleStates = new SwerveModuleState[] { new SwerveModuleState(),
             new SwerveModuleState(), new SwerveModuleState(), new SwerveModuleState() };
 
+    /**
+     * Whether to override the inputs of the driver for maintaining or turning to a
+     * specific angle.
+     */
+    @Log
+    private boolean isControlledRotationEnabled = false;
+
     @Log(groups = "control")
     private ChassisSpeeds commandedChassisSpeeds = new ChassisSpeeds();
 
-    @Log(groups = "modules")
-    private KrakenCoaxialSwerveModule frontLeft = new KrakenCoaxialSwerveModule(FRONT_LEFT_DRIVE_MOTOR_ID,
-            FRONT_LEFT_STEER_MOTOR_ID,
-            FRONT_LEFT_STEER_ENCODER_ID, CAN_BUS, false, true, false,
-            FRONT_LEFT_OFFSET,
-            SWERVE_CONSTANTS);
-
-    @Log(groups = "modules")
-    private KrakenCoaxialSwerveModule frontRight = new KrakenCoaxialSwerveModule(FRONT_RIGHT_DRIVE_MOTOR_ID,
-            FRONT_RIGHT_STEER_MOTOR_ID,
-            FRONT_RIGHT_STEER_ENCODER_ID, CAN_BUS, false, true, false,
-            FRONT_RIGHT_OFFSET,
-            SWERVE_CONSTANTS);
-
-    @Log(groups = "modules")
-    private KrakenCoaxialSwerveModule backLeft = new KrakenCoaxialSwerveModule(BACK_LEFT_DRIVE_MOTOR_ID,
-            BACK_LEFT_STEER_MOTOR_ID,
-            BACK_LEFT_STEER_ENCODER_ID, CAN_BUS, false, true, false,
-            BACK_LEFT_OFFSET,
-            SWERVE_CONSTANTS);
-
-    @Log(groups = "moudules")
-    private KrakenCoaxialSwerveModule backRight = new KrakenCoaxialSwerveModule(BACK_RIGHT_DRIVE_MOTOR_ID,
-            BACK_RIGHT_STEER_MOTOR_ID,
-            BACK_RIGHT_STEER_ENCODER_ID, CAN_BUS, false, true, false,
-            BACK_RIGHT_OFFSET,
-            SWERVE_CONSTANTS);
-
     // initiate pigeon gyro -- Jake
     @Log
-    private Pigeon2 gyro = new Pigeon2(0);
+    private Pigeon2 gyro = new Pigeon2(GYRO_DEVICE_ID);
 
     @Log
     private SwerveDrivePoseEstimator poseEstimator;
