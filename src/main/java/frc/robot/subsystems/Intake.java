@@ -159,6 +159,14 @@ public class Intake extends SubsystemBase {
                 .withName("Move to Position");
     }
 
+    /*
+     * Creates a startEndCommand (requiring this subsystem) to run the intake
+     * motor.
+     * This will run the motors until the command is interrupted/cancelled.
+     * Includes beambreak holding system.
+     * 
+     * @return the command
+     */
     public Command intakeHold() {
         return startEnd(
                 () -> setFrontVoltageHold(6),
