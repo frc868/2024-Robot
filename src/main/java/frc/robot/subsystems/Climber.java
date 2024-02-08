@@ -25,22 +25,22 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
     private double feedbackVoltage = 0;
     private double feedforwardVoltage = 0;
 
-    private CANSparkFlex climberMotor = SparkConfigurator.createSparkFlex(CLIMBER_MOTOR_ID, MotorType.kBrushless,
-            false); // TODO: add configs
+    private CANSparkFlex motor = SparkConfigurator.createSparkFlex(MOTOR_ID, MotorType.kBrushless,
+            MOTOR_INVERTED); // TODO: add configs
 
     @Override
     public double getPosition() {
-        return climberMotor.getEncoder().getPosition();
+        return motor.getEncoder().getPosition();
     }
 
     @Override
     public void resetPosition() {
-        climberMotor.getEncoder().setPosition(0);
+        motor.getEncoder().setPosition(0);
     }
 
     @Override
     public void setVoltage(double voltage) {
-        climberMotor.setVoltage(voltage);
+        motor.setVoltage(voltage);
     }
 
     @Override
@@ -91,12 +91,12 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
 
     @Override
     public Command coastMotorsCommand() {
-        return runOnce(() -> climberMotor.stopMotor())
+        return runOnce(() -> motor.stopMotor())
                 .andThen(() -> {
-                    climberMotor.setIdleMode(IdleMode.kCoast);
+                    motor.setIdleMode(IdleMode.kCoast);
                 })
                 .finallyDo((d) -> {
-                    climberMotor.setIdleMode(IdleMode.kBrake);
+                    motor.setIdleMode(IdleMode.kBrake);
                     pidController.reset(getPosition());
                 }).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
     }
