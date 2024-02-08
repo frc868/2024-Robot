@@ -268,6 +268,20 @@ public class Intake extends SubsystemBase {
     }
 
     /*
+     * Set the front motors voltage.
+     * Note will stop when touching beam break and voltage is positive.
+     * 
+     * @param voltage, the input voltage
+     */
+    public void setFrontVoltageHold(double voltage) {
+        if ((beamBreak.get() && voltage < 0.0) || (!beamBreak.get())) {
+            frontMotor.setVoltage(voltage);
+        } else {
+            frontMotor.setVoltage(0.0);
+        }
+    }
+
+    /*
      * Set the side motor's voltage
      * 
      * @param voltage, the new voltage
