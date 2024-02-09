@@ -121,7 +121,7 @@ public class Intake extends SubsystemBase {
         return startEnd(
                 () -> frontMotor.setVoltage(-6),
                 () -> frontMotor.setVoltage(0))
-                .withName("Run Front Motors");
+                .withName("Reverse Front Motors");
     }
 
     /*

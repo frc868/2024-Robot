@@ -12,10 +12,12 @@ public class LED {
     }
 
 
-    private void setStr9ipColor(int red, int green, int blue)    {
-        for (int i=0, i < ledBuffer.getlength(); i++)   {
+    private void setStripColor(int red, int green, int blue)    {
+        for (int i=0; i < ledBuffer.getlength(); i++)   {
             ledBuffer.setRGB(i, red, green, blue);
         }
         led.setData(ledBuffer);
     }
+z
+    
 }
