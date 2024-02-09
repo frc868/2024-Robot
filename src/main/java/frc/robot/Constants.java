@@ -109,21 +109,21 @@ public class Constants {
                 SWERVE_MODULE_LOCATIONS[2],
                 SWERVE_MODULE_LOCATIONS[3]);
 
-        public static final double XY_kP = 1;
-        public static final double XY_kI = 0;
-        public static final double XY_kD = 0;
+        public static final double XY_kP = 1; // untested
+        public static final double XY_kI = 0; // untested
+        public static final double XY_kD = 0; // untested
         public static final TrapezoidProfile.Constraints XY_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND,
                 SWERVE_CONSTANTS.MAX_DRIVING_ACCELERATION_METERS_PER_SECOND_SQUARED);
 
-        public static final double THETA_kP = 1;
-        public static final double THETA_kI = 0;
-        public static final double THETA_kD = 0.1;
+        public static final double THETA_kP = 1; // untested
+        public static final double THETA_kI = 0; // untested
+        public static final double THETA_kD = 0.1; // untested
         public static final TrapezoidProfile.Constraints THETA_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 20 * Math.PI, 20 * Math.PI);
 
-        public static final double PATH_FOLLOWING_TRANSLATION_kP = 7;
-        public static final double PATH_FOLLOWING_ROTATION_kP = 7;
+        public static final double PATH_FOLLOWING_TRANSLATION_kP = 7; // untested
+        public static final double PATH_FOLLOWING_ROTATION_kP = 7; // untested
     }
 
     public static final class Teleop {
@@ -134,8 +134,8 @@ public class Constants {
          * A rate limit of 3, for example, means that 0->1 in 1/3 sec.
          * Larger numbers mean less of a rate limit.
          */
-        public static final double JOYSTICK_INPUT_RATE_LIMIT = 15.0;
-        public static final double JOYSTICK_CURVE_EXP = 2;
+        public static final double JOYSTICK_INPUT_RATE_LIMIT = 15.0; // untested
+        public static final double JOYSTICK_CURVE_EXP = 2; // untested
         public static final TunableDouble INPUT_LIMIT = new TunableDouble("Drivetrain", "Input Limit", 1);
     }
 }
