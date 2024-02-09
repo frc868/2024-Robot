@@ -1,6 +1,6 @@
 package frc.robot;
 
-import com.techhounds.houndutil.houndlib.swerve.NEOCoaxialSwerveModule;
+import com.techhounds.houndutil.houndlib.swerve.KrakenCoaxialSwerveModule;
 import com.techhounds.houndutil.houndlog.logitems.TunableDouble;
 
 import edu.wpi.first.math.geometry.Translation2d;
@@ -61,7 +61,7 @@ public class Constants {
         /** Distance between front and back wheels. */
         public static final double WHEEL_BASE_METERS = Units.inchesToMeters(0); // Untested
 
-        public static final NEOCoaxialSwerveModule.SwerveConstants SWERVE_CONSTANTS = new NEOCoaxialSwerveModule.SwerveConstants();
+        public static final KrakenCoaxialSwerveModule.SwerveConstants SWERVE_CONSTANTS = new KrakenCoaxialSwerveModule.SwerveConstants();
         static {
             SWERVE_CONSTANTS.DRIVE_kP = 0; // Untested
             SWERVE_CONSTANTS.DRIVE_kI = 0; // Untested
