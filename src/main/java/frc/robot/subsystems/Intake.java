@@ -306,3 +306,4 @@ public class Intake extends SubsystemBase {
         leftMotor.stopMotor();
         rightMotor.stopMotor();
     }
+}
