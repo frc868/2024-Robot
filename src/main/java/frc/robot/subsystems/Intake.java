@@ -1,10 +1,6 @@
 package frc.robot.subsystems;
 
-import java.util.function.Function;
-
-import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkFlex;
-import com.revrobotics.REVLibError;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.techhounds.houndutil.houndlib.SparkConfigurator;
@@ -95,7 +91,7 @@ public class Intake extends SubsystemBase {
     }
 
     /*
-     * Runs the front intake motor. 
+     * Runs the front intake motor.
      * This will continue to run unless stopFrontMotorCommand is called.
      * 
      * @return the command
@@ -106,7 +102,7 @@ public class Intake extends SubsystemBase {
     }
 
     /*
-     * Stops the front intake motor. 
+     * Stops the front intake motor.
      * 
      * @return the command
      */
@@ -125,7 +121,7 @@ public class Intake extends SubsystemBase {
         return startEnd(
                 () -> frontMotor.setVoltage(-6),
                 () -> frontMotor.setVoltage(0))
-                .withName("Run Front Motors");
+                .withName("Reverse Front Motors");
     }
 
     /*
@@ -158,9 +154,20 @@ public class Intake extends SubsystemBase {
                 .finallyDo((d) -> stopLiftingMotors())
                 .withName("Move to Position");
     }
-    public Command intakeHold(DigitalInput beamBreak) {
-        
-        }
+
+    /*
+     * Creates a startEndCommand (requiring this subsystem) to run the intake
+     * motor.
+     * This will run the motors until the command is interrupted/cancelled.
+     * Includes beambreak holding system.
+     * 
+     * @return the command
+     */
+    public Command intakeHold() {
+        return startEnd(
+                () -> setFrontVoltageHold(6),
+                () -> setFrontVoltageHold(0))
+                .withName("Run Front Motors");
 
     }
 
@@ -173,13 +180,18 @@ public class Intake extends SubsystemBase {
         // set angle later
         double targetAngle = 0;
         // runs runOnce() in order
-        return Commands.sequence(
-                runOnce(() -> pidController.reset(getIntakePosition())),
-                runOnce(() -> pidController.setGoal(targetAngle)),
-                moveToCurrentGoalCommand().until(pidController::atGoal))
-                .withTimeout(2)
-                .finallyDo((d) -> stopLiftingMotors())
-                .withName("Move intake ground");
+        /*
+         * return Commands.sequence(
+         * runOnce(() -> pidController.reset(getIntakePosition())),
+         * runOnce(() -> pidController.setGoal(targetAngle)),
+         * moveToCurrentGoalCommand().until(pidController::atGoal))
+         * .withTimeout(2)
+         * .finallyDo((d) -> stopLiftingMotors())
+         * .withName("Move intake ground");
+         */
+        return runOnce(() -> {
+            liftIntake(targetAngle);
+        });
     }
 
     /*
@@ -191,13 +203,9 @@ public class Intake extends SubsystemBase {
         // set angle later
         double targetAngleAmp = 0;
         // runs runOnce() in order
-        return Commands.sequence(
-                runOnce(() -> pidController.reset(getIntakePosition())),
-                runOnce(() -> pidController.setGoal(targetAngleAmp)),
-                moveToCurrentGoalCommand().until(pidController::atGoal))
-                .withTimeout(2)
-                .finallyDo((d) -> stopLiftingMotors())
-                .withName("Move intake ground");
+        return runOnce(() -> {
+            liftIntake(targetAngleAmp);
+        });
 
     }
 
@@ -210,13 +218,9 @@ public class Intake extends SubsystemBase {
         // set angle later
         double targetAngleVertical = 0;
         // runs runOnce() in order
-        return Commands.sequence(
-                runOnce(() -> pidController.reset(getIntakePosition())),
-                runOnce(() -> pidController.setGoal(targetAngleVertical)),
-                moveToCurrentGoalCommand().until(pidController::atGoal))
-                .withTimeout(2)
-                .finallyDo((d) -> stopLiftingMotors())
-                .withName("Move intake ground");
+        return runOnce(() -> {
+            liftIntake(targetAngleVertical);
+        });
 
     }
 
@@ -254,6 +258,7 @@ public class Intake extends SubsystemBase {
      * Gets the current velocity of the motor inputted as the parameter
      * 
      * @param motor1, the first side motor
+     * 
      * @param motor2, the second side motor
      */
     public void resetSidePose(CANSparkFlex motor1, CANSparkFlex motor2) {
@@ -268,6 +273,20 @@ public class Intake extends SubsystemBase {
      */
     public void setFrontVoltage(double voltage) {
         frontMotor.setVoltage(voltage);
+    }
+
+    /*
+     * Set the front motors voltage.
+     * Note will stop when touching beam break and voltage is positive.
+     * 
+     * @param voltage, the input voltage
+     */
+    public void setFrontVoltageHold(double voltage) {
+        if ((beamBreak.get() && voltage < 0.0) || (!beamBreak.get())) {
+            frontMotor.setVoltage(voltage);
+        } else {
+            frontMotor.setVoltage(0.0);
+        }
     }
 
     /*
