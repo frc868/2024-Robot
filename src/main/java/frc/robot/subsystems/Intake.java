@@ -159,6 +159,8 @@ public class Intake extends SubsystemBase {
                 .withName("Move to Position");
     }
     public Command intakeHold(DigitalInput beamBreak) {
+        
+        }
 
     }
 
@@ -285,5 +287,3 @@ public class Intake extends SubsystemBase {
         leftMotor.stopMotor();
         rightMotor.stopMotor();
     }
-
-}
