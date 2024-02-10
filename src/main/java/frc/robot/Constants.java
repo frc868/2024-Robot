@@ -1,4 +1,5 @@
 package frc.robot;
+
 import com.techhounds.houndutil.houndlib.AprilTagPhotonCamera.PhotonCameraConstants;
 
 import edu.wpi.first.math.Matrix;
@@ -9,17 +10,14 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
-import com.revrobotics.CANSparkFlex;
 import com.techhounds.houndutil.houndlib.swerve.KrakenCoaxialSwerveModule;
 import com.techhounds.houndutil.houndlog.logitems.TunableDouble;
 
-import edu.wpi.first.math.trajectory.TrapezoidProfile;    
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.util.Units;
 
 public class Constants {
     enum ControllerType {
@@ -137,8 +135,8 @@ public class Constants {
         public static final double PATH_FOLLOWING_TRANSLATION_kP = 7; // untested
         public static final double PATH_FOLLOWING_ROTATION_kP = 7; // untested
     }
-  
-  public static final class Intake {
+
+    public static final class Intake {
         public static final int CURRENT_LIMIT = 0;
         public static final double ENCODER_ROTATIONS_TO_RADIANS = 0.0;
         public static final double RESET_POSITION = 90.0;
@@ -155,7 +153,8 @@ public class Constants {
         public static final double kS = 0.0;
         public static final double kG = 0.0;
         public static final double kV = 0.0;
-        public static final double kA = 0.0;}
+        public static final double kA = 0.0;
+    }
 
     public static final class Teleop {
         /**
@@ -169,8 +168,8 @@ public class Constants {
         public static final double JOYSTICK_CURVE_EXP = 2; // untested
         public static final TunableDouble INPUT_LIMIT = new TunableDouble("Drivetrain", "Input Limit", 1);
     }
-  
-  public static final class Climber {
+
+    public static final class Climber {
         public static enum ClimberPosition {
             TOP(0), // untested
             BOTTOM(0); // untested
@@ -231,9 +230,10 @@ public class Constants {
         public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0; // untested
 
         public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
-                MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);}
-  
- public static final class Vision {
+                MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
+    }
+
+    public static final class Vision {
         public static final Matrix<N3, N1> SINGLE_TAG_STD_DEVS = VecBuilder.fill(4, 4, 8); // TODO untested
         public static final Matrix<N3, N1> MULTI_TAG_STD_DEVS = VecBuilder.fill(0.5, 0.5, 1); // TODO untested
 
@@ -268,9 +268,8 @@ public class Constants {
         // TODO all untested
 
     }
-  
-  public class Constants {
-    public static final class Shooter{
+
+    public static final class Shooter {
         public static final int PRIMARY_MOTOR_ID = 1337;
         public static final int SECONDARY_MOTOR_ID = 1337;
         public static final int CURRENT_LIMIT = 1337;
@@ -280,8 +279,10 @@ public class Constants {
         public static final double kA = 1337;
         public static final double kP = 1337;
         public static final double kI = 1337;
-        public static final double kD = 1337;}
-public static final class ShooterTilt {
+        public static final double kD = 1337;
+    }
+
+    public static final class ShooterTilt {
 
         public static enum ShooterTiltPosition {
             TEMP(1337),
@@ -328,8 +329,8 @@ public static final class ShooterTilt {
         }
 
         public double aimingRegression(double angle) {
-            //there's going to be a regression function here once we test the shooter
-            double fudgeFactor = 65537; 
+            // there's going to be a regression function here once we test the shooter
+            double fudgeFactor = 65537;
             return fudgeFactor;
         }
 
@@ -393,5 +394,5 @@ public static final class ShooterTilt {
         public static final double HORIZONTAL_ANGLE_OFFSET_RADIANS = 1337;
 
     }
-  
-  }
+
+}
