@@ -1,6 +1,7 @@
 package frc.robot;
 
 import com.techhounds.houndutil.houndlib.AprilTagPhotonCamera.PhotonCameraConstants;
+import com.techhounds.houndutil.houndlib.leds.BaseLEDSection;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
@@ -156,119 +157,6 @@ public class Constants {
         public static final double kA = 0.0;
     }
 
-    public static final class Teleop {
-        /**
-         * A value inputted into the rate limiter (the joystick input) can move from 0
-         * to 1 in 1/RATE_LIMIT seconds.
-         * 
-         * A rate limit of 3, for example, means that 0->1 in 1/3 sec.
-         * Larger numbers mean less of a rate limit.
-         */
-        public static final double JOYSTICK_INPUT_RATE_LIMIT = 15.0; // untested
-        public static final double JOYSTICK_CURVE_EXP = 2; // untested
-        public static final TunableDouble INPUT_LIMIT = new TunableDouble("Drivetrain", "Input Limit", 1);
-    }
-
-    public static final class Climber {
-        public static enum ClimberPosition {
-            TOP(0), // untested
-            BOTTOM(0); // untested
-
-            public final double position;
-
-            private ClimberPosition(double position) {
-                this.position = position;
-            }
-        }
-
-        public static final int MOTOR_ID = 0; // untested
-        public static final boolean MOTOR_INVERTED = false; // untested
-        public static final int CURRENT_LIMIT = 0; // untested
-        public static final double ENCODER_ROTATIONS_TO_METERS = 0; // untested
-
-        public static final double kP = 0; // untested
-        public static final double kI = 0; // untested
-        public static final double kD = 0; // untested
-        public static final double kS = 0; // untested
-        public static final double kG = 0; // untested
-        public static final double kV = 0; // untested
-        public static final double kA = 0; // untested
-
-        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0; // untested
-        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0; // untested
-
-        public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
-                MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
-    }
-
-    public static final class NoteLift {
-        public static enum NoteLiftPosition {
-            TOP(0), // untested
-            BOTTOM(0); // untested
-
-            public final double position;
-
-            private NoteLiftPosition(double position) {
-                this.position = position;
-            }
-        }
-
-        public static final int MOTOR_ID = 0; // untested
-        public static final boolean MOTOR_INVERTED = false; // untested
-        public static final int CURRENT_LIMIT = 0; // untested
-        public static final double ENCODER_ROTATIONS_TO_METERS = 0; // untested
-
-        public static final double kP = 0; // untested
-        public static final double kI = 0; // untested
-        public static final double kD = 0; // untested
-        public static final double kS = 0; // untested
-        public static final double kG = 0; // untested
-        public static final double kV = 0; // untested
-        public static final double kA = 0; // untested
-
-        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0; // untested
-        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0; // untested
-
-        public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
-                MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
-    }
-
-    public static final class Vision {
-        public static final Matrix<N3, N1> SINGLE_TAG_STD_DEVS = VecBuilder.fill(4, 4, 8); // TODO untested
-        public static final Matrix<N3, N1> MULTI_TAG_STD_DEVS = VecBuilder.fill(0.5, 0.5, 1); // TODO untested
-
-        public static final PhotonCameraConstants CAMERA_CONSTANTS = new PhotonCameraConstants();
-        static {
-            CAMERA_CONSTANTS.WIDTH = 1600; // untested
-            CAMERA_CONSTANTS.HEIGHT = 1200; // untested
-            CAMERA_CONSTANTS.FOV = 95.39; // untested
-            CAMERA_CONSTANTS.FPS = 30; // untested
-            CAMERA_CONSTANTS.AVG_LATENCY = 30; // untested
-            CAMERA_CONSTANTS.STDDEV_LATENCY = 15; // untested
-        }
-
-        // NOT FINAL! PLEASE CHANGE
-        // TODO !!!!
-
-        /** Calculations for transforming from camera location to robot location */
-        public static final Transform3d[] ROBOT_TO_CAMS = new Transform3d[] {
-                new Transform3d(
-                        new Translation3d(Units.inchesToMeters(9.5), Units.inchesToMeters(9.5), // !!
-                                Units.inchesToMeters(10)), // !!
-                        new Rotation3d(0, -Units.degreesToRadians(10), -Math.PI / 8)), // !!
-                new Transform3d(
-                        new Translation3d(Units.inchesToMeters(-12.5), Units.inchesToMeters(0), // !!
-                                Units.inchesToMeters(10)), // !!
-                        new Rotation3d(0, -Units.degreesToRadians(10), Math.PI)), // !!
-                new Transform3d(
-                        new Translation3d(Units.inchesToMeters(9.5), Units.inchesToMeters(-9.5), // !!
-                                Units.inchesToMeters(10)), // !!
-                        new Rotation3d(0, -Units.degreesToRadians(10), Math.PI / 8)) // !!
-        };
-        // TODO all untested
-
-    }
-
     public static final class Shooter {
         public static final int PRIMARY_MOTOR_ID = 1337;
         public static final int SECONDARY_MOTOR_ID = 1337;
@@ -395,4 +283,158 @@ public class Constants {
 
     }
 
+    public static final class Climber {
+        public static enum ClimberPosition {
+            TOP(0), // untested
+            BOTTOM(0); // untested
+
+            public final double position;
+
+            private ClimberPosition(double position) {
+                this.position = position;
+            }
+        }
+
+        public static final int MOTOR_ID = 0; // untested
+        public static final boolean MOTOR_INVERTED = false; // untested
+        public static final int CURRENT_LIMIT = 0; // untested
+        public static final double ENCODER_ROTATIONS_TO_METERS = 0; // untested
+
+        public static final double kP = 0; // untested
+        public static final double kI = 0; // untested
+        public static final double kD = 0; // untested
+        public static final double kS = 0; // untested
+        public static final double kG = 0; // untested
+        public static final double kV = 0; // untested
+        public static final double kA = 0; // untested
+
+        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0; // untested
+        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0; // untested
+
+        public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
+                MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
+    }
+
+    public static final class NoteLift {
+        public static enum NoteLiftPosition {
+            TOP(0), // untested
+            BOTTOM(0); // untested
+
+            public final double position;
+
+            private NoteLiftPosition(double position) {
+                this.position = position;
+            }
+        }
+
+        public static final int MOTOR_ID = 0; // untested
+        public static final boolean MOTOR_INVERTED = false; // untested
+        public static final int CURRENT_LIMIT = 0; // untested
+        public static final double ENCODER_ROTATIONS_TO_METERS = 0; // untested
+
+        public static final double kP = 0; // untested
+        public static final double kI = 0; // untested
+        public static final double kD = 0; // untested
+        public static final double kS = 0; // untested
+        public static final double kG = 0; // untested
+        public static final double kV = 0; // untested
+        public static final double kA = 0; // untested
+
+        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0; // untested
+        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0; // untested
+
+        public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
+                MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
+    }
+
+    public static final class Vision {
+        public static final Matrix<N3, N1> SINGLE_TAG_STD_DEVS = VecBuilder.fill(4, 4, 8); // TODO untested
+        public static final Matrix<N3, N1> MULTI_TAG_STD_DEVS = VecBuilder.fill(0.5, 0.5, 1); // TODO untested
+
+        public static final PhotonCameraConstants CAMERA_CONSTANTS = new PhotonCameraConstants();
+        static {
+            CAMERA_CONSTANTS.WIDTH = 1600; // untested
+            CAMERA_CONSTANTS.HEIGHT = 1200; // untested
+            CAMERA_CONSTANTS.FOV = 95.39; // untested
+            CAMERA_CONSTANTS.FPS = 30; // untested
+            CAMERA_CONSTANTS.AVG_LATENCY = 30; // untested
+            CAMERA_CONSTANTS.STDDEV_LATENCY = 15; // untested
+        }
+
+        // NOT FINAL! PLEASE CHANGE
+        // TODO !!!!
+
+        /** Calculations for transforming from camera location to robot location */
+        public static final Transform3d[] ROBOT_TO_CAMS = new Transform3d[] {
+                new Transform3d(
+                        new Translation3d(Units.inchesToMeters(9.5), Units.inchesToMeters(9.5), // !!
+                                Units.inchesToMeters(10)), // !!
+                        new Rotation3d(0, -Units.degreesToRadians(10), -Math.PI / 8)), // !!
+                new Transform3d(
+                        new Translation3d(Units.inchesToMeters(-12.5), Units.inchesToMeters(0), // !!
+                                Units.inchesToMeters(10)), // !!
+                        new Rotation3d(0, -Units.degreesToRadians(10), Math.PI)), // !!
+                new Transform3d(
+                        new Translation3d(Units.inchesToMeters(9.5), Units.inchesToMeters(-9.5), // !!
+                                Units.inchesToMeters(10)), // !!
+                        new Rotation3d(0, -Units.degreesToRadians(10), Math.PI / 8)) // !!
+        };
+        // TODO all untested
+
+    }
+
+    public static final class Teleop {
+        /**
+         * A value inputted into the rate limiter (the joystick input) can move from 0
+         * to 1 in 1/RATE_LIMIT seconds.
+         * 
+         * A rate limit of 3, for example, means that 0->1 in 1/3 sec.
+         * Larger numbers mean less of a rate limit.
+         */
+        public static final double JOYSTICK_INPUT_RATE_LIMIT = 15.0; // untested
+        public static final double JOYSTICK_CURVE_EXP = 2; // untested
+        public static final TunableDouble INPUT_LIMIT = new TunableDouble("Drivetrain", "Input Limit", 1);
+    }
+
+    public static final class LEDs {
+        public static enum LEDSection implements BaseLEDSection {
+            SHOOTER_RIGHT(0, 10),
+            SHOOTER_TOP(0, 0),
+            SHOOTER_LEFT(0, 0, true),
+            ELEVATOR_LEFT(0, 0),
+            ELEVATOR_RIGHT(0, 0);
+
+            private final int startIdx;
+            private final int endIdx;
+            private final boolean inverted;
+
+            private LEDSection(int startIdx, int endIdx, boolean inverted) {
+                this.startIdx = startIdx;
+                this.endIdx = endIdx;
+                this.inverted = inverted;
+            }
+
+            private LEDSection(int startIdx, int endIdx) {
+                this(startIdx, endIdx, false);
+            }
+
+            @Override
+            public int getStart() {
+                return startIdx;
+            }
+
+            @Override
+            public int getEnd() {
+                return endIdx;
+            }
+
+            @Override
+            public boolean getInverted() {
+                return inverted;
+            }
+        }
+
+        public static final int PORT = 0;
+        public static final int LENGTH = 100; // TODO
+    }
 }
