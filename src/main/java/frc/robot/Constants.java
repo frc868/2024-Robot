@@ -3,6 +3,8 @@ import com.revrobotics.CANSparkFlex;
 import com.techhounds.houndutil.houndlib.swerve.KrakenCoaxialSwerveModule;
 import com.techhounds.houndutil.houndlog.logitems.TunableDouble;
 
+import edu.wpi.first.math.trajectory.TrapezoidProfile;    
+
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -157,4 +159,67 @@ public class Constants {
         public static final double JOYSTICK_CURVE_EXP = 2; // untested
         public static final TunableDouble INPUT_LIMIT = new TunableDouble("Drivetrain", "Input Limit", 1);
     }
+  
+  public static final class Climber {
+        public static enum ClimberPosition {
+            TOP(0), // untested
+            BOTTOM(0); // untested
+
+            public final double position;
+
+            private ClimberPosition(double position) {
+                this.position = position;
+            }
+        }
+
+        public static final int MOTOR_ID = 0; // untested
+        public static final boolean MOTOR_INVERTED = false; // untested
+        public static final int CURRENT_LIMIT = 0; // untested
+        public static final double ENCODER_ROTATIONS_TO_METERS = 0; // untested
+
+        public static final double kP = 0; // untested
+        public static final double kI = 0; // untested
+        public static final double kD = 0; // untested
+        public static final double kS = 0; // untested
+        public static final double kG = 0; // untested
+        public static final double kV = 0; // untested
+        public static final double kA = 0; // untested
+
+        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0; // untested
+        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0; // untested
+
+        public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
+                MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
+    }
+
+    public static final class NoteLift {
+        public static enum NoteLiftPosition {
+            TOP(0), // untested
+            BOTTOM(0); // untested
+
+            public final double position;
+
+            private NoteLiftPosition(double position) {
+                this.position = position;
+            }
+        }
+
+        public static final int MOTOR_ID = 0; // untested
+        public static final boolean MOTOR_INVERTED = false; // untested
+        public static final int CURRENT_LIMIT = 0; // untested
+        public static final double ENCODER_ROTATIONS_TO_METERS = 0; // untested
+
+        public static final double kP = 0; // untested
+        public static final double kI = 0; // untested
+        public static final double kD = 0; // untested
+        public static final double kS = 0; // untested
+        public static final double kG = 0; // untested
+        public static final double kV = 0; // untested
+        public static final double kA = 0; // untested
+
+        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0; // untested
+        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0; // untested
+
+        public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
+                MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);}
 }
