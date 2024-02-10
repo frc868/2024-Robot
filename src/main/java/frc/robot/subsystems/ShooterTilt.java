@@ -100,12 +100,12 @@ public class ShooterTilt extends SubsystemBase implements BaseElevator<ShooterTi
     }
 
     @Override
-    public Command moveToPositionCommand(Supplier<ShooterTiltPosition> goalPositionSupplier) { 
+    public Command moveToPositionCommand(Supplier<ShooterTiltPosition> goalPositionSupplier) {
         return Commands.sequence(
                 runOnce(() -> pidController.reset(getPosition())),
                 runOnce(() -> {
                     if (goalPositionSupplier.get() == ShooterTiltPosition.BOTTOM)
-                        pidController.setConstraints(STOWING_CONSTRAINTS); //not entirely sure if this is necessary
+                        pidController.setConstraints(STOWING_CONSTRAINTS); // not entirely sure if this is necessary
                     else
                         pidController.setConstraints(NORMAL_CONSTRAINTS);
                 }),

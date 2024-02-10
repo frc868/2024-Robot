@@ -18,8 +18,8 @@ import static frc.robot.Constants.NoteLift.*;
 
 import java.util.function.Supplier;
 
-public class NoteLift  extends SubsystemBase implements BaseElevator<NoteLiftPosition> {
-    
+public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosition> {
+
     private ProfiledPIDController pidController = new ProfiledPIDController(kP, kI, kD, MOVEMENT_CONSTRAINTS);
     private ElevatorFeedforward feedforwardController = new ElevatorFeedforward(kS, kG, kV, kA);
 
@@ -65,9 +65,9 @@ public class NoteLift  extends SubsystemBase implements BaseElevator<NoteLiftPos
     @Override
     public Command moveToArbitraryPositionCommand(Supplier<Double> goalPositionSupplier) {
         return Commands.sequence(
-            runOnce(() -> pidController.reset(getPosition())),
-            runOnce(() -> pidController.setGoal(goalPositionSupplier.get())),
-            moveToCurrentGoalCommand().until(pidController::atGoal)).withName("Move to Arbitrary Position");
+                runOnce(() -> pidController.reset(getPosition())),
+                runOnce(() -> pidController.setGoal(goalPositionSupplier.get())),
+                moveToCurrentGoalCommand().until(pidController::atGoal)).withName("Move to Arbitrary Position");
     }
 
     @Override

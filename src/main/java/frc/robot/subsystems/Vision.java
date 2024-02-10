@@ -30,10 +30,13 @@ import static frc.robot.Constants.Vision.*;
 public class Vision extends SubsystemBase implements BaseVision {
 
     /** The PhotonVision cameras, used to detect the AprilTags. */
-    //TODO error, stddev not set
-    private AprilTagPhotonCamera camera1 = new AprilTagPhotonCamera("Left/Right Camera", ROBOT_TO_CAMS[0], CAMERA_CONSTANTS, 0, 0);
-    private AprilTagPhotonCamera camera2 = new AprilTagPhotonCamera("Middle Camera", ROBOT_TO_CAMS[1], CAMERA_CONSTANTS, 0, 0);
-    private AprilTagPhotonCamera camera3 = new AprilTagPhotonCamera("Right/Left Camera", ROBOT_TO_CAMS[2], CAMERA_CONSTANTS, 0, 0);
+    // TODO error, stddev not set
+    private AprilTagPhotonCamera camera1 = new AprilTagPhotonCamera("Left/Right Camera", ROBOT_TO_CAMS[0],
+            CAMERA_CONSTANTS, 0, 0);
+    private AprilTagPhotonCamera camera2 = new AprilTagPhotonCamera("Middle Camera", ROBOT_TO_CAMS[1], CAMERA_CONSTANTS,
+            0, 0);
+    private AprilTagPhotonCamera camera3 = new AprilTagPhotonCamera("Right/Left Camera", ROBOT_TO_CAMS[2],
+            CAMERA_CONSTANTS, 0, 0);
 
     private AprilTagPhotonCamera[] photonCameras = new AprilTagPhotonCamera[] { camera1, camera2, camera3 };
 

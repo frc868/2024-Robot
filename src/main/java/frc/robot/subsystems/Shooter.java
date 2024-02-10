@@ -45,7 +45,7 @@ public class Shooter extends SubsystemBase implements BaseShooter {
                 (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
                 (s) -> s.getEncoder().setPositionConversionFactor(ENCODER_ROTATIONS_TO_METERS),
                 (s) -> s.getEncoder().setVelocityConversionFactor(ENCODER_ROTATIONS_TO_METERS / 60.0));
-        
+
         secondaryMotor.follow(primaryMotor);
     }
 
@@ -63,15 +63,17 @@ public class Shooter extends SubsystemBase implements BaseShooter {
     @Override
     public Command spinAtVelocityCommand(Supplier<Double> goalVelocitySupplier) { // idk lol
         return run(() -> {
-            feedbackVoltage = pidController.calculate(getVelocity(), goalVelocitySupplier.get()); //?
+            feedbackVoltage = pidController.calculate(getVelocity(), goalVelocitySupplier.get()); // ?
             feedforwardVoltage = feedforwardController.calculate(goalVelocitySupplier.get());
             setVoltage(feedbackVoltage + feedforwardVoltage);
         });
     }
 
-    public Command idleAtVoltageCommand(double voltage){
+    public Command idleAtVoltageCommand(double voltage) {
         return run(() -> {
-            feedbackVoltage = getVelocity() < pidController.getSetpoint() ? pidController.calculate(pidController.getSetpoint()) : 0; //?
+            feedbackVoltage = getVelocity() < pidController.getSetpoint()
+                    ? pidController.calculate(pidController.getSetpoint())
+                    : 0; // ?
             setVoltage(feedbackVoltage + voltage);
         });
     }
