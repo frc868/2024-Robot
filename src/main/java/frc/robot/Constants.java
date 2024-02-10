@@ -12,6 +12,8 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+
+import com.techhounds.houndutil.houndlib.swerve.CoaxialSwerveModule.SwerveConstants;
 import com.techhounds.houndutil.houndlib.swerve.KrakenCoaxialSwerveModule;
 import com.techhounds.houndutil.houndlog.logitems.TunableDouble;
 
@@ -32,82 +34,76 @@ public class Constants {
     public static final ControllerType CONTROLLER_TYPE = ControllerType.FlightStick;
 
     public static final class Drivetrain {
-        public static final int GYRO_DEVICE_ID = 0; // Untested
+        public static final int FRONT_LEFT_DRIVE_MOTOR_ID = 1;
+        public static final int FRONT_LEFT_STEER_MOTOR_ID = 2;
+        public static final int FRONT_RIGHT_DRIVE_MOTOR_ID = 3;
+        public static final int FRONT_RIGHT_STEER_MOTOR_ID = 4;
+        public static final int BACK_LEFT_DRIVE_MOTOR_ID = 5;
+        public static final int BACK_LEFT_STEER_MOTOR_ID = 6;
+        public static final int BACK_RIGHT_DRIVE_MOTOR_ID = 7;
+        public static final int BACK_RIGHT_STEER_MOTOR_ID = 8;
 
-        public static final boolean FRONT_LEFT_DRIVE_INVERTED = false; // Untested
-        public static final boolean FRONT_LEFT_STEER_INVERTED = true; // Untested
-        public static final boolean FRONT_LEFT_CANCODER_INVERTED = true; // Untested
-        public static final boolean FRONT_RIGHT_DRIVE_INVERTED = false; // Untested
-        public static final boolean FRONT_RIGHT_STEER_INVERTED = true; // Untested
-        public static final boolean FRONT_RIGHT_CANCODER_INVERTED = true; // Untested
-        public static final boolean BACK_LEFT_DRIVE_INVERTED = false; // Untested
-        public static final boolean BACK_LEFT_STEER_INVERTED = true; // Untested
-        public static final boolean BACK_LEFT_CANCODER_INVERTED = true; // Untested
-        public static final boolean BACK_RIGHT_DRIVE_INVERTED = false; // Untested
-        public static final boolean BACK_RIGHT_STEER_INVERTED = true; // Untested
-        public static final boolean BACK_RIGHT_CANCODER_INVERTED = true; // Untested
+        public static final int FRONT_LEFT_STEER_ENCODER_ID = 0;
+        public static final int FRONT_RIGHT_STEER_ENCODER_ID = 1;
+        public static final int BACK_LEFT_STEER_ENCODER_ID = 2;
+        public static final int BACK_RIGHT_STEER_ENCODER_ID = 3;
 
-        public static final int FRONT_LEFT_DRIVE_MOTOR_ID = 0; // Untested
-        public static final int FRONT_LEFT_STEER_MOTOR_ID = 0; // Untested
-        public static final int FRONT_RIGHT_DRIVE_MOTOR_ID = 0; // Untested
-        public static final int FRONT_RIGHT_STEER_MOTOR_ID = 0; // Untested
-        public static final int BACK_LEFT_DRIVE_MOTOR_ID = 0; // Untested
-        public static final int BACK_LEFT_STEER_MOTOR_ID = 0; // Untested
-        public static final int BACK_RIGHT_DRIVE_MOTOR_ID = 0; // Untested
-        public static final int BACK_RIGHT_STEER_MOTOR_ID = 0; // Untested
+        public static final String CAN_BUS_NAME = "canivore";
 
-        public static final int FRONT_LEFT_STEER_ENCODER_ID = 0; // Untested
-        public static final int FRONT_RIGHT_STEER_ENCODER_ID = 0; // Untested
-        public static final int BACK_LEFT_STEER_ENCODER_ID = 0; // Untested
-        public static final int BACK_RIGHT_STEER_ENCODER_ID = 0; // Untested
+        public static final int PIGEON_ID = 0;
 
-        public static final double FRONT_LEFT_OFFSET = 0; // Untested
-        public static final double FRONT_RIGHT_OFFSET = 0; // Untested
-        public static final double BACK_LEFT_OFFSET = 0; // Untested
-        public static final double BACK_RIGHT_OFFSET = 0; // Untested
+        public static final boolean DRIVE_MOTORS_INVERTED = false;
+        public static final boolean STEER_MOTORS_INVERTED = true;
+        public static final boolean CANCODERS_INVERTED = true;
 
-        public static final String CAN_BUS = "canivore";
+        // TODO
+        public static final double FRONT_LEFT_OFFSET = -0.001220703125;
+        public static final double FRONT_RIGHT_OFFSET = 0.201171875;
+        public static final double BACK_LEFT_OFFSET = 0.2403;
+        public static final double BACK_RIGHT_OFFSET = -0.4331;
 
         /** Distance between left and right wheels. */
-        public static final double TRACK_WIDTH_METERS = Units.inchesToMeters(0); // Untested
+        public static final double TRACK_WIDTH_METERS = 0.52832;
         /** Distance between front and back wheels. */
-        public static final double WHEEL_BASE_METERS = Units.inchesToMeters(0); // Untested
+        public static final double WHEEL_BASE_METERS = 0.52832;
 
-        public static final KrakenCoaxialSwerveModule.SwerveConstants SWERVE_CONSTANTS = new KrakenCoaxialSwerveModule.SwerveConstants();
+        public static final SwerveConstants SWERVE_CONSTANTS = new SwerveConstants();
         static {
-            SWERVE_CONSTANTS.DRIVE_kP = 0; // Untested
-            SWERVE_CONSTANTS.DRIVE_kI = 0; // Untested
-            SWERVE_CONSTANTS.DRIVE_kD = 0; // Untested
-            SWERVE_CONSTANTS.DRIVE_kS = 0; // Untested
-            SWERVE_CONSTANTS.DRIVE_kV = 0; // Untested
-            SWERVE_CONSTANTS.DRIVE_kA = 0; // Untested
-            SWERVE_CONSTANTS.STEER_kP = 0; // Untested
-            SWERVE_CONSTANTS.STEER_kI = 0; // Untested
-            SWERVE_CONSTANTS.STEER_kD = 0; // Untested
+            SWERVE_CONSTANTS.DRIVE_kP = 2.6794 * (2.0 * Math.PI * 0.0478); // TODO simvalue
+            SWERVE_CONSTANTS.DRIVE_kI = 0.0;
+            SWERVE_CONSTANTS.DRIVE_kD = 0.0;
+            SWERVE_CONSTANTS.DRIVE_kS = 0.0097954 * (2.0 * Math.PI * 0.0478); // TODO simvalue
+            SWERVE_CONSTANTS.DRIVE_kV = 2.1268 * (2.0 * Math.PI * 0.0478);
+            SWERVE_CONSTANTS.DRIVE_kA = 0.26277 * (2.0 * Math.PI * 0.0478);
+            SWERVE_CONSTANTS.STEER_kP = 40.0; // TODO simvalue
+            SWERVE_CONSTANTS.STEER_kI = 0.0;
+            SWERVE_CONSTANTS.STEER_kD = 1.0; // TODO simvalue
 
-            SWERVE_CONSTANTS.DRIVE_GEARING = 0; // Untested
-            SWERVE_CONSTANTS.STEER_GEARING = 0; // Untested
-            SWERVE_CONSTANTS.WHEEL_CIRCUMFERENCE = 2.0 * Math.PI * 0; // Untested
+            SWERVE_CONSTANTS.DRIVE_GEARING = 5.357;
+            SWERVE_CONSTANTS.STEER_GEARING = 150.0 / 7.0;
+            SWERVE_CONSTANTS.WHEEL_CIRCUMFERENCE = 2.0 * Math.PI * 0.0478; // 0.3003362577
             SWERVE_CONSTANTS.DRIVE_ENCODER_ROTATIONS_TO_METERS = SWERVE_CONSTANTS.WHEEL_CIRCUMFERENCE
                     / SWERVE_CONSTANTS.DRIVE_GEARING;
-            SWERVE_CONSTANTS.STEER_ENCODER_ROTATIONS_TO_RADIANS = 2 * Math.PI / SWERVE_CONSTANTS.STEER_GEARING;
+            SWERVE_CONSTANTS.STEER_ENCODER_ROTATIONS_TO_RADIANS = 2 * Math.PI
+                    / SWERVE_CONSTANTS.STEER_GEARING;
 
-            SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND = 4.282;
-            SWERVE_CONSTANTS.MAX_DRIVING_ACCELERATION_METERS_PER_SECOND_SQUARED = 3;
-            SWERVE_CONSTANTS.MAX_STEER_VELOCITY_RADIANS_PER_SECOND = 8.829 * Math.PI;
+            // 64.4
+            SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND = 5.583; // TODO simvalue
+            SWERVE_CONSTANTS.MAX_DRIVING_ACCELERATION_METERS_PER_SECOND_SQUARED = 19.3416549959; // TODO simvalue
+            SWERVE_CONSTANTS.MAX_STEER_VELOCITY_RADIANS_PER_SECOND = 100 * 2 * Math.PI; // TODO simvalue
             // max velocity in 1/3 sec
-            SWERVE_CONSTANTS.MAX_STEER_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 8.829 * 3 * Math.PI;
+            SWERVE_CONSTANTS.MAX_STEER_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 3 * 100 * 2 * Math.PI; // TODO simvalue
 
-            SWERVE_CONSTANTS.DRIVE_CURRENT_LIMIT = 50;
-            SWERVE_CONSTANTS.STEER_CURRENT_LIMIT = 20;
+            SWERVE_CONSTANTS.DRIVE_CURRENT_LIMIT = 50; // TODO simvalue
+            SWERVE_CONSTANTS.STEER_CURRENT_LIMIT = 20; // TODO simvalue
             SWERVE_CONSTANTS.DRIVE_GEARBOX_REPR = DCMotor.getKrakenX60(1);
             SWERVE_CONSTANTS.STEER_GEARBOX_REPR = DCMotor.getKrakenX60(1);
-            SWERVE_CONSTANTS.DRIVE_MOI = 0; // Untested
-            SWERVE_CONSTANTS.STEER_MOI = 0; // Untested
+            SWERVE_CONSTANTS.DRIVE_MOI = 0.04; // TODO simvalue
+            SWERVE_CONSTANTS.STEER_MOI = 0.025; // TODO simvalue
         }
 
-        public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = Math.PI / 4; // Untested
-        public static final double MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 2 * Math.PI;
+        public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = 20 * Math.PI; // TODO
+        public static final double MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 20 * Math.PI; // TODO
 
         public static final Translation2d[] SWERVE_MODULE_LOCATIONS = new Translation2d[] {
                 new Translation2d(WHEEL_BASE_METERS / 2, TRACK_WIDTH_METERS / 2),
@@ -121,21 +117,21 @@ public class Constants {
                 SWERVE_MODULE_LOCATIONS[2],
                 SWERVE_MODULE_LOCATIONS[3]);
 
-        public static final double XY_kP = 1; // untested
-        public static final double XY_kI = 0; // untested
-        public static final double XY_kD = 0; // untested
+        public static final double XY_kP = 1; // TODO
+        public static final double XY_kI = 0; // TODO
+        public static final double XY_kD = 0; // TODO
         public static final TrapezoidProfile.Constraints XY_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND,
                 SWERVE_CONSTANTS.MAX_DRIVING_ACCELERATION_METERS_PER_SECOND_SQUARED);
 
-        public static final double THETA_kP = 1; // untested
-        public static final double THETA_kI = 0; // untested
-        public static final double THETA_kD = 0.1; // untested
+        public static final double THETA_kP = 1.5; // TODO
+        public static final double THETA_kI = 0; // TODO
+        public static final double THETA_kD = 0.1; // TODO
         public static final TrapezoidProfile.Constraints THETA_CONSTRAINTS = new TrapezoidProfile.Constraints(
-                20 * Math.PI, 20 * Math.PI);
+                MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND, MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED);
 
-        public static final double PATH_FOLLOWING_TRANSLATION_kP = 7; // untested
-        public static final double PATH_FOLLOWING_ROTATION_kP = 7; // untested
+        public static final double PATH_FOLLOWING_TRANSLATION_kP = 5; // TODO simvalue
+        public static final double PATH_FOLLOWING_ROTATION_kP = 1; // TODO simvalue
     }
 
     public static final class Intake {
