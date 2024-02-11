@@ -9,8 +9,8 @@ import org.photonvision.EstimatedRobotPose;
 import org.photonvision.simulation.VisionSystemSim;
 
 import com.techhounds.houndutil.houndlib.AprilTagPhotonCamera;
-import com.techhounds.houndutil.houndlib.subsystems.BaseVision;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
+import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
 
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -24,30 +24,29 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
 import static frc.robot.Constants.Vision.*;
 
-public class Vision extends SubsystemBase implements BaseVision {
-
-    /** The PhotonVision cameras, used to detect the AprilTags. */
-    // TODO error, stddev not set
-    private AprilTagPhotonCamera camera1 = new AprilTagPhotonCamera("Left/Right Camera", ROBOT_TO_CAMS[0],
-            CAMERA_CONSTANTS, 0, 0);
-    private AprilTagPhotonCamera camera2 = new AprilTagPhotonCamera("Middle Camera", ROBOT_TO_CAMS[1], CAMERA_CONSTANTS,
-            0, 0);
-    private AprilTagPhotonCamera camera3 = new AprilTagPhotonCamera("Right/Left Camera", ROBOT_TO_CAMS[2],
-            CAMERA_CONSTANTS, 0, 0);
-
-    private AprilTagPhotonCamera[] photonCameras = new AprilTagPhotonCamera[] { camera1, camera2, camera3 };
-
-    private SwerveDrivePoseEstimator poseEstimator;
-
+@LoggedObject
+public class Vision extends SubsystemBase {
+    private SwerveDrivePoseEstimator poseEstimator = null;
+    private Supplier<Pose2d> simPoseSupplier = null;
     private final VisionSystemSim visionSim = new VisionSystemSim("main");
 
-    private Supplier<Pose2d> simPoseSupplier;
+    @Log(name = "houndeye01", groups = "cameras")
+    private final AprilTagPhotonCamera photonCamera1 = new AprilTagPhotonCamera("HoundEye01",
+            ROBOT_TO_CAMS[0], CAMERA_CONSTANTS, 0.64, 0.22);
+    @Log(name = "houndeye02", groups = "cameras")
+    private final AprilTagPhotonCamera photonCamera2 = new AprilTagPhotonCamera("HoundEye02",
+            ROBOT_TO_CAMS[1], CAMERA_CONSTANTS, 0.64, 0.22);
+    @Log(name = "houndeye03", groups = "cameras")
+    private final AprilTagPhotonCamera photonCamera3 = new AprilTagPhotonCamera("HoundEye03",
+            ROBOT_TO_CAMS[2], CAMERA_CONSTANTS, 0.64, 0.22);
+
+    private final AprilTagPhotonCamera[] photonCameras = new AprilTagPhotonCamera[] {
+            photonCamera1, photonCamera2, photonCamera3 };
 
     public Vision() {
-        AprilTagFieldLayout tagLayout = AprilTagFields.kDefaultField.loadAprilTagLayoutField();
+        AprilTagFieldLayout tagLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
         visionSim.addAprilTags(tagLayout);
         for (AprilTagPhotonCamera photonCamera : photonCameras) {
             visionSim.addCamera(photonCamera.getSim(), photonCamera.getRobotToCam());
@@ -64,7 +63,6 @@ public class Vision extends SubsystemBase implements BaseVision {
         visionSim.update(simPoseSupplier.get());
     }
 
-    /** Calculates robot location **/
     public void updatePoseEstimator() {
         if (poseEstimator == null) {
             return;
@@ -85,13 +83,8 @@ public class Vision extends SubsystemBase implements BaseVision {
         }
     }
 
-    /**
-     * Gets the current camera poses
-     * 
-     * @return the current camera poses
-     */
     @Log
-    public Pose3d[] getCameraPoses() {
+    public Pose3d[] cameraPoses() {
         List<Pose3d> poses = new ArrayList<Pose3d>();
         for (Transform3d transform : ROBOT_TO_CAMS) {
             poses.add(new Pose3d(poseEstimator.getEstimatedPosition()).plus(transform)
@@ -101,13 +94,8 @@ public class Vision extends SubsystemBase implements BaseVision {
         return poses.toArray(poseArray);
     }
 
-    /**
-     * Gets the current apriltag poses
-     * 
-     * @return the current apriltag poses
-     */
     @Log
-    public Pose3d[] getAprilTagPoses() {
+    public Pose3d[] aprilTagPoses() {
         List<Pose3d> poses = new ArrayList<Pose3d>();
         for (AprilTag tag : AprilTagFields.kDefaultField.loadAprilTagLayoutField().getTags()) {
             poses.add(tag.pose);
