@@ -1,10 +1,10 @@
 package frc.robot.subsystems;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
-
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.simulation.VisionSystemSim;
 
@@ -110,5 +110,25 @@ public class Vision extends SubsystemBase {
 
     public void setSimPoseSupplier(Supplier<Pose2d> simPoseSupplier) {
         this.simPoseSupplier = simPoseSupplier;
+    }
+
+    @Log
+    public Pose3d[] getEstimatedRobotPoses() {
+        return new Pose3d[] {
+                photonCamera1.getLoggedEstimatedRobotPose(),
+                photonCamera2.getLoggedEstimatedRobotPose(),
+                photonCamera3.getLoggedEstimatedRobotPose() };
+    }
+
+    @Log
+    public Pose3d[] getDetectedAprilTags() {
+        return Arrays
+                .stream(new Pose3d[][] {
+                        photonCamera1.getLoggedDetectedAprilTags(),
+                        photonCamera2.getLoggedDetectedAprilTags(),
+                        photonCamera3.getLoggedDetectedAprilTags() })
+                .flatMap(i -> Arrays.stream(i))
+                .toArray(Pose3d[]::new);
+
     }
 }
