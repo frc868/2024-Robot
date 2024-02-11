@@ -1,0 +1,86 @@
+{
+  "HALProvider": {
+    "Other Devices": {
+      "window": {
+        "visible": false
+      }
+    }
+  },
+  "NTProvider": {
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/HoundLog//wpilib/commandScheduler": "Scheduler",
+      "/HoundLog//wpilib/mechanisms": "Mechanism2d",
+      "/HoundLog//wpilib/subsystems/climber": "Subsystem",
+      "/HoundLog//wpilib/subsystems/drivetrain": "Subsystem",
+      "/HoundLog//wpilib/subsystems/intake": "Subsystem",
+      "/HoundLog//wpilib/subsystems/leds": "Subsystem",
+      "/HoundLog//wpilib/subsystems/noteLift": "Subsystem",
+      "/HoundLog//wpilib/subsystems/shooter": "Subsystem",
+      "/HoundLog//wpilib/subsystems/shooterTilt": "Subsystem",
+      "/HoundLog//wpilib/subsystems/vision": "Subsystem",
+      "/HoundLog/autonomous/chooser": "String Chooser",
+      "/HoundLog/autonomous/field": "Field2d",
+      "/SmartDashboard/VisionSystemSim-main/Sim Field": "Field2d"
+    },
+    "windows": {
+      "/HoundLog/autonomous/field": {
+        "Robot": {
+          "arrowSize": 53,
+          "arrowWeight": 2.0,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            255.0
+          ],
+          "length": 0.8999999761581421,
+          "weight": 2.0,
+          "width": 0.8999999761581421
+        },
+        "bottom": 1476,
+        "height": 8.210550308227539,
+        "left": 150,
+        "modules": {
+          "arrows": false,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            255.0
+          ],
+          "image": "/Users/davidracovan/Documents/Programming/GitHub/frc868/2024-Robot/resources/swerve_module.png",
+          "length": 0.30000001192092896,
+          "width": 0.30000001192092896
+        },
+        "right": 2961,
+        "simPose": {
+          "arrows": false,
+          "selectable": false,
+          "style": "Hidden"
+        },
+        "top": 79,
+        "width": 16.541748046875,
+        "window": {
+          "visible": true
+        }
+      }
+    }
+  },
+  "NetworkTables": {
+    "transitory": {
+      "HoundLog": {
+        "open": true,
+        "subsystems": {
+          "drivetrain": {
+            "modules": {
+              "open": true
+            },
+            "open": true
+          },
+          "open": true
+        }
+      }
+    }
+  }
+}

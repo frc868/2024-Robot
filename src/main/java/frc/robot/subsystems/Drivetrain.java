@@ -673,19 +673,16 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
         // Draw a pose that is based on the robot pose, but shifted by the
         // translation of the module relative to robot center,
         // then rotated around its own center by the angle of the module.
-        field.getObject("frontLeft").setPose(
+        field.getObject("modules").setPoses(
                 getPose().transformBy(
                         new Transform2d(SWERVE_MODULE_LOCATIONS[0],
-                                getModuleStates()[0].angle)));
-        field.getObject("frontRight").setPose(
+                                getModuleStates()[0].angle)),
                 getPose().transformBy(
                         new Transform2d(SWERVE_MODULE_LOCATIONS[1],
-                                getModuleStates()[1].angle)));
-        field.getObject("backLeft").setPose(
+                                getModuleStates()[1].angle)),
                 getPose().transformBy(
                         new Transform2d(SWERVE_MODULE_LOCATIONS[2],
-                                getModuleStates()[2].angle)));
-        field.getObject("backRight").setPose(
+                                getModuleStates()[2].angle)),
                 getPose().transformBy(
                         new Transform2d(SWERVE_MODULE_LOCATIONS[3],
                                 getModuleStates()[3].angle)));
