@@ -358,34 +358,45 @@ public class Constants {
 
     public static final class NoteLift {
         public static enum NoteLiftPosition {
-            TOP(0), // untested
-            BOTTOM(0); // untested
+            BOTTOM(0),
+            TOP(0.5);
 
-            public final double position;
+            public final double value;
 
-            private NoteLiftPosition(double position) {
-                this.position = position;
+            private NoteLiftPosition(double value) {
+                this.value = value;
             }
         }
 
-        public static final int MOTOR_ID = 0; // untested
-        public static final boolean MOTOR_INVERTED = false; // untested
-        public static final int CURRENT_LIMIT = 0; // untested
-        public static final double ENCODER_ROTATIONS_TO_METERS = 0; // untested
+        public static final int MOTOR_ID = 16;
 
-        public static final double kP = 0; // untested
-        public static final double kI = 0; // untested
-        public static final double kD = 0; // untested
-        public static final double kS = 0; // untested
-        public static final double kG = 0; // untested
-        public static final double kV = 0; // untested
-        public static final double kA = 0; // untested
+        public static final DCMotor MOTOR_GEARBOX_REPR = DCMotor.getNeoVortex(1);
+        public static final double GEARING = 20;
+        public static final double CARRIAGE_MASS_KG = Units.lbsToKilograms(3);
+        public static final double DRUM_RADIUS_METERS = Units.inchesToMeters(0.75);
+        public static final double WHEEL_CIRCUMFERENCE = 2.0 * Math.PI * DRUM_RADIUS_METERS;
+        public static final double ENCODER_ROTATIONS_TO_METERS = WHEEL_CIRCUMFERENCE / GEARING;
 
-        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0; // untested
-        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0; // untested
+        public static final double MIN_HEIGHT_METERS = 0; // TODO ask nate
+        public static final double MAX_HEIGHT_METERS = 0.67; // TODO ask nate
 
+        public static final int CURRENT_LIMIT = 40;
+
+        public static final double kP = 0; // TODO
+        public static final double kI = 0;
+        public static final double kD = 0;
+        public static final double kS = 0;
+        public static final double kG = 0.062861; // TODO
+        public static final double kV = 78.237; // TODO
+        public static final double kA = 5.0061; // TODO
+        public static final double TOLERANCE = 0.01;
+
+        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0.152; // TODO
+        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0.152 * 10; // TODO
         public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
+
+        public static final Pose3d BASE_COMPONENT_POSE = new Pose3d(0.177, 0, 0.2, new Rotation3d(0, 0, 0));
     }
 
     public static final class Vision {

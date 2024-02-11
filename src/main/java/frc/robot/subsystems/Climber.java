@@ -48,9 +48,6 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
     @Log(groups = "control")
     private double feedforwardVoltage = 0;
 
-    /**
-     * Initializes the elevator.
-     */
     public Climber() {
         motor = SparkConfigurator.createSparkMax(
                 MOTOR_ID, MotorType.kBrushless, false,
@@ -64,9 +61,6 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
         setDefaultCommand(moveToCurrentGoalCommand());
     }
 
-    /**
-     * Updates simulation-specific variables.
-     */
     @Override
     public void simulationPeriodic() {
         elevatorSim.setInput(motor.getAppliedOutput());
