@@ -12,10 +12,9 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 
 import com.techhounds.houndutil.houndlib.swerve.CoaxialSwerveModule.SwerveConstants;
-import com.techhounds.houndutil.houndlog.logitems.TunableDouble;
-
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 import edu.wpi.first.math.geometry.Translation2d;
@@ -134,23 +133,58 @@ public class Constants {
     }
 
     public static final class Intake {
-        public static final int CURRENT_LIMIT = 0;
-        public static final double ENCODER_ROTATIONS_TO_RADIANS = 0.0;
-        public static final double RESET_POSITION = 90.0;
-        public static final int INTAKE_MOTOR_ID = 0;
-        public static final int LIFTING_MOTOR_1_ID = 1;
-        public static final int LIFTING_MOTOR_2_ID = 2;
-        public static final int BEAM_BREAK_ID = 0;
-        public static final int BEAM_BREAK_CHANNEL = 0;
-        public static final double kP = 0.0;
-        public static final double kI = 0.0;
-        public static final double kD = 0.0;
-        public static final double maxVelocity = 0.0;
-        public static final double maxAcceleration = 0.0;
-        public static final double kS = 0.0;
-        public static final double kG = 0.0;
-        public static final double kV = 0.0;
-        public static final double kA = 0.0;
+        public static enum IntakePosition {
+            GROUND(Units.degreesToRadians(-35)), // TODO simvalue
+            AMP(Units.degreesToRadians(60)), // TODO simvalue
+            STOW(Units.degreesToRadians(95)); // TODO simvalue
+
+            public final double value;
+
+            private IntakePosition(double value) {
+                this.value = value;
+            }
+        }
+
+        public static final int PRIMARY_ARM_MOTOR_ID = 9;
+        public static final int SECONDARY_ARM_MOTOR_ID = 10;
+        public static final int ROLLER_MOTOR_ID = 11;
+
+        public static final int INTAKE_BEAM_ID = 0;
+        public static final int PRIMARY_SHOOTER_BEAM_ID = 1;
+        public static final int SECONDARY_SHOOTER_BEAM_ID = 2;
+
+        public static final DCMotor MOTOR_GEARBOX_REPR = DCMotor.getNeoVortex(2);
+        public static final double GEARING = 36.0;
+        public static final double LENGTH_METERS = 0.23; // TODO simvalue
+        public static final double MASS_KG = 4.082; // TODO simvalue
+        public static final double MOMENT_OF_INERTIA_KG_METERS_SQUARED = SingleJointedArmSim.estimateMOI(
+                LENGTH_METERS,
+                MASS_KG);
+
+        public static final double MIN_ANGLE_RADIANS = Units.degreesToRadians(-35); // TODO simvalue
+        public static final double MAX_ANGLE_RADIANS = Units.degreesToRadians(100); // TODO simvalue
+
+        public static final double ENCODER_ROTATIONS_TO_RADIANS = 2 * Math.PI / GEARING;
+        public static final int ARM_CURRENT_LIMIT = 20; // TODO simvalue
+        public static final int ROLLER_CURRENT_LIMIT = 10; // TODO simvalue
+
+        public static final double kP = 33.03; // TODO simvalue
+        public static final double kI = 0;
+        public static final double kD = 0.834;
+        public static final double kS = 0;
+        public static final double kG = 0.21316; // TODO simvalue
+        public static final double kV = 0.59658; // TODO simvalue
+        public static final double kA = 0.019195; // TODO simvalue
+        public static final double TOLERANCE = 0.01;
+
+        public static final double MAX_VELOCITY_METERS_PER_SECOND = 7.5 * Math.PI; // TODO simvalue
+        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 7.5 * 5 * Math.PI; // TODO simvalue
+        public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
+                MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
+
+        public static final Pose3d BASE_COMPONENT_POSE = new Pose3d(-0.19, 0, 0.299,
+                new Rotation3d(0, -Units.degreesToRadians(35), Math.PI));
+
     }
 
     public static final class Shooter {
