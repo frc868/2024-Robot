@@ -219,8 +219,8 @@ public class Constants {
 
     public static final class ShooterTilt {
         public static enum ShooterTiltPosition {
-            TEMP(1337),
-            BOTTOM(1337);
+            BOTTOM(Units.degreesToRadians(25)), // TODO simvalue
+            STOW(Units.degreesToRadians(80)); // TODO simvalue
 
             public final double value;
 
@@ -228,6 +228,128 @@ public class Constants {
                 this.value = value;
             }
         }
+
+        public static final int MOTOR_ID = 14;
+
+        public static final DCMotor MOTOR_GEARBOX_REPR = DCMotor.getNeoVortex(1);
+        public static final double GEARING = 16;
+        public static final double MASS_KG = Units.lbsToKilograms(12); // TODO simvalue
+        // 1 rot = 12mm
+        public static final double ENCODER_ROTATIONS_TO_METERS = Units.inchesToMeters(0.5);
+
+        public static final double MIN_HEIGHT_METERS = 0; // 9.921in // TODO simvalue
+        public static final double MAX_HEIGHT_METERS = 0.1445; // TODO simvalue
+
+        public static final double MIN_ANGLE_RADIANS = Units.degreesToRadians(22.0097); // TODO simvalue
+        public static final double MAX_ANGLE_RADIANS = Units.degreesToRadians(72.4199); // TODO simvalue
+
+        public static final int CURRENT_LIMIT = 40;
+
+        public static final double kP = 1000; // TODO simvalue
+        public static final double kI = 0;
+        public static final double kD = 0;
+        public static final double kS = 0;
+        public static final double kG = 0.022466; // TODO simvalue
+        public static final double kV = 131.43; // TODO simvalue
+        public static final double kA = 6.5761; // TODO simvalue
+        public static final double TOLERANCE = 0.01;
+
+        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0.1; // TODO simvalue
+        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0.5; // TODO simvalue
+        public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
+                MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
+
+        public static final Pose3d BASE_SHOOTER_POSE = new Pose3d(-0.19, 0, 0.299, new Rotation3d(0, 0, 0));
+        // public static final Pose3d BASE_OUTER_LEAD_SCREW_POSE = new Pose3d(1, 1, 1,
+        // new Rotation3d(0, 0, 0));
+        public static final Pose3d BASE_OUTER_LEAD_SCREW_POSE = new Pose3d(-0.0915,
+                0, 0.125,
+                new Rotation3d(0, 0, 0));
+
+        public static final Transform3d OUTER_LEAD_SCREW_TO_INNER_LEAD_SCREW = new Transform3d(0.047, 0, 0.0127,
+                new Rotation3d());
+        public static final Transform3d LEAD_SCREW_PIVOT_TO_EXTENSION = new Transform3d(0, 0, 0.0127, new Rotation3d());
+        public static final Transform3d SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT = new Transform3d(0.2572, 0, -0.0984,
+                new Rotation3d());
+        public static final double INITIAL_LEAD_SCREW_LENGTH = 0.2519;
+
+        public static final Transform3d SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT = new Transform3d(0.09906, 0, -0.1737,
+                new Rotation3d());
+
+        public static final double getLinearActuatorLength(double angle) {
+            double shooterToBottomLeadScrewAngle = Math.atan(Math.abs(SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getX())
+                    / Math.abs(SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getZ()));
+            double shooterToTopLeadScrewAngle = Math.atan(Math.abs(SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT.getZ())
+                    / Math.abs(SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT.getX()));
+
+            double shooterInteriorAngle = angle - shooterToBottomLeadScrewAngle - shooterToTopLeadScrewAngle
+                    + Math.PI / 2.0;
+
+            double shooterPivotToBottomPivot = SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getTranslation().getNorm(); // a
+            double shooterPivotToTopPivot = SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT.getTranslation().getNorm(); // b
+
+            return Math.sqrt(
+                    Math.pow(shooterPivotToBottomPivot, 2)
+                            - (2 * shooterPivotToBottomPivot * shooterPivotToTopPivot * Math.cos(shooterInteriorAngle))
+                            + Math.pow(shooterPivotToTopPivot, 2) - Math.pow(LEAD_SCREW_PIVOT_TO_EXTENSION.getZ(), 2))
+                    - INITIAL_LEAD_SCREW_LENGTH;
+        }
+
+        // https://www.desmos.com/calculator/7ojeknrpiq
+        public static final double getShooterAngle(double linearActuatorLength) {
+            double fullLeadScrewLength = INITIAL_LEAD_SCREW_LENGTH + linearActuatorLength;
+
+            double shooterPivotToBottomPivot = SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getTranslation().getNorm(); // a
+            double shooterPivotToTopPivot = SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT.getTranslation().getNorm(); // b
+            double leadScrewHyp = Math
+                    .sqrt(Math.pow(LEAD_SCREW_PIVOT_TO_EXTENSION.getZ(), 2) + Math.pow(fullLeadScrewLength, 2)); // c
+
+            double shooterInteriorAngle = Math.acos(
+                    (Math.pow(shooterPivotToBottomPivot, 2)
+                            + Math.pow(shooterPivotToTopPivot, 2)
+                            - Math.pow(leadScrewHyp, 2))
+                            / (2 * shooterPivotToBottomPivot * shooterPivotToTopPivot));
+
+            double shooterToBottomLeadScrewAngle = Math.atan(Math.abs(SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getX())
+                    / Math.abs(SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getZ()));
+            double shooterToTopLeadScrewAngle = Math.atan(Math.abs(SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT.getZ())
+                    / Math.abs(SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT.getX()));
+
+            return shooterInteriorAngle + shooterToBottomLeadScrewAngle + shooterToTopLeadScrewAngle - Math.PI / 2.0;
+        }
+
+        // used only in simulation
+        public static final double getLeadScrewAngle(double linearActuatorLength) {
+            double fullLeadScrewLength = INITIAL_LEAD_SCREW_LENGTH + linearActuatorLength;
+
+            double shooterPivotToBottomPivot = SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getTranslation().getNorm(); // a
+            double shooterPivotToTopPivot = SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT.getTranslation().getNorm(); // b
+            double leadScrewHyp = Math
+                    .sqrt(Math.pow(LEAD_SCREW_PIVOT_TO_EXTENSION.getZ(), 2) + Math.pow(fullLeadScrewLength, 2)); // c
+
+            double leadScrewInteriorAngle = Math.acos(
+                    (Math.pow(shooterPivotToBottomPivot, 2)
+                            + Math.pow(leadScrewHyp, 2)
+                            - Math.pow(shooterPivotToTopPivot, 2))
+                            / (2 * shooterPivotToBottomPivot * leadScrewHyp));
+
+            double bottomLeadScrewToShooterAngle = Math.atan(Math.abs(SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getZ())
+                    / Math.abs(SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getX()));
+
+            return Math.PI - leadScrewInteriorAngle - bottomLeadScrewToShooterAngle;
+        }
+
+        // TODO i need to actually make sure these are right
+        public static final double LEAD_SCREW_RADIUS_METERS = Units.inchesToMeters(0.613); // ?
+        public static final double SHOOTER_PIVOT_RADIUS_METERS = Units.inchesToMeters(1.625); // ?
+        public static final double SHOOTER_OFFSET_ANGLE_RADIANS = 1337;
+        public static final double ANGLE_ALPHA = 1337; // ?
+
+        public static final double BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS = Units.inchesToMeters(7.843);
+        public static final double SHOOTER_PIVOT_TO_ENDPOINT_PIVOT_LENGTH_METERS = Units.inchesToMeters(10.725);
+
+        public static final double LEAD_SCREW_MIN_LENGTH_METERS = 1337;
+        public static final double HORIZONTAL_ANGLE_OFFSET_RADIANS = 1337;
 
         /*
          * By treating the shooter + shooter tilt as a triangle with vertices at the 3
@@ -284,49 +406,6 @@ public class Constants {
             double desiredAngle = ANGLE_ALPHA - h + SHOOTER_OFFSET_ANGLE_RADIANS;
             return getLengthFromAngle(desiredAngle);
         }
-
-        public static final int MOTOR_ID = 1337;
-
-        public static final double ENCODER_ROTATIONS_TO_METERS = 1337;
-
-        public static final int CURRENT_LIMIT = 1337;
-        public static final double TOLERANCE = 1337;
-
-        public static final double MAX_VELOCITY_METERS_PER_SECOND = 1337;
-        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 1337;
-        public static final TrapezoidProfile.Constraints NORMAL_CONSTRAINTS = new TrapezoidProfile.Constraints(
-                MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
-
-        public static final double MAX_STOWING_VELOCITY_METERS_PER_SECOND = 1337;
-        public static final double MAX_STOWING_ACCELERATION_METERS_PER_SECOND_SQUARED = 1337;
-        public static final TrapezoidProfile.Constraints STOWING_CONSTRAINTS = new TrapezoidProfile.Constraints(
-                MAX_STOWING_VELOCITY_METERS_PER_SECOND, MAX_STOWING_ACCELERATION_METERS_PER_SECOND_SQUARED);
-
-        public static final double kP = 1337;
-        public static final double kI = 1337;
-        public static final double kD = 1337;
-
-        public static final double kS = 1337;
-        public static final double kG = 1337;
-        public static final double kV = 1337;
-        public static final double kA = 1337;
-
-        // geometry
-        public static final double MAX_LENGTH_METERS = 1337; // ?
-        public static final double MIN_LENGTH_METERS = 1337;
-
-        // TODO i need to actually make sure these are right
-        public static final double LEAD_SCREW_RADIUS_METERS = Units.inchesToMeters(0.613); // ?
-        public static final double SHOOTER_PIVOT_RADIUS_METERS = Units.inchesToMeters(1.625); // ?
-        public static final double SHOOTER_OFFSET_ANGLE_RADIANS = 1337;
-        public static final double ANGLE_ALPHA = 1337; // ?
-
-        public static final double BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS = Units.inchesToMeters(7.843);
-        public static final double SHOOTER_PIVOT_TO_ENDPOINT_PIVOT_LENGTH_METERS = Units.inchesToMeters(10.725);
-
-        public static final double LEAD_SCREW_MIN_LENGTH_METERS = 1337;
-        public static final double HORIZONTAL_ANGLE_OFFSET_RADIANS = 1337;
-
     }
 
     public static final class Climber {
