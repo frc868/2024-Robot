@@ -410,8 +410,8 @@ public class Constants {
 
     public static final class Climber {
         public static enum ClimberPosition {
-            BOTTOM(0),
-            TOP(0.5);
+            BOTTOM(0), // TODO
+            TOP(0.5); // TODO
 
             public final double value;
 
@@ -453,8 +453,8 @@ public class Constants {
 
     public static final class NoteLift {
         public static enum NoteLiftPosition {
-            BOTTOM(0),
-            TOP(0.5);
+            BOTTOM(0), // TODO
+            TOP(0.5); // TODO
 
             public final double value;
 

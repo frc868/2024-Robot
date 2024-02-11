@@ -14,12 +14,23 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.MutableMeasure;
+import edu.wpi.first.units.Velocity;
+import edu.wpi.first.units.Voltage;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import frc.robot.Constants.NoteLift.NoteLiftPosition;
+
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.Constants.NoteLift.*;
 
 @LoggedObject
@@ -48,6 +59,15 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
     @Log(groups = "control")
     private double feedforwardVoltage = 0;
 
+    private double simVelocity = 0.0;
+
+    private final MutableMeasure<Voltage> sysidAppliedVoltageMeasure = MutableMeasure.mutable(Volts.of(0));
+    private final MutableMeasure<Distance> sysidPositionMeasure = MutableMeasure.mutable(Meters.of(0));
+    private final MutableMeasure<Velocity<Distance>> sysidVelocityMeasure = MutableMeasure
+            .mutable(MetersPerSecond.of(0));
+
+    private final SysIdRoutine sysIdRoutine;
+
     public NoteLift() {
         motor = SparkConfigurator.createSparkMax(
                 MOTOR_ID, MotorType.kBrushless, false,
@@ -58,6 +78,18 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
 
         pidController.setTolerance(TOLERANCE);
 
+        sysIdRoutine = new SysIdRoutine(
+                new SysIdRoutine.Config(),
+                new SysIdRoutine.Mechanism(
+                        (Measure<Voltage> volts) -> setVoltage(volts.magnitude()),
+                        log -> {
+                            log.motor("primary")
+                                    .voltage(sysidAppliedVoltageMeasure.mut_replace(motor.getAppliedOutput(), Volts))
+                                    .linearPosition(sysidPositionMeasure.mut_replace(getPosition(), Meters))
+                                    .linearVelocity(sysidVelocityMeasure.mut_replace(getVelocity(), MetersPerSecond));
+                        },
+                        this));
+
         setDefaultCommand(moveToCurrentGoalCommand());
     }
 
@@ -66,12 +98,21 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
         elevatorSim.setInput(motor.getAppliedOutput());
         elevatorSim.update(0.020);
         motor.getEncoder().setPosition(elevatorSim.getPositionMeters());
+        simVelocity = elevatorSim.getVelocityMetersPerSecond();
     }
 
     @Override
     @Log
     public double getPosition() {
         return motor.getEncoder().getPosition();
+    }
+
+    @Log
+    public double getVelocity() {
+        if (RobotBase.isReal())
+            return motor.getEncoder().getVelocity();
+        else
+            return simVelocity;
     }
 
     @Log
@@ -147,5 +188,13 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
                     pidController.reset(getPosition());
                 }).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
                 .withName("noteLift.coastMotorsCommand");
+    }
+
+    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+        return sysIdRoutine.quasistatic(direction).withName("noteLift.sysIdQuasistatic");
+    }
+
+    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+        return sysIdRoutine.dynamic(direction).withName("noteLift.sysIdDynamic");
     }
 }

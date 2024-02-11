@@ -65,7 +65,6 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
     @Log(groups = "control")
     private double feedforwardVoltage = 0;
 
-    @Log
     private double simVelocity = 0.0;
 
     private final MutableMeasure<Voltage> sysidAppliedVoltageMeasure = MutableMeasure.mutable(Volts.of(0));
