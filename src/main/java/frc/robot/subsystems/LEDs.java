@@ -63,7 +63,7 @@ public class LEDs extends SubsystemBase {
             currentStates.clear();
         })
                 .ignoringDisable(true)
-                .withName("Update State Machine");
+                .withName("leds.updateStateMachine");
     }
 
     public void clear() {
