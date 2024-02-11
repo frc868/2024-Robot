@@ -151,109 +151,13 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     private final MutableMeasure<Distance> sysidDrivePositionMeasure = mutable(Meters.of(0));
     private final MutableMeasure<Velocity<Distance>> sysidDriveVelocityMeasure = mutable(MetersPerSecond.of(0));
 
-    private final SysIdRoutine sysIdDrive = new SysIdRoutine(
-            new SysIdRoutine.Config(),
-            new SysIdRoutine.Mechanism(
-                    (Measure<Voltage> volts) -> {
-                        drive(new ChassisSpeeds(
-                                SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND * volts.magnitude() / 12.0, 0,
-                                0));
-                    },
-                    log -> {
-                        log.motor("frontLeft")
-                                .voltage(
-                                        sysidDriveAppliedVoltageMeasure.mut_replace(frontLeft.getDriveMotorVoltage(),
-                                                Volts))
-                                .linearPosition(
-                                        sysidDrivePositionMeasure.mut_replace(frontLeft.getDriveMotorPosition(),
-                                                Meters))
-                                .linearVelocity(sysidDriveVelocityMeasure.mut_replace(frontLeft.getDriveMotorVelocity(),
-                                        MetersPerSecond));
-                        log.motor("frontRight")
-                                .voltage(sysidDriveAppliedVoltageMeasure.mut_replace(frontRight.getDriveMotorVoltage(),
-                                        Volts))
-                                .linearPosition(
-                                        sysidDrivePositionMeasure.mut_replace(frontRight.getDriveMotorPosition(),
-                                                Meters))
-                                .linearVelocity(
-                                        sysidDriveVelocityMeasure.mut_replace(frontRight.getDriveMotorVelocity(),
-                                                MetersPerSecond));
-                        log.motor("backLeft")
-                                .voltage(sysidDriveAppliedVoltageMeasure.mut_replace(backLeft.getDriveMotorVoltage(),
-                                        Volts))
-                                .linearPosition(
-                                        sysidDrivePositionMeasure.mut_replace(backLeft.getDriveMotorPosition(), Meters))
-                                .linearVelocity(sysidDriveVelocityMeasure.mut_replace(backLeft.getDriveMotorVelocity(),
-                                        MetersPerSecond));
-                        log.motor("backRight")
-                                .voltage(
-                                        sysidDriveAppliedVoltageMeasure.mut_replace(backRight.getDriveMotorVoltage(),
-                                                Volts))
-                                .linearPosition(
-                                        sysidDrivePositionMeasure.mut_replace(backRight.getDriveMotorPosition(),
-                                                Meters))
-                                .linearVelocity(sysidDriveVelocityMeasure.mut_replace(backRight.getDriveMotorVelocity(),
-                                        MetersPerSecond));
-                    },
-                    this));
+    private final SysIdRoutine sysIdDrive;
 
     private final MutableMeasure<Voltage> sysidSteerAppliedVoltageMeasure = mutable(Volts.of(0));
     private final MutableMeasure<Angle> sysidSteerPositionMeasure = mutable(Rotations.of(0));
     private final MutableMeasure<Velocity<Angle>> sysidSteerVelocityMeasure = mutable(RotationsPerSecond.of(0));
 
-    private final SysIdRoutine sysIdSteer = new SysIdRoutine(
-            new SysIdRoutine.Config(),
-            new SysIdRoutine.Mechanism(
-                    (Measure<Voltage> volts) -> {
-                        drive(new ChassisSpeeds(
-                                SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND * volts.magnitude() /
-                                        12.0,
-                                0,
-                                0));
-                    },
-                    log -> {
-                        log.motor("frontLeft")
-                                .voltage(
-                                        sysidSteerAppliedVoltageMeasure.mut_replace(frontLeft.getSteerMotorVoltage(),
-                                                Volts))
-                                .angularPosition(
-                                        sysidSteerPositionMeasure.mut_replace(frontLeft.getSteerMotorPosition(),
-                                                Rotations))
-                                .angularVelocity(
-                                        sysidSteerVelocityMeasure.mut_replace(frontLeft.getSteerMotorVelocity(),
-                                                RotationsPerSecond));
-                        log.motor("frontRight")
-                                .voltage(
-                                        sysidSteerAppliedVoltageMeasure.mut_replace(frontRight.getSteerMotorVoltage(),
-                                                Volts))
-                                .angularPosition(
-                                        sysidSteerPositionMeasure.mut_replace(frontRight.getSteerMotorPosition(),
-                                                Rotations))
-                                .angularVelocity(
-                                        sysidSteerVelocityMeasure.mut_replace(frontRight.getSteerMotorVelocity(),
-                                                RotationsPerSecond));
-                        log.motor("backLeft")
-                                .voltage(
-                                        sysidSteerAppliedVoltageMeasure.mut_replace(backLeft.getSteerMotorVoltage(),
-                                                Volts))
-                                .angularPosition(
-                                        sysidSteerPositionMeasure.mut_replace(backLeft.getSteerMotorPosition(),
-                                                Rotations))
-                                .angularVelocity(
-                                        sysidSteerVelocityMeasure.mut_replace(backLeft.getSteerMotorVelocity(),
-                                                RotationsPerSecond));
-                        log.motor("backRight")
-                                .voltage(
-                                        sysidSteerAppliedVoltageMeasure.mut_replace(backRight.getSteerMotorVoltage(),
-                                                Volts))
-                                .angularPosition(
-                                        sysidSteerPositionMeasure.mut_replace(backRight.getSteerMotorPosition(),
-                                                Rotations))
-                                .angularVelocity(
-                                        sysidSteerVelocityMeasure.mut_replace(backRight.getSteerMotorVelocity(),
-                                                RotationsPerSecond));
-                    },
-                    this));
+    private final SysIdRoutine sysIdSteer;
 
     /** Initializes the drivetrain. */
     public Drivetrain() {
@@ -272,12 +176,117 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
         if (RobotBase.isSimulation()) {
             simOdometry = new SwerveDriveOdometry(KINEMATICS, getRotation(), getModulePositions(), new Pose2d());
         }
+
+        sysIdDrive = new SysIdRoutine(
+                new SysIdRoutine.Config(),
+                new SysIdRoutine.Mechanism(
+                        (Measure<Voltage> volts) -> {
+                            drive(new ChassisSpeeds(
+                                    SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND * volts.magnitude() / 12.0,
+                                    0,
+                                    0));
+                        },
+                        log -> {
+                            log.motor("frontLeft")
+                                    .voltage(sysidDriveAppliedVoltageMeasure
+                                            .mut_replace(frontLeft.getDriveMotorVoltage(), Volts))
+                                    .linearPosition(
+                                            sysidDrivePositionMeasure.mut_replace(frontLeft.getDriveMotorPosition(),
+                                                    Meters))
+                                    .linearVelocity(sysidDriveVelocityMeasure
+                                            .mut_replace(frontLeft.getDriveMotorVelocity(), MetersPerSecond));
+                            log.motor("frontRight")
+                                    .voltage(sysidDriveAppliedVoltageMeasure.mut_replace(
+                                            frontRight.getDriveMotorVoltage(),
+                                            Volts))
+                                    .linearPosition(
+                                            sysidDrivePositionMeasure.mut_replace(frontRight.getDriveMotorPosition(),
+                                                    Meters))
+                                    .linearVelocity(
+                                            sysidDriveVelocityMeasure.mut_replace(frontRight.getDriveMotorVelocity(),
+                                                    MetersPerSecond));
+                            log.motor("backLeft")
+                                    .voltage(
+                                            sysidDriveAppliedVoltageMeasure.mut_replace(backLeft.getDriveMotorVoltage(),
+                                                    Volts))
+                                    .linearPosition(
+                                            sysidDrivePositionMeasure.mut_replace(backLeft.getDriveMotorPosition(),
+                                                    Meters))
+                                    .linearVelocity(
+                                            sysidDriveVelocityMeasure.mut_replace(backLeft.getDriveMotorVelocity(),
+                                                    MetersPerSecond));
+                            log.motor("backRight")
+                                    .voltage(
+                                            sysidDriveAppliedVoltageMeasure.mut_replace(
+                                                    backRight.getDriveMotorVoltage(),
+                                                    Volts))
+                                    .linearPosition(
+                                            sysidDrivePositionMeasure.mut_replace(backRight.getDriveMotorPosition(),
+                                                    Meters))
+                                    .linearVelocity(
+                                            sysidDriveVelocityMeasure.mut_replace(backRight.getDriveMotorVelocity(),
+                                                    MetersPerSecond));
+                        },
+                        this));
+
+        sysIdSteer = new SysIdRoutine(
+                new SysIdRoutine.Config(),
+                new SysIdRoutine.Mechanism(
+                        (Measure<Voltage> volts) -> {
+                            drive(new ChassisSpeeds(
+                                    SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND * volts.magnitude() /
+                                            12.0,
+                                    0,
+                                    0));
+                        },
+                        log -> {
+                            log.motor("frontLeft")
+                                    .voltage(
+                                            sysidSteerAppliedVoltageMeasure.mut_replace(
+                                                    frontLeft.getSteerMotorVoltage(),
+                                                    Volts))
+                                    .angularPosition(
+                                            sysidSteerPositionMeasure.mut_replace(frontLeft.getSteerMotorPosition(),
+                                                    Rotations))
+                                    .angularVelocity(
+                                            sysidSteerVelocityMeasure.mut_replace(frontLeft.getSteerMotorVelocity(),
+                                                    RotationsPerSecond));
+                            log.motor("frontRight")
+                                    .voltage(
+                                            sysidSteerAppliedVoltageMeasure.mut_replace(
+                                                    frontRight.getSteerMotorVoltage(),
+                                                    Volts))
+                                    .angularPosition(
+                                            sysidSteerPositionMeasure.mut_replace(frontRight.getSteerMotorPosition(),
+                                                    Rotations))
+                                    .angularVelocity(
+                                            sysidSteerVelocityMeasure.mut_replace(frontRight.getSteerMotorVelocity(),
+                                                    RotationsPerSecond));
+                            log.motor("backLeft")
+                                    .voltage(
+                                            sysidSteerAppliedVoltageMeasure.mut_replace(backLeft.getSteerMotorVoltage(),
+                                                    Volts))
+                                    .angularPosition(
+                                            sysidSteerPositionMeasure.mut_replace(backLeft.getSteerMotorPosition(),
+                                                    Rotations))
+                                    .angularVelocity(
+                                            sysidSteerVelocityMeasure.mut_replace(backLeft.getSteerMotorVelocity(),
+                                                    RotationsPerSecond));
+                            log.motor("backRight")
+                                    .voltage(
+                                            sysidSteerAppliedVoltageMeasure.mut_replace(
+                                                    backRight.getSteerMotorVoltage(),
+                                                    Volts))
+                                    .angularPosition(
+                                            sysidSteerPositionMeasure.mut_replace(backRight.getSteerMotorPosition(),
+                                                    Rotations))
+                                    .angularVelocity(
+                                            sysidSteerVelocityMeasure.mut_replace(backRight.getSteerMotorVelocity(),
+                                                    RotationsPerSecond));
+                        },
+                        this));
     }
 
-    /**
-     * Runs every 20ms. Do not run anything but odometry updating and debug code
-     * here.
-     */
     @Override
     public void periodic() {
         updatePoseEstimator();
