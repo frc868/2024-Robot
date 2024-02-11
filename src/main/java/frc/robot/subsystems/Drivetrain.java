@@ -687,18 +687,18 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     public Command sysIdDriveQuasistatic(SysIdRoutine.Direction direction) {
-        return sysIdDrive.quasistatic(direction);
+        return sysIdDrive.quasistatic(direction).withName("drivetrain.sysIdDriveQuasistatic");
     }
 
     public Command sysIdDriveDynamic(SysIdRoutine.Direction direction) {
-        return sysIdDrive.dynamic(direction);
+        return sysIdDrive.dynamic(direction).withName("drivetrain.sysIdDriveQuasistatic");
     }
 
     public Command sysIdSteerQuasistatic(SysIdRoutine.Direction direction) {
-        return sysIdSteer.quasistatic(direction);
+        return sysIdSteer.quasistatic(direction).withName("drivetrain.sysIdDriveQuasistatic");
     }
 
     public Command sysIdSteerDynamic(SysIdRoutine.Direction direction) {
-        return sysIdSteer.dynamic(direction);
+        return sysIdSteer.dynamic(direction).withName("drivetrain.sysIdDriveQuasistatic");
     }
 }
