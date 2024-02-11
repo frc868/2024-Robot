@@ -23,7 +23,6 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
@@ -109,18 +108,17 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     @Log
     private Pigeon2 pigeon = new Pigeon2(0);
 
-    @Log
     private SwerveDrivePoseEstimator poseEstimator;
 
-    @Log
+    @Log(groups = "control")
     private ProfiledPIDController xPositionController = new ProfiledPIDController(
             XY_kP, XY_kI, XY_kD, XY_CONSTRAINTS);
 
-    @Log
+    @Log(groups = "control")
     private ProfiledPIDController yPositionController = new ProfiledPIDController(
             XY_kP, XY_kI, XY_kD, XY_CONSTRAINTS);
 
-    @Log
+    @Log(groups = "control")
     private ProfiledPIDController thetaPositionController = new ProfiledPIDController(
             THETA_kP, THETA_kI, THETA_kD, THETA_CONSTRAINTS);
 
@@ -133,9 +131,6 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
     @Log
     private DriveMode driveMode = DriveMode.FIELD_ORIENTED;
-
-    @Log
-    private Twist2d twist = new Twist2d();
 
     /**
      * Whether to override the inputs of the driver for maintaining or turning to a
@@ -306,10 +301,8 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
                     currentPositions[i].angle);
         }
 
-        twist = KINEMATICS.toTwist2d(deltas);
-
         pigeon.getSimState().setRawYaw(pigeon.getYaw().getValue() +
-                Units.radiansToDegrees(twist.dtheta));
+                Units.radiansToDegrees(KINEMATICS.toTwist2d(deltas).dtheta));
 
         lastModulePositions = currentPositions;
     }
@@ -327,7 +320,10 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
     @Log
     public Pose2d getSimPose() {
-        return simOdometry.getPoseMeters();
+        if (simOdometry != null)
+            return simOdometry.getPoseMeters();
+        else
+            return new Pose2d();
     }
 
     @Override

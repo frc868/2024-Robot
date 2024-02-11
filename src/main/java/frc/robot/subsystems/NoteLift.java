@@ -38,10 +38,10 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
     @Log
     private CANSparkMax motor;
 
-    @Log
+    @Log(groups = "control")
     private ProfiledPIDController pidController = new ProfiledPIDController(kP, kI, kD, MOVEMENT_CONSTRAINTS);
 
-    @Log
+    @Log(groups = "control")
     private ElevatorFeedforward feedforwardController = new ElevatorFeedforward(kS, kG, kV, kA);
 
     private ElevatorSim elevatorSim = new ElevatorSim(

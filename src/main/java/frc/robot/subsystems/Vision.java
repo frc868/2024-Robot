@@ -32,24 +32,24 @@ public class Vision extends SubsystemBase {
     private Supplier<Pose2d> simPoseSupplier = null;
     private final VisionSystemSim visionSim = new VisionSystemSim("main");
 
-    @Log(name = "houndeye01", groups = "cameras")
-    private final AprilTagPhotonCamera photonCamera1 = new AprilTagPhotonCamera("HoundEye01",
+    @Log(groups = "cameras")
+    private final AprilTagPhotonCamera houndeye01 = new AprilTagPhotonCamera("HoundEye01",
             ROBOT_TO_CAMS[0], CAMERA_CONSTANTS, 0.64, 0.22);
-    @Log(name = "houndeye02", groups = "cameras")
-    private final AprilTagPhotonCamera photonCamera2 = new AprilTagPhotonCamera("HoundEye02",
+    @Log(groups = "cameras")
+    private final AprilTagPhotonCamera houndeye02 = new AprilTagPhotonCamera("HoundEye02",
             ROBOT_TO_CAMS[1], CAMERA_CONSTANTS, 0.64, 0.22);
-    @Log(name = "houndeye03", groups = "cameras")
-    private final AprilTagPhotonCamera photonCamera3 = new AprilTagPhotonCamera("HoundEye03",
+    @Log(groups = "cameras")
+    private final AprilTagPhotonCamera houndeye03 = new AprilTagPhotonCamera("HoundEye03",
             ROBOT_TO_CAMS[2], CAMERA_CONSTANTS, 0.64, 0.22);
 
-    private final AprilTagPhotonCamera[] photonCameras = new AprilTagPhotonCamera[] {
-            photonCamera1, photonCamera2, photonCamera3 };
+    private final AprilTagPhotonCamera[] cameras = new AprilTagPhotonCamera[] {
+            houndeye01, houndeye02, houndeye03 };
 
     public Vision() {
         AprilTagFieldLayout tagLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
         visionSim.addAprilTags(tagLayout);
-        for (AprilTagPhotonCamera photonCamera : photonCameras) {
-            visionSim.addCamera(photonCamera.getSim(), photonCamera.getRobotToCam());
+        for (AprilTagPhotonCamera camera : cameras) {
+            visionSim.addCamera(camera.getSim(), camera.getRobotToCam());
         }
     }
 
@@ -69,7 +69,7 @@ public class Vision extends SubsystemBase {
         }
 
         Pose2d prevEstimatedRobotPose = poseEstimator.getEstimatedPosition();
-        for (AprilTagPhotonCamera photonCamera : photonCameras) {
+        for (AprilTagPhotonCamera photonCamera : cameras) {
             Optional<EstimatedRobotPose> result = photonCamera
                     .getEstimatedGlobalPose(prevEstimatedRobotPose);
 
@@ -115,18 +115,18 @@ public class Vision extends SubsystemBase {
     @Log
     public Pose3d[] getEstimatedRobotPoses() {
         return new Pose3d[] {
-                photonCamera1.getLoggedEstimatedRobotPose(),
-                photonCamera2.getLoggedEstimatedRobotPose(),
-                photonCamera3.getLoggedEstimatedRobotPose() };
+                houndeye01.getLoggedEstimatedRobotPose(),
+                houndeye02.getLoggedEstimatedRobotPose(),
+                houndeye03.getLoggedEstimatedRobotPose() };
     }
 
     @Log
     public Pose3d[] getDetectedAprilTags() {
         return Arrays
                 .stream(new Pose3d[][] {
-                        photonCamera1.getLoggedDetectedAprilTags(),
-                        photonCamera2.getLoggedDetectedAprilTags(),
-                        photonCamera3.getLoggedDetectedAprilTags() })
+                        houndeye01.getLoggedDetectedAprilTags(),
+                        houndeye02.getLoggedDetectedAprilTags(),
+                        houndeye03.getLoggedDetectedAprilTags() })
                 .flatMap(i -> Arrays.stream(i))
                 .toArray(Pose3d[]::new);
 

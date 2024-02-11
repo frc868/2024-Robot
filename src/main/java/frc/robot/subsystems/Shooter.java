@@ -37,17 +37,17 @@ public class Shooter extends SubsystemBase implements BaseShooter {
     @Log
     private final CANSparkFlex secondaryMotor;
 
-    @Log
+    @Log(groups = "control")
     private final PIDController pidController = new PIDController(kP, kI, kD);
-    @Log
+    @Log(groups = "control")
     private final SimpleMotorFeedforward feedforwardController = new SimpleMotorFeedforward(kS, kV, kA);
 
     private final FlywheelSim flywheelSim = new FlywheelSim(MOTOR_GEARBOX_REPR, GEARING,
             MOMENT_OF_INERTIA_KG_METERS_SQUARED);
 
-    @Log
+    @Log(groups = "control")
     private double feedforwardVoltage = 0.0;
-    @Log
+    @Log(groups = "control")
     private double feedbackVoltage = 0.0;
 
     private double simVelocity = 0.0;
@@ -86,7 +86,7 @@ public class Shooter extends SubsystemBase implements BaseShooter {
                         this));
 
         setDefaultCommand(holdVelocityCommand(() -> IDLE_RPS));
-        pidController.setTolerance(0.25);
+        pidController.setTolerance(0.1);
 
     }
 
@@ -125,7 +125,7 @@ public class Shooter extends SubsystemBase implements BaseShooter {
         }).withName("shooter.spinAtVelocity");
     }
 
-    // will get up to speed, but slowly ramp down
+    // will get up to speed, but slowly ramp down at only FF
     public Command holdVelocityCommand(Supplier<Double> goalVelocitySupplier) {
         return run(() -> {
             feedbackVoltage = pidController.calculate(getVelocity(), goalVelocitySupplier.get());

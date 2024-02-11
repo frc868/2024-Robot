@@ -42,14 +42,13 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
     @Log
     private final CANSparkFlex motor;
 
-    @Log
+    @Log(groups = "control")
     private final ProfiledPIDController pidController = new ProfiledPIDController(kP, kI, kD, MOVEMENT_CONSTRAINTS);
 
-    @Log
+    @Log(groups = "control")
     private final ElevatorFeedforward feedforwardController = new ElevatorFeedforward(kS,
             kG, kV, kA);
 
-    @Log
     private final ElevatorSim elevatorSim = new ElevatorSim(
             MOTOR_GEARBOX_REPR,
             GEARING / ENCODER_ROTATIONS_TO_METERS,

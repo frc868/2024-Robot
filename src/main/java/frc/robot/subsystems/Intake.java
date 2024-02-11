@@ -58,13 +58,12 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
     @Log
     private final DigitalInput shooterSecondaryBeam = new DigitalInput(SECONDARY_SHOOTER_BEAM_ID);
 
-    @Log
+    @Log(groups = "control")
     private final ProfiledPIDController pidController = new ProfiledPIDController(kP, kI, kD, MOVEMENT_CONSTRAINTS);
 
-    @Log
+    @Log(groups = "control")
     private final ArmFeedforward feedforwardController = new ArmFeedforward(kS, kG, kV, kA);
 
-    @Log
     private final SingleJointedArmSim armSim = new SingleJointedArmSim(
             MOTOR_GEARBOX_REPR,
             GEARING,
@@ -74,6 +73,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
             MAX_ANGLE_RADIANS,
             true,
             0);
+
     private final DIOSim intakeBeamSim = new DIOSim(intakeBeam);
     private final DIOSim shooterPrimaryBeamSim = new DIOSim(shooterPrimaryBeam);
     private final DIOSim shooterSecondaryBeamSim = new DIOSim(shooterSecondaryBeam);
@@ -83,7 +83,6 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
     @Log(groups = "control")
     private double feedforwardVoltage = 0;
 
-    @Log
     private double simVelocity = 0.0;
 
     private final MutableMeasure<Voltage> sysidAppliedVoltageMeasure = MutableMeasure.mutable(Volts.of(0));
