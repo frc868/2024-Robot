@@ -20,6 +20,12 @@ jobs:
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v4
+    
+    - name: Update Git settings to set directory as safe
+      run: git config --global --add safe.directory /__w/2024-Robot/2024-Robot
+    
+    - name: Check out the submodule
+      run: git submodule update --init
 
     # Grant execute permission for gradlew
     - name: Grant execute permission for gradlew
