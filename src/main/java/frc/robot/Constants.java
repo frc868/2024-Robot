@@ -188,20 +188,36 @@ public class Constants {
     }
 
     public static final class Shooter {
-        public static final int PRIMARY_MOTOR_ID = 1337;
-        public static final int SECONDARY_MOTOR_ID = 1337;
-        public static final int CURRENT_LIMIT = 1337;
-        public static final double ENCODER_ROTATIONS_TO_METERS = 1337;
-        public static final double kS = 1337;
-        public static final double kV = 1337;
-        public static final double kA = 1337;
-        public static final double kP = 1337;
-        public static final double kI = 1337;
-        public static final double kD = 1337;
+        public static final int PRIMARY_MOTOR_ID = 12;
+        public static final int SECONDARY_MOTOR_ID = 13;
+
+        public static final DCMotor MOTOR_GEARBOX_REPR = DCMotor.getNeoVortex(2);
+        public static final double GEARING = 1.0;
+        public static final double WHEEL_AXLE_MASS = Units.lbsToKilograms(2.5);
+        public static final double WHEEL_RADIUS = Units.inchesToMeters(2);
+        // 3lb, 2in radius, 1/2mr^2
+        public static final double MOMENT_OF_INERTIA_KG_METERS_SQUARED = (1.0 / 2.0) * WHEEL_AXLE_MASS
+                * Math.pow(WHEEL_RADIUS, 2);
+        public static final int CURRENT_LIMIT = 40;
+
+        public static final double IDLE_RPS = 8;
+        public static final double SHOOTING_RPS = 70;
+
+        public static final double kP = 0.5; // TODO simvalue
+        public static final double kI = 0;
+        public static final double kD = 0;
+        public static final double kS = 0.011075; // TODO simvalue
+        public static final double kV = 0.10431; // TODO simvalue
+        public static final double kA = 0.036933; // TODO simvalue
+        public static final double TOLERANCE = 0.05;
+
+        public static final double MAX_VELOCITY_METERS_PER_SECOND = 6600; // TODO simvalue
+        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 1000; // TODO simvalue
+        public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
+                MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
     }
 
     public static final class ShooterTilt {
-
         public static enum ShooterTiltPosition {
             TEMP(1337),
             BOTTOM(1337);
