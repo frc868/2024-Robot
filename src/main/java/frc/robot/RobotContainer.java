@@ -65,9 +65,9 @@ public class RobotContainer {
     @SendableLog(groups = { "wpilib", "subsystems" })
     private final Vision vision = new Vision();
 
-    @Log(groups = "subsystems")
-    @SendableLog(groups = { "wpilib", "subsystems" })
-    private final LEDs leds = new LEDs();
+    // @Log(groups = "subsystems")
+    // @SendableLog(groups = { "wpilib", "subsystems" })
+    // private final LEDs leds = new LEDs();
 
     @Log(groups = { "subsystems", "misc" })
     private final PowerDistribution pdh = new PowerDistribution();
@@ -116,7 +116,9 @@ public class RobotContainer {
     }
 
     private void configureButtonBindings() {
-        Controls.configureDriverControl(0, drivetrain, intake, shooter, shooterTilt, climber, noteLift, leds);
+        Controls.configureDriverControl(0, drivetrain, intake, shooter, shooterTilt, climber, noteLift);
+        Controls.configureTestingControl(1, drivetrain, intake, shooter, shooterTilt, climber, noteLift);
+        NTCommands.configureNTCommands(drivetrain, intake, shooter, shooterTilt, climber, noteLift);
     }
 
     private void configureAuto() {
