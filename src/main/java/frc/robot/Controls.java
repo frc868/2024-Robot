@@ -3,6 +3,7 @@ package frc.robot;
 import com.techhounds.houndutil.houndlib.oi.CommandVirpilJoystick;
 import com.techhounds.houndutil.houndlib.subsystems.BaseSwerveDrive.DriveMode;
 
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.Intake.IntakePosition;
 import frc.robot.subsystems.Climber;
@@ -54,4 +55,18 @@ public class Controls {
 
         joystick.blackThumbButton().whileTrue(intake.ampScoreCommand(() -> joystick.getHID().getPinkieButton()));
     }
+
+    public static void configureTestingControl(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
+            ShooterTilt shooterTilt, Climber climber, NoteLift noteLift, LEDs leds) {
+        CommandXboxController controller = new CommandXboxController(port);
+
+        controller.x().whileTrue(shooterTilt
+                .setOverridenSpeedCommand(() -> controller.getRightTriggerAxis() - controller.getLeftTriggerAxis()));
+        controller.y().whileTrue(shooter
+                .setOverridenSpeedCommand(() -> controller.getRightTriggerAxis() - controller.getLeftTriggerAxis()));
+        controller.a().whileTrue(intake
+                .setOverridenSpeedCommand(() -> controller.getRightTriggerAxis() - controller.getLeftTriggerAxis()));
+        controller.b().whileTrue(intake.runRollersCommand());
+    }
+
 }
