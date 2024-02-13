@@ -243,7 +243,7 @@ public class Constants {
         public static final double MIN_ANGLE_RADIANS = Units.degreesToRadians(22.0097); // TODO simvalue
         public static final double MAX_ANGLE_RADIANS = Units.degreesToRadians(72.4199); // TODO simvalue
 
-        public static final int CURRENT_LIMIT = 40;
+        public static final int CURRENT_LIMIT = 10;
 
         public static final double kP = 1000; // TODO simvalue
         public static final double kI = 0;
@@ -432,7 +432,7 @@ public class Constants {
         public static final double MIN_HEIGHT_METERS = 0; // TODO ask nate
         public static final double MAX_HEIGHT_METERS = 0.67; // TODO ask nate
 
-        public static final int CURRENT_LIMIT = 40;
+        public static final int CURRENT_LIMIT = 10;
 
         public static final double kP = 0; // TODO
         public static final double kI = 0;
@@ -475,7 +475,7 @@ public class Constants {
         public static final double MIN_HEIGHT_METERS = 0; // TODO ask nate
         public static final double MAX_HEIGHT_METERS = 0.67; // TODO ask nate
 
-        public static final int CURRENT_LIMIT = 40;
+        public static final int CURRENT_LIMIT = 10;
 
         public static final double kP = 0; // TODO
         public static final double kI = 0;
