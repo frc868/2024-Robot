@@ -154,7 +154,7 @@ public class Constants {
         public static final int SECONDARY_SHOOTER_BEAM_ID = 2;
 
         public static final DCMotor MOTOR_GEARBOX_REPR = DCMotor.getNeoVortex(2);
-        public static final double GEARING = 36.0;
+        public static final double GEARING = 45.0;
         public static final double LENGTH_METERS = 0.23; // TODO simvalue
         public static final double MASS_KG = 4.082; // TODO simvalue
         public static final double MOMENT_OF_INERTIA_KG_METERS_SQUARED = SingleJointedArmSim.estimateMOI(
