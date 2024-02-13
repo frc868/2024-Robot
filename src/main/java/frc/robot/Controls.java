@@ -5,6 +5,7 @@ import com.techhounds.houndutil.houndlib.subsystems.BaseSwerveDrive.DriveMode;
 
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.Intake.IntakePosition;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Drivetrain;
@@ -18,7 +19,7 @@ public class Controls {
     private static double speedMultiplier = 1.0;
 
     public static void configureDriverControl(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
-            ShooterTilt shooterTilt, Climber climber, NoteLift noteLift, LEDs leds) {
+            ShooterTilt shooterTilt, Climber climber, NoteLift noteLift) {
         CommandVirpilJoystick joystick = new CommandVirpilJoystick(port);
 
         drivetrain.setDefaultCommand(
@@ -57,7 +58,7 @@ public class Controls {
     }
 
     public static void configureTestingControl(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
-            ShooterTilt shooterTilt, Climber climber, NoteLift noteLift, LEDs leds) {
+            ShooterTilt shooterTilt, Climber climber, NoteLift noteLift) {
         CommandXboxController controller = new CommandXboxController(port);
 
         controller.x().whileTrue(shooterTilt
@@ -67,6 +68,16 @@ public class Controls {
         controller.a().whileTrue(intake
                 .setOverridenSpeedCommand(() -> controller.getRightTriggerAxis() - controller.getLeftTriggerAxis()));
         controller.b().whileTrue(intake.runRollersCommand());
+
+        controller.povLeft().whileTrue(climber
+                .setOverridenSpeedCommand(() -> controller.getRightTriggerAxis() - controller.getLeftTriggerAxis()));
+        controller.povRight().whileTrue(noteLift
+                .setOverridenSpeedCommand(() -> controller.getRightTriggerAxis() - controller.getLeftTriggerAxis()));
+
+        // controller.x().whileTrue(intake.sysIdQuasistatic(Direction.kForward));
+        // controller.y().whileTrue(intake.sysIdQuasistatic(Direction.kReverse));
+        // controller.a().whileTrue(intake.sysIdDynamic(Direction.kForward));
+        // controller.b().whileTrue(intake.sysIdDynamic(Direction.kReverse));
     }
 
 }
