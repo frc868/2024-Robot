@@ -11,6 +11,7 @@ import com.techhounds.houndutil.houndlib.subsystems.BaseSingleJointedArm;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
 import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -27,6 +28,7 @@ import edu.wpi.first.wpilibj.simulation.DIOSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -44,9 +46,9 @@ import static edu.wpi.first.units.Units.Volts;
 @LoggedObject
 public class Intake extends SubsystemBase implements BaseSingleJointedArm<IntakePosition> {
     @Log
-    private final CANSparkFlex primaryArmMotor;
+    private final CANSparkFlex leftArmMotor;
     @Log
-    private final CANSparkFlex secondaryArmMotor;
+    private final CANSparkFlex rightArmMotor;
 
     @Log
     private final CANSparkFlex rollerMotor;
@@ -91,36 +93,50 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
 
     private final SysIdRoutine sysIdRoutine;
 
+    private final Trigger noteInShooterTrigger = new Trigger(shooterSecondaryBeam::get).negate();
+    private final Trigger noteInIntakeTrigger = new Trigger(intakeBeam::get).negate();
+
     public Intake() {
-        primaryArmMotor = SparkConfigurator.createSparkFlex(PRIMARY_ARM_MOTOR_ID, MotorType.kBrushless, false,
+        leftArmMotor = SparkConfigurator.createSparkFlex(PRIMARY_ARM_MOTOR_ID, MotorType.kBrushless, true,
                 (s) -> s.setIdleMode(IdleMode.kBrake),
                 (s) -> s.setSmartCurrentLimit(ARM_CURRENT_LIMIT),
                 (s) -> s.getEncoder().setPositionConversionFactor(ENCODER_ROTATIONS_TO_RADIANS),
                 (s) -> s.getEncoder().setVelocityConversionFactor(ENCODER_ROTATIONS_TO_RADIANS / 60.0));
 
-        secondaryArmMotor = SparkConfigurator.createSparkFlex(SECONDARY_ARM_MOTOR_ID, MotorType.kBrushless, false,
+        rightArmMotor = SparkConfigurator.createSparkFlex(SECONDARY_ARM_MOTOR_ID, MotorType.kBrushless, true,
                 (s) -> s.setIdleMode(IdleMode.kBrake),
                 (s) -> s.setSmartCurrentLimit(ARM_CURRENT_LIMIT),
-                (s) -> s.follow(primaryArmMotor));
+                (s) -> s.follow(leftArmMotor, true));
 
-        rollerMotor = SparkConfigurator.createSparkFlex(ROLLER_MOTOR_ID, MotorType.kBrushless, false,
+        rollerMotor = SparkConfigurator.createSparkFlex(ROLLER_MOTOR_ID, MotorType.kBrushless, true,
                 (s) -> s.setIdleMode(IdleMode.kBrake),
                 (s) -> s.setSmartCurrentLimit(ROLLER_CURRENT_LIMIT));
 
         sysIdRoutine = new SysIdRoutine(
-                new SysIdRoutine.Config(Volts.of(0.5).per(Seconds.of(1)), Volts.of(2), null, null),
+                new SysIdRoutine.Config(Volts.of(1).per(Seconds.of(1)), Volts.of(5), null, null),
                 new SysIdRoutine.Mechanism(
                         (Measure<Voltage> volts) -> setVoltage(volts.magnitude()),
                         log -> {
                             log.motor("primary")
-                                    .voltage(sysidAppliedVoltageMeasure.mut_replace(primaryArmMotor.getAppliedOutput(),
+                                    .voltage(sysidAppliedVoltageMeasure.mut_replace(leftArmMotor.getAppliedOutput(),
                                             Volts))
                                     .angularPosition(sysidPositionMeasure.mut_replace(getPosition(), Radians))
                                     .angularVelocity(sysidVelocityMeasure.mut_replace(getVelocity(), RadiansPerSecond));
                         },
                         this));
 
-        pidController.setGoal(IntakePosition.STOW.value);
+        pidController.setTolerance(TOLERANCE);
+        pidController.setGoal(IntakePosition.GROUND.value);
+
+        new Thread(() -> {
+            try {
+                Thread.sleep(1000);
+                pidController.reset(getPosition());
+            } catch (Exception e) {
+                e.printStackTrace(System.err);
+            }
+        }).start();
+
         intakeBeamSim.setValue(false);
         shooterPrimaryBeamSim.setValue(false);
         shooterSecondaryBeamSim.setValue(false);
@@ -129,9 +145,9 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
 
     @Override
     public void simulationPeriodic() {
-        armSim.setInput(primaryArmMotor.getAppliedOutput());
+        armSim.setInput(leftArmMotor.getAppliedOutput());
         armSim.update(0.020);
-        primaryArmMotor.getEncoder().setPosition(armSim.getAngleRads());
+        leftArmMotor.getEncoder().setPosition(armSim.getAngleRads());
         simVelocity = armSim.getVelocityRadPerSec();
     }
 
@@ -143,25 +159,28 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
     @Override
     @Log
     public double getPosition() {
-        return primaryArmMotor.getEncoder().getPosition();
+        return leftArmMotor.getEncoder().getPosition();
     }
 
     @Log
     public double getVelocity() {
         if (RobotBase.isReal())
-            return primaryArmMotor.getEncoder().getVelocity();
+            return leftArmMotor.getEncoder().getVelocity();
         else
             return simVelocity;
     }
 
     @Override
     public void resetPosition() {
-        primaryArmMotor.getEncoder().setPosition(0);
+        leftArmMotor.getEncoder().setPosition(MAX_ANGLE_RADIANS);
     }
 
     @Override
     public void setVoltage(double voltage) {
-        primaryArmMotor.setVoltage(voltage > 12 ? 12 : voltage);
+        voltage = MathUtil.clamp(voltage, -12, 12);
+        // voltage = Utils.applySoftStops(voltage, getPosition(),
+        // MIN_ANGLE_RADIANS + 0.03, MAX_ANGLE_RADIANS - 0.03);
+        leftArmMotor.setVoltage(voltage);
     }
 
     public void setRollerVoltage(double voltage) {
@@ -218,20 +237,20 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
 
     @Override
     public Command setOverridenSpeedCommand(Supplier<Double> speed) {
-        return run(() -> setVoltage(12.0 * speed.get()))
+        return runEnd(() -> setVoltage(12.0 * speed.get()), () -> setVoltage(0))
                 .withName("intake.setOverriddenSpeed");
     }
 
     @Override
     public Command coastMotorsCommand() {
-        return runOnce(() -> primaryArmMotor.stopMotor())
+        return runOnce(() -> leftArmMotor.stopMotor())
                 .andThen(() -> {
-                    primaryArmMotor.setIdleMode(IdleMode.kCoast);
-                    secondaryArmMotor.setIdleMode(IdleMode.kCoast);
+                    leftArmMotor.setIdleMode(IdleMode.kCoast);
+                    rightArmMotor.setIdleMode(IdleMode.kCoast);
                 })
                 .finallyDo((d) -> {
-                    primaryArmMotor.setIdleMode(IdleMode.kBrake);
-                    secondaryArmMotor.setIdleMode(IdleMode.kBrake);
+                    leftArmMotor.setIdleMode(IdleMode.kBrake);
+                    rightArmMotor.setIdleMode(IdleMode.kBrake);
                     pidController.reset(getPosition());
                 })
                 .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
@@ -240,15 +259,15 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
 
     public Command runRollersCommand() {
         return Commands.startEnd(
-                () -> rollerMotor.setVoltage(3),
-                () -> rollerMotor.setVoltage(0))
+                () -> setRollerVoltage(12),
+                () -> setRollerVoltage(0))
                 .withName("intake.runRollers");
     }
 
     public Command reverseRollersCommand() {
         return Commands.startEnd(
-                () -> rollerMotor.setVoltage(-3),
-                () -> rollerMotor.setVoltage(0))
+                () -> setRollerVoltage(-12),
+                () -> setRollerVoltage(0))
                 .withName("intake.reverseRollers");
     }
 
@@ -263,21 +282,22 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
     public Command intakeNoteCommand() {
         return Commands.sequence(
                 moveToPositionCommand(() -> IntakePosition.GROUND),
-                moveToCurrentGoalCommand().alongWith(runRollersCommand()).until(shooterPrimaryBeam::get),
+                moveToCurrentGoalCommand().alongWith(runRollersCommand())
+                        .until(noteInShooterTrigger),
                 moveToPositionCommand(() -> IntakePosition.STOW)).withName("intake.intakeNote");
     }
 
     public Command intakeNoteAutoCommand() {
         return Commands.sequence(
                 moveToPositionCommand(() -> IntakePosition.GROUND),
-                moveToCurrentGoalCommand().alongWith(runRollersCommand()).until(shooterPrimaryBeam::get))
+                moveToCurrentGoalCommand().alongWith(runRollersCommand()).until(noteInShooterTrigger))
                 .withName("intake.intakeNoteAuto");
     }
 
     public Command ampScoreCommand(BooleanSupplier runRollers) {
         return Commands.sequence(
                 moveToPositionCommand(() -> IntakePosition.GROUND),
-                moveToCurrentGoalCommand().alongWith(reverseRollersCommand()).until(intakeBeam::get),
+                moveToCurrentGoalCommand().alongWith(reverseRollersCommand()).until(noteInIntakeTrigger),
                 moveToPositionCommand(() -> IntakePosition.AMP),
                 moveToCurrentGoalCommand().until(runRollers),
                 moveToCurrentGoalCommand().alongWith(reverseRollersCommand()).withTimeout(1),
@@ -296,5 +316,9 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
                 .andThen(Commands.waitSeconds(1))
                 .andThen(Commands.runOnce(() -> shooterPrimaryBeamSim.setValue(false)))
                 .withName("intake.simTriggerShooterBeam");
+    }
+
+    public Command resetControllersCommand() {
+        return runOnce(() -> pidController.reset(getPosition())).andThen(holdCurrentPositionCommand());
     }
 }
