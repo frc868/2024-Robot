@@ -16,10 +16,14 @@ public class NTCommands {
     public static void configureNTCommands(Drivetrain drivetrain, Intake intake, Shooter shooter,
             ShooterTilt shooterTilt, Climber climber, NoteLift noteLift) {
         LoggingManager.getInstance().addGroup(new LogGroup(
-                new SendableLogger("commands/intake", "resetPosition", intake.resetPositionCommand()),
-                new SendableLogger("commands/shooterTilt", "resetPosition", shooterTilt.resetPositionCommand()),
-                new SendableLogger("commands/climber", "resetPosition", climber.resetPositionCommand()),
-                new SendableLogger("commands/noteLift", "resetPosition", noteLift.resetPositionCommand())));
+                new SendableLogger("commands/intake", "resetPosition",
+                        intake.resetPositionCommand().ignoringDisable(true)),
+                new SendableLogger("commands/shooterTilt", "resetPosition",
+                        shooterTilt.resetPositionCommand().ignoringDisable(true)),
+                new SendableLogger("commands/climber", "resetPosition",
+                        climber.resetPositionCommand().ignoringDisable(true)),
+                new SendableLogger("commands/noteLift", "resetPosition",
+                        noteLift.resetPositionCommand().ignoringDisable(true))));
     }
 
 }
