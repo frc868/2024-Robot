@@ -10,6 +10,7 @@ import com.techhounds.houndutil.houndlib.subsystems.BaseSingleJointedArm;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
 import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -79,8 +80,7 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
                 (s) -> s.setIdleMode(IdleMode.kBrake),
                 (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
                 (s) -> s.getEncoder().setPositionConversionFactor(ENCODER_ROTATIONS_TO_METERS),
-                (s) -> s.getEncoder().setVelocityConversionFactor(ENCODER_ROTATIONS_TO_METERS /
-                        60.0));
+                (s) -> s.getEncoder().setVelocityConversionFactor(ENCODER_ROTATIONS_TO_METERS / 60.0));
 
         sysIdRoutine = new SysIdRoutine(
                 new SysIdRoutine.Config(),
@@ -94,7 +94,17 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
                         },
                         this));
 
-        pidController.setTolerance(0.01);
+        pidController.setTolerance(TOLERANCE);
+        pidController.setGoal(getLinearActuatorLength(ShooterTiltPosition.BOTTOM.value));
+
+        new Thread(() -> {
+            try {
+                Thread.sleep(1000);
+                pidController.reset(getPosition());
+            } catch (Exception e) {
+                e.printStackTrace(System.err);
+            }
+        }).start();
 
         setDefaultCommand(moveToCurrentGoalCommand());
     }
@@ -152,7 +162,7 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
 
     @Override
     public void setVoltage(double voltage) {
-        motor.setVoltage(voltage > 12 ? 12 : voltage);
+        motor.setVoltage(MathUtil.clamp(voltage, -12, 12));
     }
 
     @Override
@@ -214,7 +224,7 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
 
     @Override
     public Command setOverridenSpeedCommand(Supplier<Double> speed) {
-        return run(() -> setVoltage(12.0 * speed.get()))
+        return runEnd(() -> setVoltage(12.0 * speed.get()), () -> setVoltage(0))
                 .withName("shooterTilt.setOverriddenSpeed");
     }
 
@@ -239,5 +249,9 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
 
     public boolean atGoal() {
         return pidController.atGoal();
+    }
+
+    public Command resetControllersCommand() {
+        return runOnce(() -> pidController.reset(getPosition())).andThen(holdCurrentPositionCommand());
     }
 }
