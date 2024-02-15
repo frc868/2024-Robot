@@ -21,9 +21,18 @@
       "/HoundLog//wpilib/subsystems/vision": "Subsystem",
       "/HoundLog/autonomous/chooser": "String Chooser",
       "/HoundLog/autonomous/field": "Field2d",
+      "/HoundLog/commands/climber/resetPosition": "Command",
+      "/HoundLog/commands/intake/resetPosition": "Command",
+      "/HoundLog/commands/noteLift/resetPosition": "Command",
+      "/HoundLog/commands/shooterTilt/resetPosition": "Command",
       "/SmartDashboard/VisionSystemSim-main/Sim Field": "Field2d"
     },
     "windows": {
+      "/HoundLog//wpilib/commandScheduler": {
+        "window": {
+          "visible": true
+        }
+      },
       "/HoundLog/autonomous/field": {
         "Robot": {
           "arrowSize": 53,
