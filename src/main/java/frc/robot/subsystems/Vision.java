@@ -23,6 +23,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static frc.robot.Constants.Vision.*;
 
@@ -47,9 +48,11 @@ public class Vision extends SubsystemBase {
 
     public Vision() {
         AprilTagFieldLayout tagLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
-        visionSim.addAprilTags(tagLayout);
-        for (AprilTagPhotonCamera camera : cameras) {
-            visionSim.addCamera(camera.getSim(), camera.getRobotToCam());
+        if (RobotBase.isSimulation()) {
+            visionSim.addAprilTags(tagLayout);
+            for (AprilTagPhotonCamera camera : cameras) {
+                visionSim.addCamera(camera.getSim(), camera.getRobotToCam());
+            }
         }
     }
 
