@@ -106,7 +106,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
             SWERVE_CONSTANTS);
 
     @Log
-    private Pigeon2 pigeon = new Pigeon2(0);
+    private Pigeon2 pigeon = new Pigeon2(0, CAN_BUS_NAME);
 
     private SwerveDrivePoseEstimator poseEstimator;
 
@@ -367,14 +367,16 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     @Override
     public void updatePoseEstimator() {
         poseEstimator.update(getRotation(), getModulePositions());
-        simOdometry.update(getRotation(), getModulePositions());
+        if (RobotBase.isSimulation())
+            simOdometry.update(getRotation(), getModulePositions());
         drawRobotOnField(AutoManager.getInstance().getField());
     }
 
     @Override
     public void resetPoseEstimator(Pose2d pose) {
         poseEstimator.resetPosition(getRotation(), getModulePositions(), pose);
-        simOdometry.resetPosition(getRotation(), getModulePositions(), pose);
+        if (RobotBase.isSimulation())
+            simOdometry.resetPosition(getRotation(), getModulePositions(), pose);
     }
 
     @Override
@@ -668,7 +670,8 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
      */
     public void drawRobotOnField(Field2d field) {
         field.setRobotPose(getPose());
-        field.getObject("simPose").setPose(simOdometry.getPoseMeters());
+        if (RobotBase.isSimulation())
+            field.getObject("simPose").setPose(simOdometry.getPoseMeters());
 
         // Draw a pose that is based on the robot pose, but shifted by the
         // translation of the module relative to robot center,
