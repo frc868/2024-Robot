@@ -6,29 +6,27 @@ import com.techhounds.houndutil.houndlog.LoggingManager;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
 import com.techhounds.houndutil.houndlog.interfaces.SendableLog;
 
-import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.PneumaticHub;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
-import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.NoteLift;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterTilt;
-import frc.robot.subsystems.Vision;
-
 import java.util.ArrayList;
 import java.util.function.Supplier;
+
+import org.littletonrobotics.urcl.URCL;
 
 /**
  * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -61,9 +59,9 @@ public class RobotContainer {
     @SendableLog(groups = { "wpilib", "subsystems" })
     private final NoteLift noteLift = new NoteLift();
 
-    @Log(groups = "subsystems")
-    @SendableLog(groups = { "wpilib", "subsystems" })
-    private final Vision vision = new Vision();
+    // @Log(groups = "subsystems")
+    // @SendableLog(groups = { "wpilib", "subsystems" })
+    // private final Vision vision = new Vision();
 
     // @Log(groups = "subsystems")
     // @SendableLog(groups = { "wpilib", "subsystems" })
@@ -71,9 +69,6 @@ public class RobotContainer {
 
     @Log(groups = { "subsystems", "misc" })
     private final PowerDistribution pdh = new PowerDistribution();
-
-    @Log(groups = { "subsystems", "misc" })
-    private final PneumaticHub ph = new PneumaticHub();
 
     @SendableLog(groups = "wpilib")
     private final CommandScheduler commandScheduler = CommandScheduler.getInstance();
@@ -88,16 +83,21 @@ public class RobotContainer {
         return loopTime * 1000.0;
     };
 
+    @Log
+    private final Supplier<Double> shooterSpeed = () -> Constants.Shooter.SHOOTING_RPS;
+
     /**
      * Constructs the robot container.
      */
     public RobotContainer() {
-        vision.setPoseEstimator(drivetrain.getPoseEstimator());
-        vision.setSimPoseSupplier(drivetrain::getSimPose);
+
+        // vision.setPoseEstimator(drivetrain.getPoseEstimator());
+        // vision.setSimPoseSupplier(drivetrain::getSimPose);
         SparkConfigurator.safeBurnFlash();
         DataLogManager.logNetworkTables(true);
         DriverStation.startDataLog(DataLogManager.getLog());
         DataLogManager.start();
+        URCL.start();
 
         LoggingManager.getInstance().registerRobotContainer(this);
         LoggingManager.getInstance().registerClass(LoggingManager.class, "houndlog", new ArrayList<>());
@@ -111,8 +111,12 @@ public class RobotContainer {
         }
         configureButtonBindings();
         configureAuto();
-        DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
-        DriverStationSim.setEnabled(true);
+
+        new Trigger(DriverStation::isEnabled)
+                .onTrue(Commands.sequence(
+                        intake.resetControllersCommand(),
+                        shooterTilt.resetControllersCommand()));
+
     }
 
     private void configureButtonBindings() {
