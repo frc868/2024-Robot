@@ -3,10 +3,12 @@ package frc.robot;
 import com.techhounds.houndutil.houndlib.oi.CommandVirpilJoystick;
 import com.techhounds.houndutil.houndlib.subsystems.BaseSwerveDrive.DriveMode;
 
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.Intake.IntakePosition;
+import frc.robot.Constants.ShooterTilt.ShooterTiltPosition;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Intake;
@@ -51,33 +53,28 @@ public class Controls {
         joystick.centerTopHatLeft().whileTrue(intake.moveToPositionCommand(() -> IntakePosition.AMP));
         joystick.centerTopHatDown().whileTrue(intake.moveToPositionCommand(() -> IntakePosition.GROUND));
 
-        joystick.triggerSoftPress().whileTrue(RobotCommands.targetSpeakerCommand(drivetrain, shooter, shooterTilt));
-        joystick.triggerHardPress().onTrue(RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt));
+        joystick.triggerSoftPress()
+                .whileTrue(RobotCommands.targetFromSubwooferCommand(drivetrain, shooter, shooterTilt));
+        joystick.triggerHardPress().whileTrue(RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt));
 
-        joystick.blackThumbButton().whileTrue(intake.ampScoreCommand(() -> joystick.getHID().getPinkieButton()));
+        joystick.blackThumbButton().whileTrue(intake.intakeNoteCommand())
+                .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
+
+        joystick.redButton().whileTrue(intake.ampScoreCommand(() -> joystick.getHID().getPinkieButton()));
     }
 
     public static void configureTestingControl(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
             ShooterTilt shooterTilt, Climber climber, NoteLift noteLift) {
         CommandXboxController controller = new CommandXboxController(port);
 
-        controller.x().whileTrue(shooterTilt
-                .setOverridenSpeedCommand(() -> controller.getRightTriggerAxis() - controller.getLeftTriggerAxis()));
-        controller.y().whileTrue(shooter
-                .setOverridenSpeedCommand(() -> controller.getRightTriggerAxis() - controller.getLeftTriggerAxis()));
-        controller.a().whileTrue(intake
-                .setOverridenSpeedCommand(() -> controller.getRightTriggerAxis() - controller.getLeftTriggerAxis()));
-        controller.b().whileTrue(intake.runRollersCommand());
+        controller.povUp().onTrue(shooterTilt.movePositionDeltaCommand(() -> 0.02));
+        controller.povDown().onTrue(shooterTilt.movePositionDeltaCommand(() -> -0.02));
+        controller.povRight().onTrue(Commands.runOnce(() -> Constants.Shooter.SHOOTING_RPS += 1));
+        controller.povLeft().onTrue(Commands.runOnce(() -> Constants.Shooter.SHOOTING_RPS -= 1));
 
-        controller.povLeft().whileTrue(climber
-                .setOverridenSpeedCommand(() -> controller.getRightTriggerAxis() - controller.getLeftTriggerAxis()));
-        controller.povRight().whileTrue(noteLift
-                .setOverridenSpeedCommand(() -> controller.getRightTriggerAxis() - controller.getLeftTriggerAxis()));
+        controller.x().whileTrue(shooter.spinAtVelocityCommand(() -> Constants.Shooter.SHOOTING_RPS));
+        controller.y().whileTrue(intake.runRollersCommand());
 
-        // controller.x().whileTrue(intake.sysIdQuasistatic(Direction.kForward));
-        // controller.y().whileTrue(intake.sysIdQuasistatic(Direction.kReverse));
-        // controller.a().whileTrue(intake.sysIdDynamic(Direction.kForward));
-        // controller.b().whileTrue(intake.sysIdDynamic(Direction.kReverse));
     }
 
 }
