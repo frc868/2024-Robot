@@ -12,9 +12,12 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 
 import com.techhounds.houndutil.houndlib.swerve.CoaxialSwerveModule.SwerveConstants;
+import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
+
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 import edu.wpi.first.math.geometry.Translation2d;
@@ -52,13 +55,13 @@ public class Constants {
 
         public static final boolean DRIVE_MOTORS_INVERTED = false;
         public static final boolean STEER_MOTORS_INVERTED = true;
-        public static final boolean STEER_CANCODERS_INVERTED = true;
+        public static final boolean STEER_CANCODERS_INVERTED = RobotBase.isReal() ? false : true;
 
-        // TODO
-        public static final double FRONT_LEFT_OFFSET = -0.001220703125;
-        public static final double FRONT_RIGHT_OFFSET = 0.201171875;
-        public static final double BACK_LEFT_OFFSET = 0.2403;
-        public static final double BACK_RIGHT_OFFSET = -0.4331;
+        // 2/13/24
+        public static final double FRONT_LEFT_OFFSET = 0.458984375;
+        public static final double FRONT_RIGHT_OFFSET = -0.179443359375;
+        public static final double BACK_LEFT_OFFSET = 0.238037109375;
+        public static final double BACK_RIGHT_OFFSET = 0.486328125;
 
         /** Distance between left and right wheels. */
         public static final double TRACK_WIDTH_METERS = 0.52832;
@@ -133,10 +136,13 @@ public class Constants {
     }
 
     public static final class Intake {
+        // RANGE OF MOTION: 2.301
+
+        // 2/14/24
         public static enum IntakePosition {
-            GROUND(Units.degreesToRadians(-35)), // TODO simvalue
-            AMP(Units.degreesToRadians(60)), // TODO simvalue
-            STOW(Units.degreesToRadians(95)); // TODO simvalue
+            GROUND(Units.degreesToRadians(-30.5)),
+            AMP(Units.degreesToRadians(45)), // TODO simvalue
+            STOW(Units.degreesToRadians(60)); // TODO simvalue
 
             public final double value;
 
@@ -147,11 +153,11 @@ public class Constants {
 
         public static final int PRIMARY_ARM_MOTOR_ID = 9;
         public static final int SECONDARY_ARM_MOTOR_ID = 10;
-        public static final int ROLLER_MOTOR_ID = 11;
+        public static final int ROLLER_MOTOR_ID = 13;
 
-        public static final int INTAKE_BEAM_ID = 0;
-        public static final int PRIMARY_SHOOTER_BEAM_ID = 1;
-        public static final int SECONDARY_SHOOTER_BEAM_ID = 2;
+        public static final int PRIMARY_SHOOTER_BEAM_ID = 0;
+        public static final int SECONDARY_SHOOTER_BEAM_ID = 1;
+        public static final int INTAKE_BEAM_ID = 2;
 
         public static final DCMotor MOTOR_GEARBOX_REPR = DCMotor.getNeoVortex(2);
         public static final double GEARING = 45.0;
@@ -161,26 +167,29 @@ public class Constants {
                 LENGTH_METERS,
                 MASS_KG);
 
-        public static final double MIN_ANGLE_RADIANS = Units.degreesToRadians(-35); // TODO simvalue
-        public static final double MAX_ANGLE_RADIANS = Units.degreesToRadians(100); // TODO simvalue
+        public static final double MIN_ANGLE_RADIANS = -0.610;
+        public static final double MAX_ANGLE_RADIANS = 1.691;
 
         public static final double ENCODER_ROTATIONS_TO_RADIANS = 2 * Math.PI / GEARING;
-        public static final int ARM_CURRENT_LIMIT = 20; // TODO simvalue
-        public static final int ROLLER_CURRENT_LIMIT = 10; // TODO simvalue
+        public static final int ARM_CURRENT_LIMIT = 40; // TODO simvalue
+        public static final int ROLLER_CURRENT_LIMIT = 50; // TODO simvalue
 
-        public static final double kP = 33.03; // TODO simvalue
-        public static final double kI = 0;
-        public static final double kD = 0.834;
-        public static final double kS = 0;
-        public static final double kG = 0.21316; // TODO simvalue
-        public static final double kV = 0.59658; // TODO simvalue
-        public static final double kA = 0.019195; // TODO simvalue
-        public static final double TOLERANCE = 0.01;
+        // 2/14/24
+        public static final double kP = 5.0;
+        public static final double kI = 0.0;
+        public static final double kD = 0.5;
+        public static final double kS = 0.14936;
+        public static final double kG = 0.2114;
+        public static final double kV = 0.78401;
+        public static final double kA = 0.077465;
+        public static final double TOLERANCE = 0.05;
 
-        public static final double MAX_VELOCITY_METERS_PER_SECOND = 7.5 * Math.PI; // TODO simvalue
-        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 7.5 * 5 * Math.PI; // TODO simvalue
+        // max theoretical velocity: 15.777 rad/s
+        // 2/14/24
+        public static final double MAX_VELOCITY_RADIANS_PER_SECOND = 13;
+        public static final double MAX_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 10;
         public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
-                MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
+                MAX_VELOCITY_RADIANS_PER_SECOND, MAX_ACCELERATION_RADIANS_PER_SECOND_SQUARED);
 
         public static final Pose3d BASE_COMPONENT_POSE = new Pose3d(-0.19, 0, 0.299,
                 new Rotation3d(0, -Units.degreesToRadians(35), Math.PI));
@@ -188,8 +197,8 @@ public class Constants {
     }
 
     public static final class Shooter {
-        public static final int PRIMARY_MOTOR_ID = 12;
-        public static final int SECONDARY_MOTOR_ID = 13;
+        public static final int LEFT_MOTOR_ID = 11;
+        public static final int RIGHT_MOTOR_ID = 12;
 
         public static final DCMotor MOTOR_GEARBOX_REPR = DCMotor.getNeoVortex(2);
         public static final double GEARING = 1.0;
@@ -201,26 +210,29 @@ public class Constants {
         public static final int CURRENT_LIMIT = 40;
 
         public static final double IDLE_RPS = 8;
-        public static final double SHOOTING_RPS = 70;
+        public static double SHOOTING_RPS = 90;
 
-        public static final double kP = 0.5; // TODO simvalue
+        // 2/14/24
+        public static final double kP = 0.15;
         public static final double kI = 0;
         public static final double kD = 0;
-        public static final double kS = 0.011075; // TODO simvalue
-        public static final double kV = 0.10431; // TODO simvalue
-        public static final double kA = 0.036933; // TODO simvalue
-        public static final double TOLERANCE = 0.05;
+        public static final double kS = 0.17395;
+        public static final double kV = 0.10893;
+        public static final double kA = 0.021944;
+        public static final double TOLERANCE = 0.3;
 
-        public static final double MAX_VELOCITY_METERS_PER_SECOND = 6600; // TODO simvalue
-        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 1000; // TODO simvalue
+        public static final double MAX_VELOCITY_METERS_PER_SECOND = 80; // TODO simvalue
+        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 10; // TODO simvalue
         public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
     }
 
     public static final class ShooterTilt {
+        // 0.160 max movement
         public static enum ShooterTiltPosition {
-            BOTTOM(Units.degreesToRadians(25)), // TODO simvalue
-            STOW(Units.degreesToRadians(80)); // TODO simvalue
+            BOTTOM(Units.degreesToRadians(30)), // TODO simvalue
+            STOW(Units.degreesToRadians(50)), // TODO simvalue
+            SUBWOOFER(0.987); // TODO simvalue
 
             public final double value;
 
@@ -232,10 +244,10 @@ public class Constants {
         public static final int MOTOR_ID = 14;
 
         public static final DCMotor MOTOR_GEARBOX_REPR = DCMotor.getNeoVortex(1);
-        public static final double GEARING = 16;
+        public static final double GEARING = 9.0;
         public static final double MASS_KG = Units.lbsToKilograms(12); // TODO simvalue
         // 1 rot = 12mm
-        public static final double ENCODER_ROTATIONS_TO_METERS = Units.inchesToMeters(0.5);
+        public static final double ENCODER_ROTATIONS_TO_METERS = Units.inchesToMeters(0.5) / GEARING;
 
         public static final double MIN_HEIGHT_METERS = 0; // 9.921in // TODO simvalue
         public static final double MAX_HEIGHT_METERS = 0.1445; // TODO simvalue
@@ -243,25 +255,23 @@ public class Constants {
         public static final double MIN_ANGLE_RADIANS = Units.degreesToRadians(22.0097); // TODO simvalue
         public static final double MAX_ANGLE_RADIANS = Units.degreesToRadians(72.4199); // TODO simvalue
 
-        public static final int CURRENT_LIMIT = 10;
+        public static final int CURRENT_LIMIT = 25;
 
-        public static final double kP = 1000; // TODO simvalue
+        public static final double kP = 200; // TODO simvalue
         public static final double kI = 0;
-        public static final double kD = 0;
-        public static final double kS = 0;
-        public static final double kG = 0.022466; // TODO simvalue
-        public static final double kV = 131.43; // TODO simvalue
-        public static final double kA = 6.5761; // TODO simvalue
-        public static final double TOLERANCE = 0.01;
+        public static final double kD = 2;
+        public static final double kS = 0.14184;
+        public static final double kG = 0.026363;
+        public static final double kV = 75.803;
+        public static final double kA = 8;
+        public static final double TOLERANCE = 0.005;
 
-        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0.1; // TODO simvalue
-        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0.5; // TODO simvalue
+        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0.3;
+        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0.32;
         public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
 
         public static final Pose3d BASE_SHOOTER_POSE = new Pose3d(-0.19, 0, 0.299, new Rotation3d(0, 0, 0));
-        // public static final Pose3d BASE_OUTER_LEAD_SCREW_POSE = new Pose3d(1, 1, 1,
-        // new Rotation3d(0, 0, 0));
         public static final Pose3d BASE_OUTER_LEAD_SCREW_POSE = new Pose3d(-0.0915,
                 0, 0.125,
                 new Rotation3d(0, 0, 0));
@@ -399,7 +409,6 @@ public class Constants {
          * units in meters and radians
          */
         public double mathematicallyPerfectLengthFromTarget(double dx, double dy) {
-
             double h = 2 * Math.atan(
                     (dy - Math.sqrt(dx * dx + dy * dy - SHOOTER_PIVOT_RADIUS_METERS * SHOOTER_PIVOT_RADIUS_METERS))
                             / (dx + SHOOTER_PIVOT_RADIUS_METERS));
