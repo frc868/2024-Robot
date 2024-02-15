@@ -2,7 +2,7 @@ package frc.robot.subsystems;
 
 import java.util.function.Supplier;
 
-import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.techhounds.houndutil.houndlib.SparkConfigurator;
@@ -36,7 +36,7 @@ import static frc.robot.Constants.Climber.*;
 @LoggedObject
 public class Climber extends SubsystemBase implements BaseElevator<ClimberPosition> {
     @Log
-    private CANSparkMax motor;
+    private CANSparkFlex motor;
 
     @Log(groups = "control")
     private ProfiledPIDController pidController = new ProfiledPIDController(kP, kI, kD, MOVEMENT_CONSTRAINTS);
@@ -69,7 +69,7 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
     private final SysIdRoutine sysIdRoutine;
 
     public Climber() {
-        motor = SparkConfigurator.createSparkMax(
+        motor = SparkConfigurator.createSparkFlex(
                 MOTOR_ID, MotorType.kBrushless, false,
                 (s) -> s.setIdleMode(IdleMode.kBrake),
                 (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
@@ -90,7 +90,7 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
                         },
                         this));
 
-        setDefaultCommand(moveToCurrentGoalCommand());
+        // setDefaultCommand(moveToCurrentGoalCommand());
     }
 
     @Override
@@ -127,7 +127,7 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
 
     @Override
     public void setVoltage(double voltage) {
-        motor.setVoltage(voltage);
+        // motor.setVoltage(voltage);
     }
 
     @Override
@@ -175,7 +175,7 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
 
     @Override
     public Command setOverridenSpeedCommand(Supplier<Double> speed) {
-        return run(() -> setVoltage(12.0 * speed.get()))
+        return runEnd(() -> setVoltage(12.0 * speed.get()), () -> setVoltage(0))
                 .withName("climber.setOverriddenSpeed");
     }
 
