@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Constants.ShooterTilt.ShooterTiltPosition;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
@@ -30,11 +31,18 @@ public class RobotCommands {
                 shooter.spinAtVelocityCommand(() -> SHOOTING_RPS).asProxy());
     }
 
+    public static Command targetFromSubwooferCommand(Drivetrain drivetrain, Shooter shooter, ShooterTilt shooterTilt) {
+        return Commands.parallel(
+                // shooterTilt.moveToPositionCommand(() ->
+                // ShooterTiltPosition.SUBWOOFER).asProxy(),
+                shooter.spinAtVelocityCommand(() -> SHOOTING_RPS).asProxy());
+    }
+
     public static Command shootCommand(Drivetrain drivetrain, Intake intake, Shooter shooter, ShooterTilt shooterTilt) {
         return Commands.sequence(
                 shooter.spinAtVelocityCommand(() -> SHOOTING_RPS).asProxy()
                         .until(() -> shooterTilt.atGoal() && shooter.atGoal()),
                 shooter.spinAtVelocityCommand(() -> SHOOTING_RPS).asProxy().alongWith(intake.runRollersCommand())
-                        .withTimeout(0.2));
+                        .withTimeout(1));
     }
 }
