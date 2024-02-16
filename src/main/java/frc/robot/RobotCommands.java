@@ -33,8 +33,7 @@ public class RobotCommands {
 
     public static Command targetFromSubwooferCommand(Drivetrain drivetrain, Shooter shooter, ShooterTilt shooterTilt) {
         return Commands.parallel(
-                // shooterTilt.moveToPositionCommand(() ->
-                // ShooterTiltPosition.SUBWOOFER).asProxy(),
+                shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.SUBWOOFER).asProxy(),
                 shooter.spinAtVelocityCommand(() -> SHOOTING_RPS).asProxy());
     }
 
