@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
@@ -16,8 +17,6 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 
 import com.techhounds.houndutil.houndlib.swerve.CoaxialSwerveModule.SwerveConstants;
-import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
-
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 import edu.wpi.first.math.geometry.Translation2d;
@@ -138,11 +137,11 @@ public class Constants {
     public static final class Intake {
         // RANGE OF MOTION: 2.301
 
-        // 2/14/24
+        // 2/15/24
         public static enum IntakePosition {
-            GROUND(Units.degreesToRadians(-30.5)),
-            AMP(Units.degreesToRadians(45)), // TODO simvalue
-            STOW(Units.degreesToRadians(60)); // TODO simvalue
+            GROUND(-0.617905),
+            AMP(1.18),
+            STOW(1.586136);
 
             public final double value;
 
@@ -157,7 +156,7 @@ public class Constants {
 
         public static final int PRIMARY_SHOOTER_BEAM_ID = 0;
         public static final int SECONDARY_SHOOTER_BEAM_ID = 1;
-        public static final int INTAKE_BEAM_ID = 2;
+        public static final int INTAKE_BEAM_ID = 3;
 
         public static final DCMotor MOTOR_GEARBOX_REPR = DCMotor.getNeoVortex(2);
         public static final double GEARING = 45.0;
@@ -171,8 +170,8 @@ public class Constants {
         public static final double MAX_ANGLE_RADIANS = 1.691;
 
         public static final double ENCODER_ROTATIONS_TO_RADIANS = 2 * Math.PI / GEARING;
-        public static final int ARM_CURRENT_LIMIT = 40; // TODO simvalue
-        public static final int ROLLER_CURRENT_LIMIT = 50; // TODO simvalue
+        public static final int ARM_CURRENT_LIMIT = 40;
+        public static final int ROLLER_CURRENT_LIMIT = 50;
 
         // 2/14/24
         public static final double kP = 5.0;
@@ -186,8 +185,8 @@ public class Constants {
 
         // max theoretical velocity: 15.777 rad/s
         // 2/14/24
-        public static final double MAX_VELOCITY_RADIANS_PER_SECOND = 13;
-        public static final double MAX_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 10;
+        public static final double MAX_VELOCITY_RADIANS_PER_SECOND = 7;
+        public static final double MAX_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 5;
         public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_VELOCITY_RADIANS_PER_SECOND, MAX_ACCELERATION_RADIANS_PER_SECOND_SQUARED);
 
@@ -210,7 +209,7 @@ public class Constants {
         public static final int CURRENT_LIMIT = 40;
 
         public static final double IDLE_RPS = 8;
-        public static double SHOOTING_RPS = 90;
+        public static double SHOOTING_RPS = 70;
 
         // 2/14/24
         public static final double kP = 0.15;
@@ -221,16 +220,24 @@ public class Constants {
         public static final double kA = 0.021944;
         public static final double TOLERANCE = 0.3;
 
-        public static final double MAX_VELOCITY_METERS_PER_SECOND = 80; // TODO simvalue
-        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 10; // TODO simvalue
+        public static final double MAX_VELOCITY_METERS_PER_SECOND = 80;
+        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 10;
         public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
+
+        // key: distance, value: speed
+        public static final InterpolatingDoubleTreeMap SPEED_INTERPOLATOR = new InterpolatingDoubleTreeMap();
+        static {
+            // SPEED_INTERPOLATOR.put(75.0, 75.0);
+        }
     }
 
     public static final class ShooterTilt {
         // 0.160 max movement
+        // 2/15/2024
         public static enum ShooterTiltPosition {
             BOTTOM(Units.degreesToRadians(30)), // TODO simvalue
+            AMP_EJECT(0.601),
             STOW(Units.degreesToRadians(50)), // TODO simvalue
             SUBWOOFER(0.987); // TODO simvalue
 
@@ -257,7 +264,8 @@ public class Constants {
 
         public static final int CURRENT_LIMIT = 25;
 
-        public static final double kP = 200; // TODO simvalue
+        // 2/14/2024
+        public static final double kP = 200;
         public static final double kI = 0;
         public static final double kD = 2;
         public static final double kS = 0.14184;
@@ -349,71 +357,10 @@ public class Constants {
             return Math.PI - leadScrewInteriorAngle - bottomLeadScrewToShooterAngle;
         }
 
-        // TODO i need to actually make sure these are right
-        public static final double LEAD_SCREW_RADIUS_METERS = Units.inchesToMeters(0.613); // ?
-        public static final double SHOOTER_PIVOT_RADIUS_METERS = Units.inchesToMeters(1.625); // ?
-        public static final double SHOOTER_OFFSET_ANGLE_RADIANS = 1337;
-        public static final double ANGLE_ALPHA = 1337; // ?
-
-        public static final double BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS = Units.inchesToMeters(7.843);
-        public static final double SHOOTER_PIVOT_TO_ENDPOINT_PIVOT_LENGTH_METERS = Units.inchesToMeters(10.725);
-
-        public static final double LEAD_SCREW_MIN_LENGTH_METERS = 1337;
-        public static final double HORIZONTAL_ANGLE_OFFSET_RADIANS = 1337;
-
-        /*
-         * By treating the shooter + shooter tilt as a triangle with vertices at the 3
-         * pivot points, we can use trig to get the shooter's approximate angle based on
-         * lead screw length
-         * units are radians and meters
-         */
-
-        public double getAngleFromLength(double length) {
-            length += LEAD_SCREW_MIN_LENGTH_METERS;
-            double theta = Math.acos((LEAD_SCREW_RADIUS_METERS * LEAD_SCREW_RADIUS_METERS +
-                    length * length
-                    - SHOOTER_PIVOT_TO_ENDPOINT_PIVOT_LENGTH_METERS * SHOOTER_PIVOT_TO_ENDPOINT_PIVOT_LENGTH_METERS -
-                    BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS * BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS)
-                    / (-2 * SHOOTER_PIVOT_TO_ENDPOINT_PIVOT_LENGTH_METERS * BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS));
-            theta += HORIZONTAL_ANGLE_OFFSET_RADIANS; // to include or not to include...
-            return theta;
-        }
-
-        /*
-         * The inverse equation of the method above
-         * units are meters and radians
-         */
-        public double getLengthFromAngle(double angle) {
-            angle += HORIZONTAL_ANGLE_OFFSET_RADIANS; // angle to the horizontal + that offset that we need
-            double length = Math.sqrt(-2 * BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS
-                    * SHOOTER_PIVOT_TO_ENDPOINT_PIVOT_LENGTH_METERS * Math.cos(angle) +
-                    BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS * BOTTOM_PIVOT_TO_TOP_PIVOT_LENGTH_METERS +
-                    SHOOTER_PIVOT_TO_ENDPOINT_PIVOT_LENGTH_METERS * SHOOTER_PIVOT_TO_ENDPOINT_PIVOT_LENGTH_METERS -
-                    LEAD_SCREW_RADIUS_METERS * LEAD_SCREW_RADIUS_METERS);
-            length -= LEAD_SCREW_MIN_LENGTH_METERS; // include or...
-            return length;
-        }
-
-        public double aimingRegression(double angle) {
-            // there's going to be a regression function here once we test the shooter
-            double fudgeFactor = 65537;
-            return fudgeFactor;
-        }
-
-        /*
-         * this does effectively nothing except for account for miniscule positional
-         * changes in the entry point of the shooter, but it was fun to figure this out
-         * so im going to keep this in
-         * dx and dy are the target's horizontal and vertical distances from the shooter
-         * pivot
-         * units in meters and radians
-         */
-        public double mathematicallyPerfectLengthFromTarget(double dx, double dy) {
-            double h = 2 * Math.atan(
-                    (dy - Math.sqrt(dx * dx + dy * dy - SHOOTER_PIVOT_RADIUS_METERS * SHOOTER_PIVOT_RADIUS_METERS))
-                            / (dx + SHOOTER_PIVOT_RADIUS_METERS));
-            double desiredAngle = ANGLE_ALPHA - h + SHOOTER_OFFSET_ANGLE_RADIANS;
-            return getLengthFromAngle(desiredAngle);
+        // key: distance, value: angle
+        public static final InterpolatingDoubleTreeMap ANGLE_INTERPOLATOR = new InterpolatingDoubleTreeMap();
+        static {
+            // interpolator.put(75.0, 75.0);
         }
     }
 
@@ -441,7 +388,7 @@ public class Constants {
         public static final double MIN_HEIGHT_METERS = 0; // TODO ask nate
         public static final double MAX_HEIGHT_METERS = 0.67; // TODO ask nate
 
-        public static final int CURRENT_LIMIT = 10;
+        public static final int CURRENT_LIMIT = 60;
 
         public static final double kP = 0; // TODO
         public static final double kI = 0;
@@ -484,7 +431,7 @@ public class Constants {
         public static final double MIN_HEIGHT_METERS = 0; // TODO ask nate
         public static final double MAX_HEIGHT_METERS = 0.67; // TODO ask nate
 
-        public static final int CURRENT_LIMIT = 10;
+        public static final int CURRENT_LIMIT = 25;
 
         public static final double kP = 0; // TODO
         public static final double kI = 0;
