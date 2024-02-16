@@ -7,6 +7,7 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.techhounds.houndutil.houndlib.SparkConfigurator;
+import com.techhounds.houndutil.houndlib.Utils;
 import com.techhounds.houndutil.houndlib.subsystems.BaseSingleJointedArm;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
 import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
@@ -94,7 +95,14 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
     private final SysIdRoutine sysIdRoutine;
 
     private final Trigger noteInShooterTrigger = new Trigger(shooterSecondaryBeam::get).negate();
-    private final Trigger noteInIntakeTrigger = new Trigger(intakeBeam::get).negate();
+
+    private boolean prevIntakeBeamState = false;
+
+    private final Trigger noteInIntakeTrigger = new Trigger(() -> {
+        boolean triggered = !prevIntakeBeamState && intakeBeam.get();
+        prevIntakeBeamState = intakeBeam.get();
+        return triggered;
+    });
 
     public Intake() {
         leftArmMotor = SparkConfigurator.createSparkFlex(PRIMARY_ARM_MOTOR_ID, MotorType.kBrushless, true,
@@ -178,8 +186,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
     @Override
     public void setVoltage(double voltage) {
         voltage = MathUtil.clamp(voltage, -12, 12);
-        // voltage = Utils.applySoftStops(voltage, getPosition(),
-        // MIN_ANGLE_RADIANS + 0.03, MAX_ANGLE_RADIANS - 0.03);
+        voltage = Utils.applySoftStops(voltage, getPosition(), MIN_ANGLE_RADIANS, MAX_ANGLE_RADIANS - 0.03);
         leftArmMotor.setVoltage(voltage);
     }
 
@@ -271,6 +278,13 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
                 .withName("intake.reverseRollers");
     }
 
+    public Command ampScoreRollersCommand() {
+        return Commands.startEnd(
+                () -> setRollerVoltage(-3.5),
+                () -> setRollerVoltage(0))
+                .withName("intake.reverseRollers");
+    }
+
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
         return sysIdRoutine.quasistatic(direction).withName("intake.sysIdQuasistatic");
     }
@@ -300,7 +314,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
                 moveToCurrentGoalCommand().alongWith(reverseRollersCommand()).until(noteInIntakeTrigger),
                 moveToPositionCommand(() -> IntakePosition.AMP),
                 moveToCurrentGoalCommand().until(runRollers),
-                moveToCurrentGoalCommand().alongWith(reverseRollersCommand()).withTimeout(1),
+                moveToCurrentGoalCommand().alongWith(ampScoreRollersCommand()).withTimeout(1),
                 moveToPositionCommand(() -> IntakePosition.STOW)).withName("intake.ampScore");
     }
 
