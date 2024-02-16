@@ -15,9 +15,9 @@ import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.MutableMeasure;
@@ -196,7 +196,8 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
     public Command targetSpeakerCommand(Supplier<Pose2d> poseSupplier) {
         return moveToArbitraryPositionCommand(() -> {
             Transform3d diff = new Pose3d(poseSupplier.get()).minus(FieldConstants.TARGET);
-            return new Rotation2d(Math.abs(diff.getX()), Math.abs(diff.getZ())).getRadians();
+            double distance = new Translation2d(diff.getX(), diff.getY()).getNorm();
+            return ANGLE_INTERPOLATOR.get(distance);
         }).withName("shooterTilt.targetSpeaker");
     }
 
