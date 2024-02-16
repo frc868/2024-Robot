@@ -6,13 +6,11 @@ import com.techhounds.houndutil.houndlib.subsystems.BaseSwerveDrive.DriveMode;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.Intake.IntakePosition;
 import frc.robot.Constants.ShooterTilt.ShooterTiltPosition;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.NoteLift;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterTilt;
@@ -60,7 +58,8 @@ public class Controls {
         joystick.blackThumbButton().whileTrue(intake.intakeNoteCommand())
                 .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
 
-        joystick.redButton().whileTrue(intake.ampScoreCommand(() -> joystick.getHID().getPinkieButton()));
+        joystick.redButton().whileTrue(intake.ampScoreCommand(() -> joystick.getHID().getPinkieButton())
+                .alongWith(shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.AMP_EJECT)));
     }
 
     public static void configureTestingControl(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
@@ -72,8 +71,14 @@ public class Controls {
         controller.povRight().onTrue(Commands.runOnce(() -> Constants.Shooter.SHOOTING_RPS += 1));
         controller.povLeft().onTrue(Commands.runOnce(() -> Constants.Shooter.SHOOTING_RPS -= 1));
 
-        controller.x().whileTrue(shooter.spinAtVelocityCommand(() -> Constants.Shooter.SHOOTING_RPS));
-        controller.y().whileTrue(intake.runRollersCommand());
+        // controller.x().whileTrue(shooter.spinAtVelocityCommand(() ->
+        // Constants.Shooter.SHOOTING_RPS));
+        // controller.y().whileTrue(intake.runRollersCommand());
+
+        controller.x().whileTrue(climber
+                .setOverridenSpeedCommand(() -> controller.getRightTriggerAxis() - controller.getLeftTriggerAxis()));
+        controller.y().whileTrue(noteLift
+                .setOverridenSpeedCommand(() -> controller.getRightTriggerAxis() - controller.getLeftTriggerAxis()));
 
     }
 
