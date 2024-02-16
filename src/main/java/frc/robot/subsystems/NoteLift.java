@@ -70,7 +70,7 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
 
     public NoteLift() {
         motor = SparkConfigurator.createSparkFlex(
-                MOTOR_ID, MotorType.kBrushless, false,
+                MOTOR_ID, MotorType.kBrushless, true,
                 (s) -> s.setIdleMode(IdleMode.kBrake),
                 (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
                 (s) -> s.getEncoder().setPositionConversionFactor(ENCODER_ROTATIONS_TO_METERS),
@@ -127,7 +127,7 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
 
     @Override
     public void setVoltage(double voltage) {
-        // motor.setVoltage(voltage);
+        motor.setVoltage(voltage);
     }
 
     @Override
