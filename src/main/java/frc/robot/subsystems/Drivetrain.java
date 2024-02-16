@@ -156,7 +156,6 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
     /** Initializes the drivetrain. */
     public Drivetrain() {
-        resetGyro();
         poseEstimator = new SwerveDrivePoseEstimator(
                 KINEMATICS,
                 getRotation(),
