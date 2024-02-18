@@ -33,6 +33,11 @@
           "visible": true
         }
       },
+      "/HoundLog/autonomous/chooser": {
+        "window": {
+          "visible": true
+        }
+      },
       "/HoundLog/autonomous/field": {
         "Robot": {
           "arrowSize": 53,
@@ -69,6 +74,10 @@
           "style": "Hidden"
         },
         "top": 79,
+        "trajectory": {
+          "arrows": false,
+          "style": "Line"
+        },
         "width": 16.541748046875,
         "window": {
           "visible": true
@@ -84,10 +93,12 @@
           "drivetrain": {
             "modules": {
               "open": true
-            },
-            "open": true
+            }
           },
-          "open": true
+          "open": true,
+          "shooterTilt": {
+            "open": true
+          }
         }
       }
     }
