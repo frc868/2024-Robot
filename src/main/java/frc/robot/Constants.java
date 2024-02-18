@@ -56,11 +56,11 @@ public class Constants {
         public static final boolean STEER_MOTORS_INVERTED = true;
         public static final boolean STEER_CANCODERS_INVERTED = RobotBase.isReal() ? false : true;
 
-        // 2/13/24
-        public static final double FRONT_LEFT_OFFSET = 0.458984375;
-        public static final double FRONT_RIGHT_OFFSET = -0.179443359375;
-        public static final double BACK_LEFT_OFFSET = 0.238037109375;
-        public static final double BACK_RIGHT_OFFSET = 0.486328125;
+        // 2/17/24
+        public static final double FRONT_LEFT_OFFSET = 0.457763671875;
+        public static final double FRONT_RIGHT_OFFSET = -0.183349609375;
+        public static final double BACK_LEFT_OFFSET = 0.24267578125;
+        public static final double BACK_RIGHT_OFFSET = 0.48583984375;
 
         /** Distance between left and right wheels. */
         public static final double TRACK_WIDTH_METERS = 0.52832;
@@ -69,19 +69,20 @@ public class Constants {
 
         public static final SwerveConstants SWERVE_CONSTANTS = new SwerveConstants();
         static {
-            SWERVE_CONSTANTS.DRIVE_kP = 2.6794 * (2.0 * Math.PI * 0.0478); // TODO simvalue
+            // 2/17/24
+            SWERVE_CONSTANTS.DRIVE_kP = 1.1503 * (2.0 * Math.PI * 0.0478);
             SWERVE_CONSTANTS.DRIVE_kI = 0.0;
             SWERVE_CONSTANTS.DRIVE_kD = 0.0;
-            SWERVE_CONSTANTS.DRIVE_kS = 0.0097954 * (2.0 * Math.PI * 0.0478); // TODO simvalue
-            SWERVE_CONSTANTS.DRIVE_kV = 2.1268 * (2.0 * Math.PI * 0.0478);
-            SWERVE_CONSTANTS.DRIVE_kA = 0.26277 * (2.0 * Math.PI * 0.0478);
-            SWERVE_CONSTANTS.STEER_kP = 40.0; // TODO simvalue
+            SWERVE_CONSTANTS.DRIVE_kS = 0.18819 * (2.0 * Math.PI * 0.0478);
+            SWERVE_CONSTANTS.DRIVE_kV = 2.2181 * (2.0 * Math.PI * 0.0478);
+            SWERVE_CONSTANTS.DRIVE_kA = 0.6 * (2.0 * Math.PI * 0.0478);
+            SWERVE_CONSTANTS.STEER_kP = 60.0; // TODO simvalue
             SWERVE_CONSTANTS.STEER_kI = 0.0;
             SWERVE_CONSTANTS.STEER_kD = 1.0; // TODO simvalue
 
             SWERVE_CONSTANTS.DRIVE_GEARING = 5.357;
             SWERVE_CONSTANTS.STEER_GEARING = 150.0 / 7.0;
-            SWERVE_CONSTANTS.WHEEL_CIRCUMFERENCE = 2.0 * Math.PI * 0.0478; // 0.3003362577
+            SWERVE_CONSTANTS.WHEEL_CIRCUMFERENCE = 2.0 * Math.PI * 0.0478 * 1.01071356378; // 0.3003362577
             SWERVE_CONSTANTS.DRIVE_ENCODER_ROTATIONS_TO_METERS = SWERVE_CONSTANTS.WHEEL_CIRCUMFERENCE
                     / SWERVE_CONSTANTS.DRIVE_GEARING;
             SWERVE_CONSTANTS.STEER_ENCODER_ROTATIONS_TO_RADIANS = 2 * Math.PI
@@ -131,7 +132,7 @@ public class Constants {
                 MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND, MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED);
 
         public static final double PATH_FOLLOWING_TRANSLATION_kP = 5; // TODO simvalue
-        public static final double PATH_FOLLOWING_ROTATION_kP = 1; // TODO simvalue
+        public static final double PATH_FOLLOWING_ROTATION_kP = 0.5; // TODO simvalue
     }
 
     public static final class Intake {
@@ -141,7 +142,8 @@ public class Constants {
         public static enum IntakePosition {
             GROUND(-0.617905),
             AMP(1.18),
-            STOW(1.586136);
+            STOW(1.4),
+            SOURCE(1.578);
 
             public final double value;
 
@@ -171,7 +173,7 @@ public class Constants {
 
         public static final double ENCODER_ROTATIONS_TO_RADIANS = 2 * Math.PI / GEARING;
         public static final int ARM_CURRENT_LIMIT = 40;
-        public static final int ROLLER_CURRENT_LIMIT = 50;
+        public static final int ROLLER_CURRENT_LIMIT = 55;
 
         // 2/14/24
         public static final double kP = 5.0;
@@ -209,7 +211,7 @@ public class Constants {
         public static final int CURRENT_LIMIT = 40;
 
         public static final double IDLE_RPS = 8;
-        public static double SHOOTING_RPS = 70;
+        public static double SHOOTING_RPS = 50;
 
         // 2/14/24
         public static final double kP = 0.15;
@@ -218,7 +220,7 @@ public class Constants {
         public static final double kS = 0.17395;
         public static final double kV = 0.10893;
         public static final double kA = 0.021944;
-        public static final double TOLERANCE = 0.3;
+        public static final double TOLERANCE = 5;
 
         public static final double MAX_VELOCITY_METERS_PER_SECOND = 80;
         public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 10;
@@ -228,7 +230,19 @@ public class Constants {
         // key: distance, value: speed
         public static final InterpolatingDoubleTreeMap SPEED_INTERPOLATOR = new InterpolatingDoubleTreeMap();
         static {
-            // SPEED_INTERPOLATOR.put(75.0, 75.0);
+            // 2/17/24
+            SPEED_INTERPOLATOR.put(1.142, 50.0);
+            SPEED_INTERPOLATOR.put(1.511, 60.0);
+            SPEED_INTERPOLATOR.put(1.995, 60.0);
+            SPEED_INTERPOLATOR.put(2.2845, 65.0);
+            SPEED_INTERPOLATOR.put(2.593, 65.0);
+            SPEED_INTERPOLATOR.put(2.87, 75.0);
+            SPEED_INTERPOLATOR.put(3.128, 75.0);
+            SPEED_INTERPOLATOR.put(3.478, 75.0);
+            SPEED_INTERPOLATOR.put(3.834, 75.0);
+            SPEED_INTERPOLATOR.put(4.239, 75.0);
+            SPEED_INTERPOLATOR.put(4.597, 75.0);
+            SPEED_INTERPOLATOR.put(5.1322, 75.0);
         }
     }
 
@@ -239,6 +253,7 @@ public class Constants {
             BOTTOM(Units.degreesToRadians(30)), // TODO simvalue
             AMP_EJECT(0.601),
             STOW(Units.degreesToRadians(50)), // TODO simvalue
+            CLIMB(1.176781), // TODO simvalue
             SUBWOOFER(0.987); // TODO simvalue
 
             public final double value;
@@ -360,7 +375,19 @@ public class Constants {
         // key: distance, value: angle
         public static final InterpolatingDoubleTreeMap ANGLE_INTERPOLATOR = new InterpolatingDoubleTreeMap();
         static {
-            // interpolator.put(75.0, 75.0);
+            // 2/17/24
+            ANGLE_INTERPOLATOR.put(1.142, 0.988);
+            ANGLE_INTERPOLATOR.put(1.511, 0.8889);
+            ANGLE_INTERPOLATOR.put(1.995, 0.7909);
+            ANGLE_INTERPOLATOR.put(2.2845, 0.71647);
+            ANGLE_INTERPOLATOR.put(2.593, 0.63854);
+            ANGLE_INTERPOLATOR.put(2.87, 0.59609);
+            ANGLE_INTERPOLATOR.put(3.128, 0.57226);
+            ANGLE_INTERPOLATOR.put(3.478, 0.53408);
+            ANGLE_INTERPOLATOR.put(3.834, 0.506119);
+            ANGLE_INTERPOLATOR.put(4.239, 0.480486);
+            ANGLE_INTERPOLATOR.put(4.597, 0.432625);
+            ANGLE_INTERPOLATOR.put(5.1322, 0.4322);
         }
     }
 
@@ -422,7 +449,7 @@ public class Constants {
         public static final int MOTOR_ID = 16;
 
         public static final DCMotor MOTOR_GEARBOX_REPR = DCMotor.getNeoVortex(1);
-        public static final double GEARING = 20;
+        public static final double GEARING = 9;
         public static final double CARRIAGE_MASS_KG = Units.lbsToKilograms(3);
         public static final double DRUM_RADIUS_METERS = Units.inchesToMeters(0.75);
         public static final double WHEEL_CIRCUMFERENCE = 2.0 * Math.PI * DRUM_RADIUS_METERS;
@@ -431,7 +458,7 @@ public class Constants {
         public static final double MIN_HEIGHT_METERS = 0; // TODO ask nate
         public static final double MAX_HEIGHT_METERS = 0.67; // TODO ask nate
 
-        public static final int CURRENT_LIMIT = 25;
+        public static final int CURRENT_LIMIT = 40;
 
         public static final double kP = 0; // TODO
         public static final double kI = 0;
@@ -464,17 +491,29 @@ public class Constants {
             CAMERA_CONSTANTS.STDDEV_LATENCY = 15;
         }
 
-        // TODO
+        // 2/17/24
         public static final Transform3d[] ROBOT_TO_CAMS = new Transform3d[] {
+                // front camera
                 new Transform3d(
-                        new Translation3d(0.26416, 0.26416, 0.25),
-                        new Rotation3d(0, Units.degreesToRadians(-25), Units.degreesToRadians(-10))),
+                        new Translation3d(
+                                Units.inchesToMeters(11.886316),
+                                -Units.inchesToMeters(7.507594),
+                                Units.inchesToMeters(9.541569)),
+                        new Rotation3d(0, Units.degreesToRadians(-25), Units.degreesToRadians(10))),
+                // left camera
                 new Transform3d(
-                        new Translation3d(-0.26416, 0.26416, 0.25),
-                        new Rotation3d(0, Units.degreesToRadians(-25), Units.degreesToRadians(70))),
+                        new Translation3d(
+                                -Units.inchesToMeters(1.765373),
+                                Units.inchesToMeters(10.707761),
+                                Units.inchesToMeters(12.116848)),
+                        new Rotation3d(0, Units.degreesToRadians(-20), Units.degreesToRadians(70))),
+                // right camera
                 new Transform3d(
-                        new Translation3d(-0.26416, -0.26416, 0.25),
-                        new Rotation3d(0, Units.degreesToRadians(-25), Units.degreesToRadians(-70)))
+                        new Translation3d(
+                                -Units.inchesToMeters(1.765373),
+                                -Units.inchesToMeters(10.707761),
+                                Units.inchesToMeters(12.116848)),
+                        new Rotation3d(0, Units.degreesToRadians(-20), Units.degreesToRadians(-70)))
         };
     }
 
