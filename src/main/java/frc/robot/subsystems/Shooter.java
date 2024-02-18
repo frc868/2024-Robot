@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.techhounds.houndutil.houndauto.Reflector;
 import com.techhounds.houndutil.houndlib.SparkConfigurator;
 import com.techhounds.houndutil.houndlib.subsystems.BaseShooter;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
@@ -18,17 +19,24 @@ import java.util.function.Supplier;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.MutableMeasure;
 import edu.wpi.first.units.Velocity;
 import edu.wpi.first.units.Voltage;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.FieldConstants;
 
 @LoggedObject
 public class Shooter extends SubsystemBase implements BaseShooter {
@@ -169,18 +177,33 @@ public class Shooter extends SubsystemBase implements BaseShooter {
         }).withName("shooter.spinAtVelocity");
     }
 
+    public Command targetSpeakerCommand(Supplier<Pose2d> poseSupplier) {
+        return spinAtVelocityCommand(() -> {
+            Pose3d target = DriverStation.getAlliance().isPresent()
+                    && DriverStation.getAlliance().get() == Alliance.Red
+                            ? Reflector.reflectPose3d(FieldConstants.TARGET,
+                                    FieldConstants.FIELD_LENGTH)
+                            : FieldConstants.TARGET;
+
+            Transform3d diff = new Pose3d(poseSupplier.get()).minus(target);
+            return SPEED_INTERPOLATOR.get(new Translation2d(diff.getX(), diff.getY()).getNorm());
+        }).withName("shooter.targetSpeaker");
+    }
+
     // will get up to speed, but slowly ramp down at only FF
     public Command holdVelocityCommand(Supplier<Double> goalVelocitySupplier) {
         return run(() -> {
-            leftFeedbackVoltage = leftPidController.calculate(getLeftVelocity(), goalVelocitySupplier.get());
-            rightFeedbackVoltage = rightPidController.calculate(getRightVelocity(), goalVelocitySupplier.get());
+            // leftFeedbackVoltage = leftPidController.calculate(getLeftVelocity(),
+            // goalVelocitySupplier.get());
+            // rightFeedbackVoltage = rightPidController.calculate(getRightVelocity(),
+            // goalVelocitySupplier.get());
             feedforwardVoltage = feedforwardController.calculate(goalVelocitySupplier.get());
-            if (leftFeedbackVoltage < 0)
-                leftFeedbackVoltage = 0.0;
-            if (rightFeedbackVoltage < 0)
-                rightFeedbackVoltage = 0.0;
-            setLeftVoltage(leftFeedbackVoltage + feedforwardVoltage);
-            setRightVoltage(rightFeedbackVoltage + feedforwardVoltage);
+            // if (leftFeedbackVoltage < 0)
+            // leftFeedbackVoltage = 0.0;
+            // if (rightFeedbackVoltage < 0)
+            rightFeedbackVoltage = 0.0;
+            setLeftVoltage(feedforwardVoltage);
+            setRightVoltage(feedforwardVoltage);
         }).withName("shooter.holdVelocity");
     }
 
