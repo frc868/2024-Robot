@@ -103,6 +103,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
         prevIntakeBeamState = intakeBeam.get();
         return triggered;
     });
+    private final Trigger noteInIntakeFromSourceTrigger = new Trigger(intakeBeam::get).negate();
 
     public Intake() {
         leftArmMotor = SparkConfigurator.createSparkFlex(PRIMARY_ARM_MOTOR_ID, MotorType.kBrushless, true,
@@ -278,6 +279,13 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
                 .withName("intake.reverseRollers");
     }
 
+    public Command sourceIntakeRollersCommand() {
+        return Commands.startEnd(
+                () -> setRollerVoltage(3.5),
+                () -> setRollerVoltage(0))
+                .withName("intake.reverseRollers");
+    }
+
     public Command ampScoreRollersCommand() {
         return Commands.startEnd(
                 () -> setRollerVoltage(-3.5),
@@ -298,6 +306,14 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
                 moveToPositionCommand(() -> IntakePosition.GROUND),
                 moveToCurrentGoalCommand().alongWith(runRollersCommand())
                         .until(noteInShooterTrigger),
+                moveToPositionCommand(() -> IntakePosition.STOW)).withName("intake.intakeNote");
+    }
+
+    public Command intakeFromSourceCommand() {
+        return Commands.sequence(
+                moveToPositionCommand(() -> IntakePosition.SOURCE),
+                moveToCurrentGoalCommand().alongWith(sourceIntakeRollersCommand())
+                        .until(noteInIntakeFromSourceTrigger),
                 moveToPositionCommand(() -> IntakePosition.STOW)).withName("intake.intakeNote");
     }
 
