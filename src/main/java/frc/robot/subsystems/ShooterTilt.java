@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.techhounds.houndutil.houndauto.Reflector;
 import com.techhounds.houndutil.houndlib.SparkConfigurator;
 import com.techhounds.houndutil.houndlib.subsystems.BaseSingleJointedArm;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
@@ -23,6 +24,8 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.MutableMeasure;
 import edu.wpi.first.units.Velocity;
 import edu.wpi.first.units.Voltage;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -52,7 +55,7 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
 
     private final ElevatorSim elevatorSim = new ElevatorSim(
             MOTOR_GEARBOX_REPR,
-            GEARING / ENCODER_ROTATIONS_TO_METERS,
+            1 / ENCODER_ROTATIONS_TO_METERS,
             MASS_KG,
             1 / (2.0 * Math.PI),
             MIN_HEIGHT_METERS,
@@ -73,6 +76,9 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
             .mutable(MetersPerSecond.of(0));
 
     private final SysIdRoutine sysIdRoutine;
+
+    @Log
+    private double distance = 0.0;
 
     public ShooterTilt() {
         motor = SparkConfigurator.createSparkFlex(MOTOR_ID,
@@ -195,8 +201,14 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
 
     public Command targetSpeakerCommand(Supplier<Pose2d> poseSupplier) {
         return moveToArbitraryPositionCommand(() -> {
-            Transform3d diff = new Pose3d(poseSupplier.get()).minus(FieldConstants.TARGET);
-            double distance = new Translation2d(diff.getX(), diff.getY()).getNorm();
+            Pose3d target = DriverStation.getAlliance().isPresent()
+                    && DriverStation.getAlliance().get() == Alliance.Red
+                            ? Reflector.reflectPose3d(FieldConstants.TARGET,
+                                    FieldConstants.FIELD_LENGTH)
+                            : FieldConstants.TARGET;
+
+            Transform3d diff = new Pose3d(poseSupplier.get()).minus(target);
+            this.distance = new Translation2d(diff.getX(), diff.getY()).getNorm();
             return ANGLE_INTERPOLATOR.get(distance);
         }).withName("shooterTilt.targetSpeaker");
     }
