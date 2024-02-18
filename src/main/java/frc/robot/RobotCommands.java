@@ -2,8 +2,13 @@ package frc.robot;
 
 import static frc.robot.Constants.Shooter.SHOOTING_RPS;
 
+import java.lang.reflect.Field;
+import java.sql.Driver;
+
+import com.techhounds.houndutil.houndauto.Reflector;
 import com.techhounds.houndutil.houndlib.subsystems.BaseSwerveDrive.DriveMode;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -20,7 +25,12 @@ public class RobotCommands {
     public static Command targetSpeakerCommand(Drivetrain drivetrain, Shooter shooter, ShooterTilt shooterTilt) {
         return Commands.parallel(
                 drivetrain.controlledRotateCommand(() -> {
-                    Transform2d diff = drivetrain.getPose().minus(FieldConstants.TARGET.toPose2d());
+                    Pose2d target = DriverStation.getAlliance().isPresent()
+                            && DriverStation.getAlliance().get() == Alliance.Red
+                                    ? Reflector.reflectPose2d(FieldConstants.TARGET.toPose2d(),
+                                            FieldConstants.FIELD_LENGTH)
+                                    : FieldConstants.TARGET.toPose2d();
+                    Transform2d diff = drivetrain.getPose().minus(target);
                     Rotation2d rot = new Rotation2d(diff.getX(), diff.getY());
                     if (DriverStation.getAlliance().isPresent() &&
                             DriverStation.getAlliance().get() == Alliance.Blue)
@@ -28,7 +38,7 @@ public class RobotCommands {
                     return rot.getRadians();
                 }, DriveMode.FIELD_ORIENTED),
                 shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
-                shooter.spinAtVelocityCommand(() -> SHOOTING_RPS).asProxy());
+                shooter.targetSpeakerCommand(drivetrain::getPose).asProxy());
     }
 
     public static Command targetFromSubwooferCommand(Drivetrain drivetrain, Shooter shooter, ShooterTilt shooterTilt) {
@@ -39,9 +49,9 @@ public class RobotCommands {
 
     public static Command shootCommand(Drivetrain drivetrain, Intake intake, Shooter shooter, ShooterTilt shooterTilt) {
         return Commands.sequence(
-                shooter.spinAtVelocityCommand(() -> SHOOTING_RPS).asProxy()
-                        .until(() -> shooterTilt.atGoal() && shooter.atGoal()),
-                shooter.spinAtVelocityCommand(() -> SHOOTING_RPS).asProxy().alongWith(intake.runRollersCommand())
+                shooter.targetSpeakerCommand(drivetrain::getPose).asProxy()
+                        .until(() -> shooter.atGoal() && shooterTilt.atGoal()),
+                shooter.targetSpeakerCommand(drivetrain::getPose).asProxy().alongWith(intake.runRollersCommand())
                         .withTimeout(1));
     }
 }
