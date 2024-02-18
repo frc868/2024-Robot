@@ -176,9 +176,9 @@ public class Constants {
         public static final int ROLLER_CURRENT_LIMIT = 55;
 
         // 2/14/24
-        public static final double kP = 5.0;
+        public static final double kP = 3.0;
         public static final double kI = 0.0;
-        public static final double kD = 0.5;
+        public static final double kD = 0.1;
         public static final double kS = 0.14936;
         public static final double kG = 0.2114;
         public static final double kV = 0.78401;
@@ -214,12 +214,19 @@ public class Constants {
         public static double SHOOTING_RPS = 50;
 
         // 2/14/24
-        public static final double kP = 0.15;
-        public static final double kI = 0;
-        public static final double kD = 0;
-        public static final double kS = 0.17395;
-        public static final double kV = 0.10893;
-        public static final double kA = 0.021944;
+        public static final double left_kP = 0.15;
+        public static final double left_kI = 0;
+        public static final double left_kD = 0;
+        public static final double left_kS = 0.17395;
+        public static final double left_kV = 0.10893;
+        public static final double left_kA = 0.021944;
+
+        public static final double right_kP = 0.15;
+        public static final double right_kI = 0;
+        public static final double right_kD = 0;
+        public static final double right_kS = 0.17395;
+        public static final double right_kV = 0.10893;
+        public static final double right_kA = 0.021944;
         public static final double TOLERANCE = 5;
 
         public static final double MAX_VELOCITY_METERS_PER_SECOND = 80;
@@ -394,7 +401,9 @@ public class Constants {
     public static final class Climber {
         public static enum ClimberPosition {
             BOTTOM(0), // TODO
-            TOP(0.5); // TODO
+            ON_CHAIN(0.489), // TODO
+            CLIMB_PREP(0.57), // TODO
+            TOP(0.6); // TODO
 
             public final double value;
 
@@ -406,28 +415,29 @@ public class Constants {
         public static final int MOTOR_ID = 15;
 
         public static final DCMotor MOTOR_GEARBOX_REPR = DCMotor.getNeoVortex(1);
-        public static final double GEARING = 20;
+        public static final double GEARING = 25;
         public static final double CARRIAGE_MASS_KG = Units.lbsToKilograms(3);
         public static final double DRUM_RADIUS_METERS = Units.inchesToMeters(0.75);
         public static final double WHEEL_CIRCUMFERENCE = 2.0 * Math.PI * DRUM_RADIUS_METERS;
         public static final double ENCODER_ROTATIONS_TO_METERS = WHEEL_CIRCUMFERENCE / GEARING;
 
         public static final double MIN_HEIGHT_METERS = 0; // TODO ask nate
-        public static final double MAX_HEIGHT_METERS = 0.67; // TODO ask nate
+        public static final double MAX_HEIGHT_METERS = 0.57; // TODO ask nate
 
         public static final int CURRENT_LIMIT = 60;
 
-        public static final double kP = 0; // TODO
+        public static final double kP = 50; // TODO
         public static final double kI = 0;
         public static final double kD = 0;
         public static final double kS = 0;
-        public static final double kG = 0.062861; // TODO
-        public static final double kV = 78.237; // TODO
-        public static final double kA = 5.0061; // TODO
+        public static final double kG = 0.033964; // TODO
+        public static final double climb_kG = -5; // TODO
+        public static final double kV = 21.792; // TODO
+        public static final double kA = 1.3539; // TODO
         public static final double TOLERANCE = 0.01;
 
-        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0.152; // TODO
-        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0.152 * 10; // TODO
+        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0.55; // TODO
+        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0.5; // TODO
         public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
 
@@ -437,7 +447,10 @@ public class Constants {
     public static final class NoteLift {
         public static enum NoteLiftPosition {
             BOTTOM(0), // TODO
-            TOP(0.5); // TODO
+            INTAKE(0.03), // TODO
+            CLIMB_PREP(0.37), // TODO
+            STOW(0.44), // TODO
+            TOP(0.48); // TODO
 
             public final double value;
 
@@ -456,25 +469,25 @@ public class Constants {
         public static final double ENCODER_ROTATIONS_TO_METERS = WHEEL_CIRCUMFERENCE / GEARING;
 
         public static final double MIN_HEIGHT_METERS = 0; // TODO ask nate
-        public static final double MAX_HEIGHT_METERS = 0.67; // TODO ask nate
+        public static final double MAX_HEIGHT_METERS = 0.48; // TODO ask nate
 
         public static final int CURRENT_LIMIT = 40;
 
-        public static final double kP = 0; // TODO
+        public static final double kP = 38; // TODO
         public static final double kI = 0;
-        public static final double kD = 0;
-        public static final double kS = 0;
-        public static final double kG = 0.062861; // TODO
-        public static final double kV = 78.237; // TODO
-        public static final double kA = 5.0061; // TODO
+        public static final double kD = 3;
+        public static final double kS = 0.362388;
+        public static final double kG = -0.166392; // TODO
+        public static final double kV = 8.18532; // TODO
+        public static final double kA = 0.541548; // TODO
         public static final double TOLERANCE = 0.01;
 
-        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0.152; // TODO
-        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0.152 * 10; // TODO
+        public static final double MAX_VELOCITY_METERS_PER_SECOND = 1.533; // TODO
+        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0.9; // TODO
         public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
 
-        public static final Pose3d BASE_COMPONENT_POSE = new Pose3d(0.177, 0, 0.2, new Rotation3d(0, 0, 0));
+        public static final Pose3d BASE_COMPONENT_POSE = new Pose3d(0.177, 0, 0.41, new Rotation3d(0, 0, 0));
     }
 
     public static final class Vision {
