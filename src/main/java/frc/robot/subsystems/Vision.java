@@ -97,7 +97,7 @@ public class Vision extends SubsystemBase {
         return poses.toArray(poseArray);
     }
 
-    @Log
+    // @Log
     public Pose3d[] aprilTagPoses() {
         List<Pose3d> poses = new ArrayList<Pose3d>();
         for (AprilTag tag : AprilTagFields.kDefaultField.loadAprilTagLayoutField().getTags()) {
