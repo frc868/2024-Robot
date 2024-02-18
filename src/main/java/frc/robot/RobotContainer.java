@@ -1,5 +1,6 @@
 package frc.robot;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.techhounds.houndutil.houndauto.AutoManager;
 import com.techhounds.houndutil.houndlib.SparkConfigurator;
 import com.techhounds.houndutil.houndlog.LoggingManager;
@@ -23,6 +24,8 @@ import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.NoteLift;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterTilt;
+import frc.robot.subsystems.Vision;
+
 import java.util.ArrayList;
 import java.util.function.Supplier;
 
@@ -59,9 +62,9 @@ public class RobotContainer {
     @SendableLog(groups = { "wpilib", "subsystems" })
     private final NoteLift noteLift = new NoteLift();
 
-    // @Log(groups = "subsystems")
-    // @SendableLog(groups = { "wpilib", "subsystems" })
-    // private final Vision vision = new Vision();
+    @Log(groups = "subsystems")
+    @SendableLog(groups = { "wpilib", "subsystems" })
+    private final Vision vision = new Vision();
 
     // @Log(groups = "subsystems")
     // @SendableLog(groups = { "wpilib", "subsystems" })
@@ -90,14 +93,15 @@ public class RobotContainer {
      * Constructs the robot container.
      */
     public RobotContainer() {
-
-        // vision.setPoseEstimator(drivetrain.getPoseEstimator());
-        // vision.setSimPoseSupplier(drivetrain::getSimPose);
+        vision.setPoseEstimator(drivetrain.getPoseEstimator());
+        vision.setSimPoseSupplier(drivetrain::getSimPose);
         SparkConfigurator.safeBurnFlash();
         DataLogManager.logNetworkTables(true);
         DriverStation.startDataLog(DataLogManager.getLog());
         DataLogManager.start();
         URCL.start();
+        SignalLogger.setPath("/media/sda1/ctre-logs/");
+        SignalLogger.start();
 
         LoggingManager.getInstance().registerRobotContainer(this);
         LoggingManager.getInstance().registerClass(LoggingManager.class, "houndlog", new ArrayList<>());
@@ -126,12 +130,21 @@ public class RobotContainer {
     }
 
     private void configureAuto() {
-        AutoManager.getInstance().addRoutine(Autos.autoA123(drivetrain, intake, shooter, shooterTilt));
-        AutoManager.getInstance().addRoutine(Autos.autoBA123(drivetrain, intake, shooter, shooterTilt));
-        AutoManager.getInstance().addRoutine(Autos.autoCBA123(drivetrain, intake, shooter, shooterTilt));
-        AutoManager.getInstance().addRoutine(Autos.auto453(drivetrain, intake, shooter, shooterTilt));
-        AutoManager.getInstance().addRoutine(Autos.autoBAC(drivetrain, intake, shooter, shooterTilt));
-        AutoManager.getInstance().addRoutine(Autos.auto1234(drivetrain, intake, shooter, shooterTilt));
+        // AutoManager.getInstance().addRoutine(Autos.autoTest(drivetrain, intake,
+        // shooter, shooterTilt));
+        // AutoManager.getInstance().addRoutine(Autos.autoA123(drivetrain, intake,
+        // shooter, shooterTilt));
+        // AutoManager.getInstance().addRoutine(Autos.autoBA123(drivetrain, intake,
+        // shooter, shooterTilt));
+        // AutoManager.getInstance().addRoutine(Autos.autoCBA123(drivetrain, intake,
+        // shooter, shooterTilt));
+        AutoManager.getInstance().addRoutine(Autos.autoCBA(drivetrain, intake, shooter, shooterTilt));
+        // AutoManager.getInstance().addRoutine(Autos.auto453(drivetrain, intake,
+        // shooter, shooterTilt));
+        // AutoManager.getInstance().addRoutine(Autos.autoBAC(drivetrain, intake,
+        // shooter, shooterTilt));
+        // AutoManager.getInstance().addRoutine(Autos.auto1234(drivetrain, intake,
+        // shooter, shooterTilt));
     }
 
     @Log
