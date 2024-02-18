@@ -6,6 +6,7 @@ import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.techhounds.houndutil.houndlib.SparkConfigurator;
+import com.techhounds.houndutil.houndlib.Utils;
 import com.techhounds.houndutil.houndlib.subsystems.BaseElevator;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
 import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
@@ -127,6 +128,7 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
 
     @Override
     public void setVoltage(double voltage) {
+        voltage = Utils.applySoftStops(voltage, getPosition(), -5, 0.05);
         motor.setVoltage(voltage);
     }
 
