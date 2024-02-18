@@ -2,6 +2,8 @@ package frc.robot.subsystems;
 
 import java.util.Set;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
+
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.commands.FollowPathHolonomic;
 import com.pathplanner.lib.path.GoalEndState;
@@ -11,6 +13,7 @@ import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 import com.techhounds.houndutil.houndauto.AutoManager;
+import com.techhounds.houndutil.houndauto.Reflector;
 import com.techhounds.houndutil.houndlib.MotorHoldMode;
 import com.techhounds.houndutil.houndlib.subsystems.BaseSwerveDrive;
 import com.techhounds.houndutil.houndlib.swerve.KrakenCoaxialSwerveModule;
@@ -21,8 +24,11 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
@@ -44,6 +50,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.FieldConstants;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 
 import static frc.robot.Constants.Drivetrain.*;
@@ -366,9 +373,10 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     @Override
     public void updatePoseEstimator() {
         poseEstimator.update(getRotation(), getModulePositions());
-        if (RobotBase.isSimulation())
+        if (RobotBase.isSimulation()) {
             simOdometry.update(getRotation(), getModulePositions());
-        drawRobotOnField(AutoManager.getInstance().getField());
+            drawRobotOnField(AutoManager.getInstance().getField());
+        }
     }
 
     @Override
@@ -704,5 +712,18 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
     public Command sysIdSteerDynamic(SysIdRoutine.Direction direction) {
         return sysIdSteer.dynamic(direction).withName("drivetrain.sysIdDriveQuasistatic");
+    }
+
+    @Log
+    public double getShotDistance() {
+        Pose3d target = DriverStation.getAlliance().isPresent()
+                && DriverStation.getAlliance().get() == Alliance.Red
+                        ? Reflector.reflectPose3d(FieldConstants.TARGET,
+                                FieldConstants.FIELD_LENGTH)
+                        : FieldConstants.TARGET;
+
+        Transform3d diff = new Pose3d(getPose()).minus(target);
+        return new Translation2d(diff.getX(), diff.getY()).getNorm();
+
     }
 }
