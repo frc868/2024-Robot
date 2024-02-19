@@ -10,6 +10,8 @@ import com.techhounds.houndutil.houndlib.Utils;
 import com.techhounds.houndutil.houndlib.subsystems.BaseElevator;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
 import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
+
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -53,7 +55,7 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
             MIN_HEIGHT_METERS,
             MAX_HEIGHT_METERS,
             true,
-            0);
+            MAX_HEIGHT_METERS);
 
     @Log(groups = "control")
     private double feedbackVoltage = 0;
@@ -91,7 +93,7 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
                         },
                         this));
 
-        // setDefaultCommand(moveToCurrentGoalCommand());
+        setDefaultCommand(moveToCurrentGoalCommand());
     }
 
     @Override
@@ -123,12 +125,14 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
 
     @Override
     public void resetPosition() {
-        motor.getEncoder().setPosition(0);
+        motor.getEncoder().setPosition(MAX_HEIGHT_METERS);
     }
 
     @Override
     public void setVoltage(double voltage) {
-        voltage = Utils.applySoftStops(voltage, getPosition(), -5, 0.05);
+        voltage = MathUtil.clamp(voltage, -12, 12);
+        voltage = Utils.applySoftStops(voltage, getPosition(), MIN_HEIGHT_METERS,
+                MAX_HEIGHT_METERS + 0.03);
         motor.setVoltage(voltage);
     }
 
@@ -136,8 +140,7 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
     public Command moveToCurrentGoalCommand() {
         return run(() -> {
             feedbackVoltage = pidController.calculate(getPosition());
-            feedforwardVoltage = feedforwardController.calculate(pidController.getSetpoint().position,
-                    pidController.getSetpoint().velocity);
+            feedforwardVoltage = feedforwardController.calculate(pidController.getSetpoint().velocity);
             setVoltage(feedbackVoltage + feedforwardVoltage);
         }).withName("noteLift.moveToCurrentGoal");
     }
@@ -198,5 +201,22 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
 
     public Command sysIdDynamic(SysIdRoutine.Direction direction) {
         return sysIdRoutine.dynamic(direction).withName("noteLift.sysIdDynamic");
+    }
+
+    public Command scoreNoteCommand() {
+        return run(() -> {
+            if (getPosition() < MAX_HEIGHT_METERS + 0.03)
+                setVoltage(12);
+            else
+                setVoltage(0);
+        }).finallyDo(() -> {
+            pidController.reset(getPosition());
+            pidController.setGoal(getPosition());
+        });
+    }
+
+    public Command resetControllersCommand() {
+        return Commands.runOnce(() -> pidController.reset(getPosition()))
+                .andThen(Commands.runOnce(() -> pidController.setGoal(getPosition())));
     }
 }
