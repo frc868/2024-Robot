@@ -75,7 +75,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
             MIN_ANGLE_RADIANS,
             MAX_ANGLE_RADIANS,
             true,
-            0);
+            MAX_ANGLE_RADIANS);
 
     private final DIOSim intakeBeamSim = new DIOSim(intakeBeam);
     private final DIOSim shooterPrimaryBeamSim = new DIOSim(shooterPrimaryBeam);
@@ -349,6 +349,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
     }
 
     public Command resetControllersCommand() {
-        return runOnce(() -> pidController.reset(getPosition())).andThen(holdCurrentPositionCommand());
+        return Commands.runOnce(() -> pidController.reset(getPosition()))
+                .andThen(Commands.runOnce(() -> pidController.setGoal(getPosition())));
     }
 }
