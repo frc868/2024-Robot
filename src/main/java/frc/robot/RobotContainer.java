@@ -56,7 +56,7 @@ public class RobotContainer {
 
     @Log(groups = "subsystems")
     @SendableLog(groups = { "wpilib", "subsystems" })
-    private final Climber climber = new Climber();
+    private final Climber climber = new Climber(shooterTilt::getAngle);
 
     @Log(groups = "subsystems")
     @SendableLog(groups = { "wpilib", "subsystems" })
@@ -117,9 +117,11 @@ public class RobotContainer {
         configureAuto();
 
         new Trigger(DriverStation::isEnabled)
-                .onTrue(Commands.sequence(
+                .onTrue(Commands.parallel(
                         intake.resetControllersCommand(),
-                        shooterTilt.resetControllersCommand()));
+                        shooterTilt.resetControllersCommand(),
+                        noteLift.resetControllersCommand(),
+                        climber.resetControllersCommand()).withName("resetControllers"));
 
     }
 
@@ -138,7 +140,8 @@ public class RobotContainer {
         // shooter, shooterTilt));
         // AutoManager.getInstance().addRoutine(Autos.autoCBA123(drivetrain, intake,
         // shooter, shooterTilt));
-        AutoManager.getInstance().addRoutine(Autos.autoCBA(drivetrain, intake, shooter, shooterTilt));
+        AutoManager.getInstance().addRoutine(Autos.autoCBA(drivetrain, intake,
+                shooter, shooterTilt));
         // AutoManager.getInstance().addRoutine(Autos.auto453(drivetrain, intake,
         // shooter, shooterTilt));
         // AutoManager.getInstance().addRoutine(Autos.autoBAC(drivetrain, intake,
