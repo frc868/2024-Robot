@@ -6,9 +6,12 @@ import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.techhounds.houndutil.houndlib.SparkConfigurator;
+import com.techhounds.houndutil.houndlib.Utils;
 import com.techhounds.houndutil.houndlib.subsystems.BaseElevator;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
 import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
+
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -68,7 +71,9 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
 
     private final SysIdRoutine sysIdRoutine;
 
-    public Climber() {
+    private Supplier<Double> shooterTiltAngleSupplier;
+
+    public Climber(Supplier<Double> shooterTiltPositionSupplier) {
         motor = SparkConfigurator.createSparkFlex(
                 MOTOR_ID, MotorType.kBrushless, true,
                 (s) -> s.setIdleMode(IdleMode.kBrake),
@@ -90,7 +95,9 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
                         },
                         this));
 
-        // setDefaultCommand(moveToCurrentGoalCommand());
+        this.shooterTiltAngleSupplier = shooterTiltPositionSupplier;
+
+        setDefaultCommand(moveToCurrentGoalCommand());
     }
 
     @Override
@@ -127,6 +134,15 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
 
     @Override
     public void setVoltage(double voltage) {
+        voltage = MathUtil.clamp(voltage, -12, 12);
+        voltage = Utils.applySoftStops(voltage, getPosition(), -5, MAX_HEIGHT_METERS);
+        if (getPosition() < 0.02) {
+            voltage = MathUtil.clamp(voltage, -3, 12);
+        }
+
+        if (shooterTiltAngleSupplier.get() < 1.1) {
+            voltage = 0;
+        }
         motor.setVoltage(voltage);
     }
 
@@ -134,8 +150,7 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
     public Command moveToCurrentGoalCommand() {
         return run(() -> {
             feedbackVoltage = pidController.calculate(getPosition());
-            feedforwardVoltage = feedforwardController.calculate(pidController.getSetpoint().position,
-                    pidController.getSetpoint().velocity);
+            feedforwardVoltage = feedforwardController.calculate(pidController.getSetpoint().velocity);
             setVoltage(feedbackVoltage + feedforwardVoltage);
         }).withName("climber.moveToCurrentGoal");
     }
@@ -196,5 +211,23 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
 
     public Command sysIdDynamic(SysIdRoutine.Direction direction) {
         return sysIdRoutine.dynamic(direction).withName("climber.sysIdDynamic");
+    }
+
+    public Command climbDownCommand() {
+        return run(() -> {
+            if (getPosition() > ClimberPosition.BOTTOM.value + 0.02) {
+                setVoltage(-9);
+            } else {
+                setVoltage(-3);
+            }
+        }).finallyDo(() -> {
+            pidController.reset(getPosition());
+            pidController.setGoal(getPosition());
+        });
+    }
+
+    public Command resetControllersCommand() {
+        return Commands.runOnce(() -> pidController.reset(getPosition()))
+                .andThen(Commands.runOnce(() -> pidController.setGoal(getPosition())));
     }
 }
