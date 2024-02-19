@@ -23,6 +23,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.MutableMeasure;
@@ -47,18 +48,24 @@ public class Shooter extends SubsystemBase implements BaseShooter {
     private final CANSparkFlex rightMotor;
 
     @Log(groups = "control")
-    private final PIDController leftPidController = new PIDController(kP, kI, kD);
+    private final PIDController leftPidController = new PIDController(left_kP, left_kI, left_kD);
     @Log(groups = "control")
-    private final PIDController rightPidController = new PIDController(kP, kI, kD);
+    private final PIDController rightPidController = new PIDController(right_kP, right_kI, right_kD);
 
     @Log(groups = "control")
-    private final SimpleMotorFeedforward feedforwardController = new SimpleMotorFeedforward(kS, kV, kA);
+    private final SimpleMotorFeedforward leftFeedforwardController = new SimpleMotorFeedforward(left_kS, left_kV,
+            left_kA);
+    @Log(groups = "control")
+    private final SimpleMotorFeedforward rightFeedforwardController = new SimpleMotorFeedforward(right_kS, right_kV,
+            right_kA);
 
     private final FlywheelSim flywheelSim = new FlywheelSim(MOTOR_GEARBOX_REPR, GEARING,
             MOMENT_OF_INERTIA_KG_METERS_SQUARED);
 
     @Log(groups = "control")
-    private double feedforwardVoltage = 0.0;
+    private double leftFeedforwardVoltage = 0.0;
+    @Log(groups = "control")
+    private double rightFeedforwardVoltage = 0.0;
     @Log(groups = "control")
     private double leftFeedbackVoltage = 0.0;
     @Log(groups = "control")
@@ -171,9 +178,10 @@ public class Shooter extends SubsystemBase implements BaseShooter {
         return run(() -> {
             leftFeedbackVoltage = leftPidController.calculate(getLeftVelocity(), goalVelocitySupplier.get());
             rightFeedbackVoltage = rightPidController.calculate(getRightVelocity(), goalVelocitySupplier.get());
-            feedforwardVoltage = feedforwardController.calculate(goalVelocitySupplier.get());
-            setLeftVoltage(leftFeedbackVoltage + feedforwardVoltage);
-            setRightVoltage(rightFeedbackVoltage + feedforwardVoltage);
+            leftFeedforwardVoltage = leftFeedforwardController.calculate(goalVelocitySupplier.get());
+            rightFeedforwardVoltage = rightFeedforwardController.calculate(goalVelocitySupplier.get());
+            setLeftVoltage(leftFeedbackVoltage + leftFeedforwardVoltage);
+            setRightVoltage(rightFeedbackVoltage + rightFeedforwardVoltage);
         }).withName("shooter.spinAtVelocity");
     }
 
@@ -193,17 +201,19 @@ public class Shooter extends SubsystemBase implements BaseShooter {
     // will get up to speed, but slowly ramp down at only FF
     public Command holdVelocityCommand(Supplier<Double> goalVelocitySupplier) {
         return run(() -> {
-            // leftFeedbackVoltage = leftPidController.calculate(getLeftVelocity(),
-            // goalVelocitySupplier.get());
-            // rightFeedbackVoltage = rightPidController.calculate(getRightVelocity(),
-            // goalVelocitySupplier.get());
-            feedforwardVoltage = feedforwardController.calculate(goalVelocitySupplier.get());
-            // if (leftFeedbackVoltage < 0)
-            // leftFeedbackVoltage = 0.0;
-            // if (rightFeedbackVoltage < 0)
-            rightFeedbackVoltage = 0.0;
-            setLeftVoltage(feedforwardVoltage);
-            setRightVoltage(feedforwardVoltage);
+            if (getVelocity() > goalVelocitySupplier.get() * 1.2) {
+                setVoltage(0);
+            } else {
+                leftFeedforwardVoltage = leftFeedforwardController.calculate(goalVelocitySupplier.get());
+                rightFeedforwardVoltage = rightFeedforwardController.calculate(goalVelocitySupplier.get());
+                leftFeedbackVoltage = leftPidController.calculate(getLeftVelocity(),
+                        goalVelocitySupplier.get());
+                rightFeedbackVoltage = rightPidController.calculate(getRightVelocity(),
+                        goalVelocitySupplier.get());
+                setLeftVoltage(leftFeedforwardVoltage + leftFeedbackVoltage);
+                setRightVoltage(rightFeedforwardVoltage + rightFeedbackVoltage);
+            }
+
         }).withName("shooter.holdVelocity");
     }
 
@@ -238,5 +248,9 @@ public class Shooter extends SubsystemBase implements BaseShooter {
     @Log
     public boolean atGoal() {
         return leftPidController.atSetpoint() && rightPidController.atSetpoint();
+    }
+
+    public Command stopCommand() {
+        return run(this::stop);
     }
 }
