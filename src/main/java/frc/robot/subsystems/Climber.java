@@ -213,7 +213,7 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
         return sysIdRoutine.dynamic(direction).withName("climber.sysIdDynamic");
     }
 
-    public Command climbDownCommand() {
+    public Command climbToBottomCommand() {
         return run(() -> {
             if (getPosition() > ClimberPosition.BOTTOM.value + 0.02) {
                 setVoltage(-9);
