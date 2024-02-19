@@ -194,7 +194,8 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
         return Commands.sequence(
                 runOnce(() -> pidController.reset(getPosition())),
                 Commands.parallel(
-                        Commands.run(() -> pidController.setGoal(getLinearActuatorLength(goalPositionSupplier.get()))),
+                        Commands.run(() -> pidController
+                                .setGoal(getLinearActuatorLength(goalPositionSupplier.get()))),
                         moveToCurrentGoalCommand()))
                 .withName("shooterTilt.moveToArbitraryPosition");
     }
@@ -265,6 +266,7 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
     }
 
     public Command resetControllersCommand() {
-        return runOnce(() -> pidController.reset(getPosition())).andThen(holdCurrentPositionCommand());
+        return Commands.runOnce(() -> pidController.reset(getPosition()))
+                .andThen(Commands.runOnce(() -> pidController.setGoal(getPosition())));
     }
 }
