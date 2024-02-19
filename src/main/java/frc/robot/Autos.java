@@ -174,26 +174,30 @@ public class Autos {
         PathPlannerPath pathBToA = PathPlannerPath.fromChoreoTrajectory("CBA.3");
         Pose2d startingPose = pathStartToC.getPreviewStartingHolonomicPose();
 
-        Command command = Commands.sequence(
-                // Commands.parallel(
-                shooterTilt.targetSpeakerCommand(drivetrain::getPose),
-                shooter.targetSpeakerCommand(drivetrain::getPose),
-                // .until(() -> shooter.atGoal() && shooterTilt.atGoal()),
-                drivetrain.followPathCommand(pathStartToC),
-                Commands.waitSeconds(1),
-                drivetrain.followPathCommand(pathCToB),
-                Commands.waitSeconds(1),
-                drivetrain.followPathCommand(pathBToA));
-
         // Command command = Commands.sequence(
-        // // RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
-        // // intake.moveToPositionCommand(() -> IntakePosition.GROUND),
-        // drivetrain.followPathCommand(pathStartToC).alongWith(intake.intakeNoteAutoCommand()),
-        // // RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
-        // drivetrain.followPathCommand(pathCToB).alongWith(intake.intakeNoteAutoCommand()),
-        // // RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
-        // drivetrain.followPathCommand(pathBToA).alongWith(intake.intakeNoteAutoCommand()));
-        // RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt));
+        // RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
+        // // Commands.parallel(
+        // //
+        // shooterTilt.targetSpeakerCommand(drivetrain::getPose).until(shooterTilt::atGoal),
+        // // shooter.targetSpeakerCommand(drivetrain::getPose),
+        // // .until(() -> shooter.atGoal() && shooterTilt.atGoal()),
+        // drivetrain.followPathCommand(pathStartToC),
+        // Commands.waitSeconds(1),
+        // drivetrain.followPathCommand(pathCToB),
+        // Commands.waitSeconds(1),
+        // drivetrain.followPathCommand(pathBToA));
+
+        Command command = Commands.parallel(
+                shooterTilt.targetSpeakerCommand(drivetrain::getPose),
+                Commands.sequence(
+                        RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
+                        intake.moveToPositionCommand(() -> IntakePosition.GROUND),
+                        drivetrain.followPathCommand(pathStartToC).alongWith(intake.intakeNoteAutoCommand()),
+                        RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
+                        drivetrain.followPathCommand(pathCToB).alongWith(intake.intakeNoteAutoCommand()),
+                        RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
+                        drivetrain.followPathCommand(pathBToA).alongWith(intake.intakeNoteAutoCommand()),
+                        RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt)));
 
         return new AutoRoutine("CBA", command,
                 List.of(pathStartToC, pathCToB, pathBToA),
