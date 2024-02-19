@@ -8,7 +8,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.Constants.Climber.ClimberPosition;
 import frc.robot.Constants.Intake.IntakePosition;
+import frc.robot.Constants.NoteLift.NoteLiftPosition;
 import frc.robot.Constants.ShooterTilt.ShooterTiltPosition;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Drivetrain;
@@ -78,7 +80,7 @@ public class Controls {
 
         // controller.x().whileTrue(shooter.spinAtVelocityCommand(() ->
         // Constants.Shooter.SHOOTING_RPS));
-        // controller.y().whileTrue(intake.runRollersCommand());
+        // controller.y().whileTrue(intake.runRollersCommand());d
 
         // climber.setDefaultCommand();
 
@@ -100,11 +102,41 @@ public class Controls {
 
         // controller.a().toggleOnTrue(Commands.run(shooter::stop, shooter));
 
-        controller.x().whileTrue(drivetrain.sysIdDriveQuasistatic(Direction.kForward));
-        controller.y().whileTrue(drivetrain.sysIdDriveQuasistatic(Direction.kReverse));
-        controller.a().whileTrue(drivetrain.sysIdDriveDynamic(Direction.kForward));
-        controller.b().whileTrue(drivetrain.sysIdDriveDynamic(Direction.kReverse));
+        // controller.a().whileTrue(intake.moveToPositionCommand(() ->
+        // IntakePosition.GROUND));
+        // controller.y().whileTrue(intake.moveToPositionCommand(() ->
+        // IntakePosition.STOW));
+        // controller.x().whileTrue(RobotCommands.shootCommand(drivetrain, intake,
+        // shooter, shooterTilt));
+        // controller.b().whileTrue(RobotCommands.targetSpeakerCommand(drivetrain,
+        // shooter, shooterTilt));
 
+        // controller.x().whileTrue(shooter.sysIdQuasistatic(Direction.kForward));
+        // controller.y().whileTrue(shooter.sysIdQuasistatic(Direction.kReverse));
+        // controller.a().whileTrue(shooter.sysIdDynamic(Direction.kForward));
+        // controller.b().whileTrue(shooter.sysIdDynamic(Direction.kReverse));
+        // controller.a().whileTrue(noteLift.moveToPositionCommand(() ->
+        // NoteLiftPosition.BOTTOM));
+        // controller.x().whileTrue(noteLift.moveToPositionCommand(() ->
+        // NoteLiftPosition.STOW));
+        // controller.y().whileTrue(noteLift.moveToPositionCommand(() ->
+        // NoteLiftPosition.TOP));
+
+        controller.a().whileTrue(RobotCommands.intakeToNoteLift(shooter, shooterTilt,
+                noteLift));
+        controller.b().whileTrue(RobotCommands.prepareClimb(intake, shooter,
+                shooterTilt, climber, noteLift));
+        controller.x().whileTrue(climber.climbToBottomCommand());
+        controller.y().whileTrue(noteLift.scoreNoteCommand());
+
+        // controller.y().whileTrue(noteLift.moveToPositionCommand(() ->
+        // NoteLiftPosition.TOP));
+        // controller.b().whileTrue(noteLift.moveToPositionCommand(() ->
+        // NoteLiftPosition.STOW));
+        // controller.x().whileTrue(noteLift.moveToPositionCommand(() ->
+        // NoteLiftPosition.CLIMB_PREP));
+        // controller.a().whileTrue(noteLift.moveToPositionCommand(() ->
+        // NoteLiftPosition.BOTTOM));
     }
 
 }
