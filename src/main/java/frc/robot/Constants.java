@@ -213,20 +213,20 @@ public class Constants {
         public static final double IDLE_RPS = 8;
         public static double SHOOTING_RPS = 50;
 
-        // 2/14/24
-        public static final double left_kP = 0.15;
+        // 2/18/24
+        public static final double left_kP = 0.00016938;
         public static final double left_kI = 0;
         public static final double left_kD = 0;
-        public static final double left_kS = 0.17395;
-        public static final double left_kV = 0.10893;
-        public static final double left_kA = 0.021944;
+        public static final double left_kS = 0.070681;
+        public static final double left_kV = 0.1068;
+        public static final double left_kA = 0.021904;
 
-        public static final double right_kP = 0.15;
+        public static final double right_kP = 0.00001;
         public static final double right_kI = 0;
         public static final double right_kD = 0;
-        public static final double right_kS = 0.17395;
-        public static final double right_kV = 0.10893;
-        public static final double right_kA = 0.021944;
+        public static final double right_kS = 0.057727;
+        public static final double right_kV = 0.10764;
+        public static final double right_kA = 0.021661;
         public static final double TOLERANCE = 5;
 
         public static final double MAX_VELOCITY_METERS_PER_SECOND = 80;
@@ -400,10 +400,9 @@ public class Constants {
 
     public static final class Climber {
         public static enum ClimberPosition {
-            BOTTOM(0), // TODO
-            ON_CHAIN(0.489), // TODO
-            CLIMB_PREP(0.57), // TODO
-            TOP(0.6); // TODO
+            BOTTOM(0),
+            ON_CHAIN(0.489),
+            CLIMB_PREP(0.61);
 
             public final double value;
 
@@ -421,19 +420,19 @@ public class Constants {
         public static final double WHEEL_CIRCUMFERENCE = 2.0 * Math.PI * DRUM_RADIUS_METERS;
         public static final double ENCODER_ROTATIONS_TO_METERS = WHEEL_CIRCUMFERENCE / GEARING;
 
-        public static final double MIN_HEIGHT_METERS = 0; // TODO ask nate
-        public static final double MAX_HEIGHT_METERS = 0.57; // TODO ask nate
+        public static final double MIN_HEIGHT_METERS = 0;
+        public static final double MAX_HEIGHT_METERS = 0.61;
 
         public static final int CURRENT_LIMIT = 60;
 
-        public static final double kP = 50; // TODO
+        // 2/18/24
+        public static final double kP = 10;
         public static final double kI = 0;
         public static final double kD = 0;
-        public static final double kS = 0;
-        public static final double kG = 0.033964; // TODO
-        public static final double climb_kG = -5; // TODO
-        public static final double kV = 21.792; // TODO
-        public static final double kA = 1.3539; // TODO
+        public static final double kS = 0.1059372;
+        public static final double kG = -0.0512412;
+        public static final double kV = 22.3908;
+        public static final double kA = 0.494484;
         public static final double TOLERANCE = 0.01;
 
         public static final double MAX_VELOCITY_METERS_PER_SECOND = 0.55; // TODO
@@ -446,11 +445,11 @@ public class Constants {
 
     public static final class NoteLift {
         public static enum NoteLiftPosition {
-            BOTTOM(0), // TODO
-            INTAKE(0.03), // TODO
-            CLIMB_PREP(0.37), // TODO
-            STOW(0.44), // TODO
-            TOP(0.48); // TODO
+            BOTTOM(0),
+            INTAKE(0.03),
+            CLIMB_PREP(0.37),
+            STOW(0.44),
+            TOP(0.48);
 
             public final double value;
 
@@ -468,22 +467,23 @@ public class Constants {
         public static final double WHEEL_CIRCUMFERENCE = 2.0 * Math.PI * DRUM_RADIUS_METERS;
         public static final double ENCODER_ROTATIONS_TO_METERS = WHEEL_CIRCUMFERENCE / GEARING;
 
-        public static final double MIN_HEIGHT_METERS = 0; // TODO ask nate
-        public static final double MAX_HEIGHT_METERS = 0.48; // TODO ask nate
+        public static final double MIN_HEIGHT_METERS = 0;
+        public static final double MAX_HEIGHT_METERS = 0.48;
 
         public static final int CURRENT_LIMIT = 40;
 
-        public static final double kP = 38; // TODO
+        // 2/18/24
+        public static final double kP = 30;
         public static final double kI = 0;
-        public static final double kD = 3;
+        public static final double kD = 1;
         public static final double kS = 0.362388;
-        public static final double kG = -0.166392; // TODO
-        public static final double kV = 8.18532; // TODO
-        public static final double kA = 0.541548; // TODO
+        public static final double kG = -0.166392;
+        public static final double kV = 8.18532;
+        public static final double kA = 0.541548;
         public static final double TOLERANCE = 0.01;
 
-        public static final double MAX_VELOCITY_METERS_PER_SECOND = 1.533; // TODO
-        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0.9; // TODO
+        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0.5; // TODO
+        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0.5; // TODO
         public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
 
