@@ -23,7 +23,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.MutableMeasure;
@@ -189,9 +188,9 @@ public class Shooter extends SubsystemBase implements BaseShooter {
         return spinAtVelocityCommand(() -> {
             Pose3d target = DriverStation.getAlliance().isPresent()
                     && DriverStation.getAlliance().get() == Alliance.Red
-                            ? Reflector.reflectPose3d(FieldConstants.TARGET,
+                            ? Reflector.reflectPose3d(FieldConstants.SPEAKER_TARGET,
                                     FieldConstants.FIELD_LENGTH)
-                            : FieldConstants.TARGET;
+                            : FieldConstants.SPEAKER_TARGET;
 
             Transform3d diff = new Pose3d(poseSupplier.get()).minus(target);
             return SPEED_INTERPOLATOR.get(new Translation2d(diff.getX(), diff.getY()).getNorm());

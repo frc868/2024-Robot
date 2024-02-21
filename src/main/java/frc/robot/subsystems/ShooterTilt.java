@@ -204,9 +204,9 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
         return moveToArbitraryPositionCommand(() -> {
             Pose3d target = DriverStation.getAlliance().isPresent()
                     && DriverStation.getAlliance().get() == Alliance.Red
-                            ? Reflector.reflectPose3d(FieldConstants.TARGET,
+                            ? Reflector.reflectPose3d(FieldConstants.SPEAKER_TARGET,
                                     FieldConstants.FIELD_LENGTH)
-                            : FieldConstants.TARGET;
+                            : FieldConstants.SPEAKER_TARGET;
 
             Transform3d diff = new Pose3d(poseSupplier.get()).minus(target);
             this.distance = new Translation2d(diff.getX(), diff.getY()).getNorm();

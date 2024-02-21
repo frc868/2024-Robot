@@ -86,9 +86,6 @@ public class RobotContainer {
         return loopTime * 1000.0;
     };
 
-    @Log
-    private final Supplier<Double> shooterSpeed = () -> Constants.Shooter.SHOOTING_RPS;
-
     /**
      * Constructs the robot container.
      */

@@ -3,14 +3,10 @@ package frc.robot;
 import com.techhounds.houndutil.houndlib.oi.CommandVirpilJoystick;
 import com.techhounds.houndutil.houndlib.subsystems.BaseSwerveDrive.DriveMode;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.Constants.Climber.ClimberPosition;
 import frc.robot.Constants.Intake.IntakePosition;
-import frc.robot.Constants.NoteLift.NoteLiftPosition;
 import frc.robot.Constants.ShooterTilt.ShooterTiltPosition;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Drivetrain;
@@ -65,18 +61,24 @@ public class Controls {
         joystick.centerTopHatButton().whileTrue(intake.intakeFromSourceCommand())
                 .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
 
-        joystick.redButton().whileTrue(intake.ampScoreCommand(() -> joystick.getHID().getPinkieButton())
+        joystick.redButton().whileTrue(intake.ampPrepCommand()
                 .alongWith(shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.AMP_EJECT)));
+        joystick.pinkieButton().whileTrue(intake.ampScoreRollersCommand())
+                .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
     }
 
     public static void configureTestingControl(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
             ShooterTilt shooterTilt, Climber climber, NoteLift noteLift) {
         CommandXboxController controller = new CommandXboxController(port);
 
-        controller.povUp().onTrue(shooterTilt.movePositionDeltaCommand(() -> 0.01));
-        controller.povDown().onTrue(shooterTilt.movePositionDeltaCommand(() -> -0.01));
-        controller.povRight().onTrue(Commands.runOnce(() -> Constants.Shooter.SHOOTING_RPS += 1));
-        controller.povLeft().onTrue(Commands.runOnce(() -> Constants.Shooter.SHOOTING_RPS -= 1));
+        controller.povDown().whileTrue(RobotCommands.resetClimb(intake, shooter, shooterTilt, climber, noteLift));
+        controller.povUp().whileTrue(RobotCommands.deClimb(intake, shooter, shooterTilt, climber, noteLift));
+        controller.povRight()
+                .whileTrue(RobotCommands.moveToHomeCommand(intake, shooter, shooterTilt, climber, noteLift));
+        // controller.povLeft().whileTrue(climber.setOverridenSpeedCommand(() ->
+        // -controller.getLeftY()));
+        // controller.povRight().whileTrue(shooterTilt.moveToPositionCommand(() ->
+        // ShooterTiltPosition.CLIMB));
 
         // controller.x().whileTrue(shooter.spinAtVelocityCommand(() ->
         // Constants.Shooter.SHOOTING_RPS));
@@ -111,10 +113,10 @@ public class Controls {
         // controller.b().whileTrue(RobotCommands.targetSpeakerCommand(drivetrain,
         // shooter, shooterTilt));
 
-        // controller.x().whileTrue(shooter.sysIdQuasistatic(Direction.kForward));
-        // controller.y().whileTrue(shooter.sysIdQuasistatic(Direction.kReverse));
-        // controller.a().whileTrue(shooter.sysIdDynamic(Direction.kForward));
-        // controller.b().whileTrue(shooter.sysIdDynamic(Direction.kReverse));
+        // controller.x().whileTrue(climber.sysIdQuasistatic(Direction.kForward));
+        // controller.y().whileTrue(climber.sysIdQuasistatic(Direction.kReverse));
+        // controller.a().whileTrue(climber.sysIdDynamic(Direction.kForward));
+        // controller.b().whileTrue(climber.sysIdDynamic(Direction.kReverse));
         // controller.a().whileTrue(noteLift.moveToPositionCommand(() ->
         // NoteLiftPosition.BOTTOM));
         // controller.x().whileTrue(noteLift.moveToPositionCommand(() ->
@@ -128,6 +130,10 @@ public class Controls {
                 shooterTilt, climber, noteLift));
         controller.x().whileTrue(climber.climbToBottomCommand());
         controller.y().whileTrue(noteLift.scoreNoteCommand());
+
+        // controller.a()
+        // .whileTrue(drivetrain.targetStageCommand(() -> -controller.getLeftY(), () ->
+        // -controller.getLeftX()));
 
         // controller.y().whileTrue(noteLift.moveToPositionCommand(() ->
         // NoteLiftPosition.TOP));

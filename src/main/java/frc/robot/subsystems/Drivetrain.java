@@ -118,15 +118,14 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     private SwerveDrivePoseEstimator poseEstimator;
 
     @Log(groups = "control")
-    private ProfiledPIDController xPositionController = new ProfiledPIDController(
+    private ProfiledPIDController driveController = new ProfiledPIDController(
             XY_kP, XY_kI, XY_kD, XY_CONSTRAINTS);
 
     @Log(groups = "control")
-    private ProfiledPIDController yPositionController = new ProfiledPIDController(
-            XY_kP, XY_kI, XY_kD, XY_CONSTRAINTS);
+    private double poseDistance = 0.0;
 
     @Log(groups = "control")
-    private ProfiledPIDController thetaPositionController = new ProfiledPIDController(
+    private ProfiledPIDController rotationController = new ProfiledPIDController(
             THETA_kP, THETA_kI, THETA_kD, THETA_CONSTRAINTS);
 
     @Log(groups = "control")
@@ -161,6 +160,10 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
     private final SysIdRoutine sysIdSteer;
 
+    private Pose2d targettedStagePose = new Pose2d();
+    @Log
+    private Pose2d targettedPose = new Pose2d();
+
     /** Initializes the drivetrain. */
     public Drivetrain() {
         poseEstimator = new SwerveDrivePoseEstimator(
@@ -169,8 +172,9 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
                 getModulePositions(),
                 new Pose2d(0, 0, new Rotation2d()));
 
-        thetaPositionController.setTolerance(0.05);
-        thetaPositionController.enableContinuousInput(0, 2 * Math.PI);
+        driveController.setTolerance(0.05);
+        rotationController.setTolerance(0.05);
+        rotationController.enableContinuousInput(0, 2 * Math.PI);
 
         AutoManager.getInstance().setResetOdometryConsumer(this::resetPoseEstimator);
 
@@ -534,7 +538,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
             thetaSpeed = thetaSpeedLimiter.calculate(thetaSpeed);
 
             if (isControlledRotationEnabled) {
-                thetaSpeed = thetaPositionController.calculate(getRotation().getRadians());
+                thetaSpeed = rotationController.calculate(getRotation().getRadians());
             }
 
             // the speeds are initially values from -1.0 to 1.0, so we multiply by the max
@@ -551,14 +555,14 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     public Command controlledRotateCommand(DoubleSupplier angle, DriveMode driveMode) {
         return Commands.run(() -> {
             if (!isControlledRotationEnabled) {
-                thetaPositionController.reset(getRotation().getRadians());
+                rotationController.reset(getRotation().getRadians());
             }
             isControlledRotationEnabled = true;
             if (driveMode == DriveMode.FIELD_ORIENTED && DriverStation.getAlliance().isPresent()
                     && DriverStation.getAlliance().get() == Alliance.Red)
-                thetaPositionController.setGoal(angle.getAsDouble() + Math.PI);
+                rotationController.setGoal(angle.getAsDouble() + Math.PI);
             else
-                thetaPositionController.setGoal(angle.getAsDouble());
+                rotationController.setGoal(angle.getAsDouble());
         }).withName("drivetrain.controlledRotate");
     }
 
@@ -596,17 +600,32 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     @Override
-    public Command driveToPoseCommand(Pose2d pose) {
+    public Command driveToPoseCommand(Supplier<Pose2d> poseSupplier) {
         return runOnce(() -> {
-            xPositionController.reset(getPose().getX());
-            yPositionController.reset(getPose().getY());
-            thetaPositionController.reset(getPose().getRotation().getRadians());
+            driveController.reset(getPose().getTranslation().getDistance(poseSupplier.get().getTranslation()));
+            rotationController.reset(getPose().getRotation().getRadians());
         }).andThen(run(() -> {
-            driveClosedLoop(
+            poseDistance = getPose().getTranslation().getDistance(poseSupplier.get().getTranslation());
+            double driveVelocityScalar = driveController.getSetpoint().velocity + driveController.calculate(
+                    poseDistance, 0.0);
+            if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red) {
+                driveVelocityScalar *= -1;
+            }
+            if (driveController.atGoal())
+                driveVelocityScalar = 0.0;
+
+            Translation2d driveVelocity = new Pose2d(
+                    new Translation2d(),
+                    getPose().getTranslation().minus(poseSupplier.get().getTranslation()).getAngle())
+                    .transformBy(new Transform2d(driveVelocityScalar, 0, new Rotation2d()))
+                    .getTranslation();
+
+            drive(
                     new ChassisSpeeds(
-                            xPositionController.calculate(getPose().getX(), pose.getX()),
-                            yPositionController.calculate(getPose().getX(), pose.getY()),
-                            thetaPositionController.calculate(getPose().getX(), pose.getRotation().getRadians())),
+                            driveVelocity.getX(),
+                            driveVelocity.getY(),
+                            rotationController.calculate(getPose().getRotation().getRadians(),
+                                    poseSupplier.get().getRotation().getRadians())),
                     DriveMode.FIELD_ORIENTED);
         })).withName("drivetrain.driveToPose");
     }
@@ -718,12 +737,57 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     public double getShotDistance() {
         Pose3d target = DriverStation.getAlliance().isPresent()
                 && DriverStation.getAlliance().get() == Alliance.Red
-                        ? Reflector.reflectPose3d(FieldConstants.TARGET,
+                        ? Reflector.reflectPose3d(FieldConstants.SPEAKER_TARGET,
                                 FieldConstants.FIELD_LENGTH)
-                        : FieldConstants.TARGET;
+                        : FieldConstants.SPEAKER_TARGET;
 
         Transform3d diff = new Pose3d(getPose()).minus(target);
         return new Translation2d(diff.getX(), diff.getY()).getNorm();
-
     }
+
+    // public Command targetStageCommand(DoubleSupplier xSpeedSupplier,
+    // DoubleSupplier ySpeedSupplier) {
+    // SlewRateLimiter xSpeedLimiter = new
+    // SlewRateLimiter(JOYSTICK_INPUT_RATE_LIMIT);
+    // SlewRateLimiter ySpeedLimiter = new
+    // SlewRateLimiter(JOYSTICK_INPUT_RATE_LIMIT);
+
+    // return runOnce(() -> {
+    // List<Pose2d> stagePoses;
+    // if (DriverStation.getAlliance().isPresent() &&
+    // DriverStation.getAlliance().get() == Alliance.Red) {
+    // stagePoses = List.of(
+    // Reflector.reflectPose2d(FieldConstants.LEFT_CHAIN_CENTER,
+    // FieldConstants.FIELD_LENGTH),
+    // Reflector.reflectPose2d(FieldConstants.RIGHT_CHAIN_CENTER,
+    // FieldConstants.FIELD_LENGTH),
+    // Reflector.reflectPose2d(FieldConstants.FAR_CHAIN_CENTER,
+    // FieldConstants.FIELD_LENGTH));
+    // } else {
+    // stagePoses = List.of(
+    // FieldConstants.LEFT_CHAIN_CENTER,
+    // FieldConstants.RIGHT_CHAIN_CENTER,
+    // FieldConstants.FAR_CHAIN_CENTER);
+    // }
+    // targettedStagePose = getPose().nearest(stagePoses);
+    // }).andThen(driveToPoseCommand(() -> {
+    // double xSpeed = xSpeedSupplier.getAsDouble();
+    // xSpeed = MathUtil.applyDeadband(xSpeed, JOYSTICK_INPUT_DEADBAND);
+    // xSpeed = Math.copySign(Math.pow(xSpeed, JOYSTICK_CURVE_EXP), xSpeed);
+    // xSpeed = xSpeedLimiter.calculate(xSpeed);
+    // xSpeed *= SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND;
+    // System.out.println(xSpeed);
+
+    // double ySpeed = ySpeedSupplier.getAsDouble();
+    // ySpeed = MathUtil.applyDeadband(ySpeed, JOYSTICK_INPUT_DEADBAND);
+    // ySpeed = Math.copySign(Math.pow(ySpeed, JOYSTICK_CURVE_EXP), ySpeed);
+    // ySpeed = ySpeedLimiter.calculate(ySpeed);
+    // ySpeed *= SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND;
+
+    // targettedPose = targettedPose.plus(new Transform2d(xSpeed * 0.020, ySpeed *
+    // 0.020, new Rotation2d()));
+    // return targettedPose;
+    // })).withName("drivetrain.teleopDrive");
+    // }
+
 }

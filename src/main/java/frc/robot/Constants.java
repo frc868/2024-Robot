@@ -118,7 +118,7 @@ public class Constants {
                 SWERVE_MODULE_LOCATIONS[2],
                 SWERVE_MODULE_LOCATIONS[3]);
 
-        public static final double XY_kP = 1; // TODO
+        public static final double XY_kP = 10; // TODO
         public static final double XY_kI = 0; // TODO
         public static final double XY_kD = 0; // TODO
         public static final TrapezoidProfile.Constraints XY_CONSTRAINTS = new TrapezoidProfile.Constraints(
@@ -143,7 +143,8 @@ public class Constants {
             GROUND(-0.617905),
             AMP(1.18),
             STOW(1.4),
-            SOURCE(1.578);
+            SOURCE(1.578),
+            TOP(1.691);
 
             public final double value;
 
@@ -156,12 +157,12 @@ public class Constants {
         public static final int SECONDARY_ARM_MOTOR_ID = 10;
         public static final int ROLLER_MOTOR_ID = 13;
 
-        public static final int PRIMARY_SHOOTER_BEAM_ID = 0;
-        public static final int SECONDARY_SHOOTER_BEAM_ID = 1;
-        public static final int INTAKE_BEAM_ID = 3;
+        public static final int PRIMARY_SHOOTER_BEAM_ID = 1;
+        public static final int SECONDARY_SHOOTER_BEAM_ID = 0;
+        public static final int INTAKE_BEAM_ID = 2;
 
         public static final DCMotor MOTOR_GEARBOX_REPR = DCMotor.getNeoVortex(2);
-        public static final double GEARING = 45.0;
+        public static final double GEARING = 45.5;
         public static final double LENGTH_METERS = 0.23; // TODO simvalue
         public static final double MASS_KG = 4.082; // TODO simvalue
         public static final double MOMENT_OF_INERTIA_KG_METERS_SQUARED = SingleJointedArmSim.estimateMOI(
@@ -173,10 +174,10 @@ public class Constants {
 
         public static final double ENCODER_ROTATIONS_TO_RADIANS = 2 * Math.PI / GEARING;
         public static final int ARM_CURRENT_LIMIT = 40;
-        public static final int ROLLER_CURRENT_LIMIT = 55;
+        public static final int ROLLER_CURRENT_LIMIT = 65;
 
         // 2/14/24
-        public static final double kP = 3.0;
+        public static final double kP = 3.5;
         public static final double kI = 0.0;
         public static final double kD = 0.1;
         public static final double kS = 0.14936;
@@ -188,7 +189,7 @@ public class Constants {
         // max theoretical velocity: 15.777 rad/s
         // 2/14/24
         public static final double MAX_VELOCITY_RADIANS_PER_SECOND = 7;
-        public static final double MAX_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 5;
+        public static final double MAX_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 17;
         public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_VELOCITY_RADIANS_PER_SECOND, MAX_ACCELERATION_RADIANS_PER_SECOND_SQUARED);
 
@@ -211,7 +212,7 @@ public class Constants {
         public static final int CURRENT_LIMIT = 40;
 
         public static final double IDLE_RPS = 8;
-        public static double SHOOTING_RPS = 50;
+        public static final double BASE_SHOOTING_RPS = 50;
 
         // 2/18/24
         public static final double left_kP = 0.00016938;
@@ -257,7 +258,7 @@ public class Constants {
         // 0.160 max movement
         // 2/15/2024
         public static enum ShooterTiltPosition {
-            BOTTOM(Units.degreesToRadians(30)), // TODO simvalue
+            BOTTOM(0.389842), // TODO simvalue
             AMP_EJECT(0.601),
             STOW(Units.degreesToRadians(50)), // TODO simvalue
             CLIMB(1.176781), // TODO simvalue
@@ -414,7 +415,7 @@ public class Constants {
         public static final int MOTOR_ID = 15;
 
         public static final DCMotor MOTOR_GEARBOX_REPR = DCMotor.getNeoVortex(1);
-        public static final double GEARING = 25;
+        public static final double GEARING = 36;
         public static final double CARRIAGE_MASS_KG = Units.lbsToKilograms(3);
         public static final double DRUM_RADIUS_METERS = Units.inchesToMeters(0.75);
         public static final double WHEEL_CIRCUMFERENCE = 2.0 * Math.PI * DRUM_RADIUS_METERS;
@@ -423,16 +424,16 @@ public class Constants {
         public static final double MIN_HEIGHT_METERS = 0;
         public static final double MAX_HEIGHT_METERS = 0.61;
 
-        public static final int CURRENT_LIMIT = 60;
+        public static final int CURRENT_LIMIT = 50;
 
         // 2/18/24
-        public static final double kP = 10;
+        public static final double kP = 20;
         public static final double kI = 0;
         public static final double kD = 0;
-        public static final double kS = 0.1059372;
-        public static final double kG = -0.0512412;
-        public static final double kV = 22.3908;
-        public static final double kA = 0.494484;
+        public static final double kS = 0.0787596;
+        public static final double kG = -0.0558552;
+        public static final double kV = 32.5716;
+        public static final double kA = 1.099416;
         public static final double TOLERANCE = 0.01;
 
         public static final double MAX_VELOCITY_METERS_PER_SECOND = 0.55; // TODO
@@ -440,7 +441,7 @@ public class Constants {
         public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
 
-        public static final Pose3d BASE_COMPONENT_POSE = new Pose3d(0.177, 0, 0.198, new Rotation3d(0, 0, 0));
+        public static final Pose3d BASE_COMPONENT_POSE = new Pose3d(0.177, 0, 0.18, new Rotation3d(0, 0, 0));
     }
 
     public static final class NoteLift {
@@ -482,8 +483,8 @@ public class Constants {
         public static final double kA = 0.541548;
         public static final double TOLERANCE = 0.01;
 
-        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0.5; // TODO
-        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0.5; // TODO
+        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0.7; // TODO
+        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0.7; // TODO
         public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
 

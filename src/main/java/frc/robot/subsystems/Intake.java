@@ -1,6 +1,5 @@
 package frc.robot.subsystems;
 
-import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import com.revrobotics.CANSparkBase.IdleMode;
@@ -96,7 +95,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
 
     private final Trigger noteInShooterTrigger = new Trigger(shooterSecondaryBeam::get).negate();
 
-    private boolean prevIntakeBeamState = false;
+    private boolean prevIntakeBeamState = true;
 
     private final Trigger noteInIntakeTrigger = new Trigger(() -> {
         boolean triggered = !prevIntakeBeamState && intakeBeam.get();
@@ -288,7 +287,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
 
     public Command ampScoreRollersCommand() {
         return Commands.startEnd(
-                () -> setRollerVoltage(-3.5),
+                () -> setRollerVoltage(-4.25),
                 () -> setRollerVoltage(0))
                 .withName("intake.reverseRollers");
     }
@@ -324,14 +323,11 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
                 .withName("intake.intakeNoteAuto");
     }
 
-    public Command ampScoreCommand(BooleanSupplier runRollers) {
+    public Command ampPrepCommand() {
         return Commands.sequence(
                 moveToPositionCommand(() -> IntakePosition.GROUND),
                 moveToCurrentGoalCommand().alongWith(reverseRollersCommand()).until(noteInIntakeTrigger),
-                moveToPositionCommand(() -> IntakePosition.AMP),
-                moveToCurrentGoalCommand().until(runRollers),
-                moveToCurrentGoalCommand().alongWith(ampScoreRollersCommand()).withTimeout(1),
-                moveToPositionCommand(() -> IntakePosition.STOW)).withName("intake.ampScore");
+                moveToPositionCommand(() -> IntakePosition.AMP)).withName("intake.ampScore");
     }
 
     public Command simTriggerIntakeBeamCommand() {
