@@ -29,8 +29,6 @@ import frc.robot.subsystems.Vision;
 import java.util.ArrayList;
 import java.util.function.Supplier;
 
-import org.littletonrobotics.urcl.URCL;
-
 /**
  * The container for the robot. Contains subsystems, OI devices, and commands.
  */
@@ -96,7 +94,7 @@ public class RobotContainer {
         DataLogManager.logNetworkTables(true);
         DriverStation.startDataLog(DataLogManager.getLog());
         DataLogManager.start();
-        URCL.start();
+        // URCL.start();
         SignalLogger.setPath("/media/sda1/ctre-logs/");
         SignalLogger.start();
 
@@ -129,8 +127,8 @@ public class RobotContainer {
     }
 
     private void configureAuto() {
-        // AutoManager.getInstance().addRoutine(Autos.autoTest(drivetrain, intake,
-        // shooter, shooterTilt));
+        AutoManager.getInstance().addRoutine(Autos.autoTest(drivetrain, intake,
+                shooter, shooterTilt));
         // AutoManager.getInstance().addRoutine(Autos.autoA123(drivetrain, intake,
         // shooter, shooterTilt));
         // AutoManager.getInstance().addRoutine(Autos.autoBA123(drivetrain, intake,
