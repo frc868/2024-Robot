@@ -17,18 +17,19 @@ import frc.robot.subsystems.ShooterTilt;
 
 public class Autos {
 
-    // public static AutoRoutine autoTest(Drivetrain drivetrain, Intake intake,
-    // Shooter shooter, ShooterTilt shooterTilt) {
-    // PathPlannerPath path = PathPlannerPath.fromChoreoTrajectory("test.1");
+    public static AutoRoutine autoTest(Drivetrain drivetrain, Intake intake,
+            Shooter shooter, ShooterTilt shooterTilt) {
+        PathPlannerPath path = PathPlannerPath.fromChoreoTrajectory("test.1");
 
-    // Command command = Commands.parallel(
-    // Commands.sequence(
-    // drivetrain.followPathCommand(path)));
+        Command command = Commands.parallel(
+                Commands.sequence(
+                        drivetrain.followPathCommand(path)));
 
-    // return new AutoRoutine("test", command,
-    // List.of(path),
-    // new Pose2d(1.2992212, 5.547220706939697, new Rotation2d(Math.PI)));
-    // }
+        return new AutoRoutine("test", command,
+                List.of(path),
+                new Pose2d(path.getPreviewStartingHolonomicPose().getX(), path.getPreviewStartingHolonomicPose().getY(),
+                        new Rotation2d(Math.PI)));
+    }
 
     // public static AutoRoutine autoA123(Drivetrain drivetrain, Intake intake,
     // Shooter shooter, ShooterTilt shooterTilt) {
@@ -188,7 +189,7 @@ public class Autos {
         // drivetrain.followPathCommand(pathBToA));
 
         Command command = Commands.parallel(
-                shooterTilt.targetSpeakerCommand(drivetrain::getPose),
+                // shooterTilt.targetSpeakerCommand(drivetrain::getPose),
                 Commands.sequence(
                         RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
                         intake.moveToPositionCommand(() -> IntakePosition.GROUND),
