@@ -215,15 +215,17 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
 
     public Command climbToBottomCommand() {
         return run(() -> {
-            if (getPosition() > ClimberPosition.BOTTOM.value + 0.02) {
+            if (getPosition() > ClimberPosition.BOTTOM.value + 0.008) {
                 setVoltage(-9);
             } else {
                 setVoltage(-3);
             }
-        }).finallyDo(() -> {
-            pidController.reset(getPosition());
-            pidController.setGoal(getPosition());
-        });
+        })
+                .until(() -> getPosition() < ClimberPosition.BOTTOM.value + 0.008)
+                .finallyDo(() -> {
+                    pidController.reset(getPosition());
+                    pidController.setGoal(getPosition());
+                });
     }
 
     public Command resetControllersCommand() {
