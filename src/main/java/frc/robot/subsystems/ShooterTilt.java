@@ -36,6 +36,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.ShooterTilt.ShooterTiltPosition;
 import frc.robot.FieldConstants;
 
+import static frc.robot.Constants.Shooter.MAX_SHOOTING_DISTANCE;
 import static frc.robot.Constants.ShooterTilt.*;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -79,6 +80,8 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
 
     @Log
     private double distance = 0.0;
+    @Log
+    private boolean beyondMaxDistance = false;
 
     public ShooterTilt() {
         motor = SparkConfigurator.createSparkFlex(MOTOR_ID,
@@ -100,7 +103,7 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
                         },
                         this));
 
-        pidController.setTolerance(TOLERANCE);
+        pidController.setTolerance(0.02);
         pidController.setGoal(getLinearActuatorLength(ShooterTiltPosition.BOTTOM.value));
 
         new Thread(() -> {
@@ -210,6 +213,7 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
 
             Transform3d diff = new Pose3d(poseSupplier.get()).minus(target);
             this.distance = new Translation2d(diff.getX(), diff.getY()).getNorm();
+            this.beyondMaxDistance = distance > MAX_SHOOTING_DISTANCE;
             return ANGLE_INTERPOLATOR.get(distance);
         }).withName("shooterTilt.targetSpeaker");
     }
@@ -262,7 +266,7 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
     }
 
     public boolean atGoal() {
-        return pidController.atGoal();
+        return pidController.atSetpoint() && !beyondMaxDistance;
     }
 
     public Command resetControllersCommand() {
