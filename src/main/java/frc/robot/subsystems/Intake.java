@@ -180,7 +180,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
 
     @Override
     public void resetPosition() {
-        leftArmMotor.getEncoder().setPosition(MAX_ANGLE_RADIANS);
+        leftArmMotor.getEncoder().setPosition(IntakePosition.GROUND.value);
     }
 
     @Override
@@ -280,7 +280,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
 
     public Command sourceIntakeRollersCommand() {
         return Commands.startEnd(
-                () -> setRollerVoltage(3.5),
+                () -> setRollerVoltage(5),
                 () -> setRollerVoltage(0))
                 .withName("intake.reverseRollers");
     }
