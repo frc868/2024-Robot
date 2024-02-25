@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import java.util.List;
 import java.util.Set;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -20,6 +21,7 @@ import com.techhounds.houndutil.houndlib.swerve.KrakenCoaxialSwerveModule;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
 import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -34,6 +36,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Distance;
@@ -160,9 +163,15 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
     private final SysIdRoutine sysIdSteer;
 
+    @Log
     private Pose2d targettedStagePose = new Pose2d();
     @Log
     private Pose2d targettedPose = new Pose2d();
+
+    @Log
+    private double distance = 0.0;
+    @Log
+    private ProfiledPIDController yPidController = new ProfiledPIDController(XY_kP, XY_kI, XY_kD, XY_CONSTRAINTS);
 
     /** Initializes the drivetrain. */
     public Drivetrain() {
@@ -531,7 +540,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
             xSpeed = Math.copySign(Math.pow(xSpeed, JOYSTICK_CURVE_EXP), xSpeed);
             ySpeed = Math.copySign(Math.pow(ySpeed, JOYSTICK_CURVE_EXP), ySpeed);
-            thetaSpeed = Math.copySign(Math.pow(thetaSpeed, JOYSTICK_CURVE_EXP), thetaSpeed);
+            thetaSpeed = Math.copySign(Math.pow(thetaSpeed, JOYSTICK_ROT_CURVE_EXP), thetaSpeed);
 
             xSpeed = xSpeedLimiter.calculate(xSpeed);
             ySpeed = ySpeedLimiter.calculate(ySpeed);
@@ -641,10 +650,10 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
                         new PIDConstants(PATH_FOLLOWING_TRANSLATION_kP, 0, 0),
                         new PIDConstants(PATH_FOLLOWING_ROTATION_kP, 0, 0),
                         SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND,
-                        0.41,
+                        0.3727,
                         new ReplanningConfig()),
                 () -> false,
-                this).withName("drivetrain.followPath");
+                this).finallyDo(this::stop).withName("drivetrain.followPath");
     }
 
     @Override
@@ -745,49 +754,82 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
         return new Translation2d(diff.getX(), diff.getY()).getNorm();
     }
 
-    // public Command targetStageCommand(DoubleSupplier xSpeedSupplier,
-    // DoubleSupplier ySpeedSupplier) {
-    // SlewRateLimiter xSpeedLimiter = new
-    // SlewRateLimiter(JOYSTICK_INPUT_RATE_LIMIT);
-    // SlewRateLimiter ySpeedLimiter = new
-    // SlewRateLimiter(JOYSTICK_INPUT_RATE_LIMIT);
+    public Command targetStageCommand(Supplier<Double> xJoystickSupplier,
+            Supplier<Double> yJoystickSupplier) {
+        SlewRateLimiter xSpeedLimiter = new SlewRateLimiter(JOYSTICK_INPUT_RATE_LIMIT);
+        SlewRateLimiter ySpeedLimiter = new SlewRateLimiter(JOYSTICK_INPUT_RATE_LIMIT);
 
-    // return runOnce(() -> {
-    // List<Pose2d> stagePoses;
-    // if (DriverStation.getAlliance().isPresent() &&
-    // DriverStation.getAlliance().get() == Alliance.Red) {
-    // stagePoses = List.of(
-    // Reflector.reflectPose2d(FieldConstants.LEFT_CHAIN_CENTER,
-    // FieldConstants.FIELD_LENGTH),
-    // Reflector.reflectPose2d(FieldConstants.RIGHT_CHAIN_CENTER,
-    // FieldConstants.FIELD_LENGTH),
-    // Reflector.reflectPose2d(FieldConstants.FAR_CHAIN_CENTER,
-    // FieldConstants.FIELD_LENGTH));
-    // } else {
-    // stagePoses = List.of(
-    // FieldConstants.LEFT_CHAIN_CENTER,
-    // FieldConstants.RIGHT_CHAIN_CENTER,
-    // FieldConstants.FAR_CHAIN_CENTER);
-    // }
-    // targettedStagePose = getPose().nearest(stagePoses);
-    // }).andThen(driveToPoseCommand(() -> {
-    // double xSpeed = xSpeedSupplier.getAsDouble();
-    // xSpeed = MathUtil.applyDeadband(xSpeed, JOYSTICK_INPUT_DEADBAND);
-    // xSpeed = Math.copySign(Math.pow(xSpeed, JOYSTICK_CURVE_EXP), xSpeed);
-    // xSpeed = xSpeedLimiter.calculate(xSpeed);
-    // xSpeed *= SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND;
-    // System.out.println(xSpeed);
+        ProfiledPIDController yPidController = new ProfiledPIDController(XY_kP, XY_kI, XY_kD,
+                new TrapezoidProfile.Constraints(1, 1));
 
-    // double ySpeed = ySpeedSupplier.getAsDouble();
-    // ySpeed = MathUtil.applyDeadband(ySpeed, JOYSTICK_INPUT_DEADBAND);
-    // ySpeed = Math.copySign(Math.pow(ySpeed, JOYSTICK_CURVE_EXP), ySpeed);
-    // ySpeed = ySpeedLimiter.calculate(ySpeed);
-    // ySpeed *= SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND;
+        return runOnce(() -> {
+            List<Pose2d> stagePoses;
+            Pose2d currentPose = getPose();
+            if (DriverStation.getAlliance().isPresent() &&
+                    DriverStation.getAlliance().get() == Alliance.Red) {
+                stagePoses = List.of(
+                        Reflector.reflectPose2d(FieldConstants.LEFT_CHAIN_CENTER,
+                                FieldConstants.FIELD_LENGTH),
+                        Reflector.reflectPose2d(FieldConstants.RIGHT_CHAIN_CENTER,
+                                FieldConstants.FIELD_LENGTH),
+                        Reflector.reflectPose2d(FieldConstants.FAR_CHAIN_CENTER,
+                                FieldConstants.FIELD_LENGTH));
+            } else {
+                stagePoses = List.of(
+                        FieldConstants.LEFT_CHAIN_CENTER,
+                        FieldConstants.RIGHT_CHAIN_CENTER,
+                        FieldConstants.FAR_CHAIN_CENTER);
+            }
 
-    // targettedPose = targettedPose.plus(new Transform2d(xSpeed * 0.020, ySpeed *
-    // 0.020, new Rotation2d()));
-    // return targettedPose;
-    // })).withName("drivetrain.teleopDrive");
-    // }
+            targettedStagePose = currentPose.nearest(stagePoses);
+        }).andThen(run(() -> {
+
+            double cosTheta = targettedStagePose.getRotation().getCos();
+            double sinTheta = targettedStagePose.getRotation().getSin();
+
+            double A = -sinTheta;
+            double B = cosTheta;
+            double C = -(A * targettedStagePose.getX() + B * targettedStagePose.getY());
+
+            // formula for distance between point and line given Ax + By + C = 0
+            distance = (A * getPose().getX() + B * getPose().getY() + C) / Math.sqrt(A * A + B * B);
+
+            double ySpeedRelStage = yPidController.calculate(distance, 0.0);
+
+            double xJoystick = xJoystickSupplier.get();
+            xJoystick = MathUtil.applyDeadband(xJoystick, JOYSTICK_INPUT_DEADBAND);
+            xJoystick = Math.copySign(Math.pow(xJoystick, JOYSTICK_CURVE_EXP), xJoystick);
+            xJoystick = xSpeedLimiter.calculate(xJoystick);
+            xJoystick *= SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND / 2.0;
+            if (DriverStation.getAlliance().isPresent() &&
+                    DriverStation.getAlliance().get() == Alliance.Red) {
+                xJoystick *= -1;
+            }
+
+            double yJoystick = yJoystickSupplier.get();
+            yJoystick = MathUtil.applyDeadband(yJoystick, JOYSTICK_INPUT_DEADBAND);
+            yJoystick = Math.copySign(Math.pow(yJoystick, JOYSTICK_CURVE_EXP), yJoystick);
+            yJoystick = ySpeedLimiter.calculate(yJoystick);
+            yJoystick *= SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND / 2.0;
+
+            double lineDirX = Math.cos(targettedStagePose.getRotation().getRadians());
+            double lineDirY = Math.sin(targettedStagePose.getRotation().getRadians());
+
+            double xSpeedRelStage = xJoystick * lineDirX + yJoystick * lineDirY;
+
+            double xSpeed = xSpeedRelStage * cosTheta - ySpeedRelStage * sinTheta;
+            double ySpeed = xSpeedRelStage * sinTheta + ySpeedRelStage * cosTheta;
+
+            if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red) {
+                xSpeed *= -1;
+                ySpeed *= -1;
+            }
+
+            double thetaSpeed = rotationController.calculate(getRotation().getRadians(),
+                    targettedStagePose.getRotation().getRadians());
+
+            drive(new ChassisSpeeds(xSpeed, ySpeed, thetaSpeed), DriveMode.FIELD_ORIENTED);
+        })).withName("drivetrain.teleopDrive");
+    }
 
 }
