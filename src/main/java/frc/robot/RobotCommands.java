@@ -2,6 +2,8 @@ package frc.robot;
 
 import static frc.robot.Constants.Shooter.BASE_SHOOTING_RPS;
 
+import java.util.function.Supplier;
+
 import com.techhounds.houndutil.houndauto.Reflector;
 import com.techhounds.houndutil.houndlib.subsystems.BaseSwerveDrive.DriveMode;
 
@@ -49,13 +51,26 @@ public class RobotCommands {
     }
 
     public static Command shootCommand(Drivetrain drivetrain, Intake intake, Shooter shooter, ShooterTilt shooterTilt) {
-        return Commands.sequence(
-                Commands.parallel(
-                        shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
-                        shooter.targetSpeakerCommand(drivetrain::getPose).asProxy())
-                        .until(() -> shooter.atGoal() && shooterTilt.atGoal()),
-                shooter.targetSpeakerCommand(drivetrain::getPose).asProxy().alongWith(intake.runRollersCommand())
-                        .withTimeout(1));
+        return Commands.parallel(
+                drivetrain.controlledRotateCommand(() -> {
+                    Pose2d target = DriverStation.getAlliance().isPresent()
+                            && DriverStation.getAlliance().get() == Alliance.Red
+                                    ? Reflector.reflectPose2d(FieldConstants.SPEAKER_TARGET.toPose2d(),
+                                            FieldConstants.FIELD_LENGTH)
+                                    : FieldConstants.SPEAKER_TARGET.toPose2d();
+                    Transform2d diff = drivetrain.getPose().minus(target);
+                    Rotation2d rot = new Rotation2d(diff.getX(), diff.getY());
+                    rot = rot.plus(new Rotation2d(Math.PI));
+                    return rot.getRadians();
+                }, DriveMode.FIELD_ORIENTED),
+                Commands.sequence(
+                        Commands.parallel(
+                                shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
+                                shooter.targetSpeakerCommand(drivetrain::getPose).asProxy())
+                                .until(() -> shooter.atGoal() && shooterTilt.atGoal()),
+                        shooter.targetSpeakerCommand(drivetrain::getPose).asProxy()
+                                .alongWith(intake.runRollersCommand())
+                                .withTimeout(1)));
     }
 
     public static Command intakeToNoteLift(Shooter shooter, ShooterTilt shooterTilt, NoteLift noteLift) {
@@ -65,10 +80,12 @@ public class RobotCommands {
                 noteLift.moveToPositionCommand(() -> NoteLiftPosition.INTAKE).asProxy());
     }
 
-    public static Command prepareClimb(Intake intake, Shooter shooter, ShooterTilt shooterTilt, Climber climber,
+    public static Command prepareClimb(Supplier<Double> xSpeedSupplier, Supplier<Double> ySpeedSupplier,
+            Drivetrain drivetrain, Intake intake, Shooter shooter, ShooterTilt shooterTilt, Climber climber,
             NoteLift noteLift) {
         return Commands.parallel(
                 new ScheduleCommand(shooter.stopCommand()),
+                drivetrain.targetStageCommand(xSpeedSupplier, ySpeedSupplier),
                 shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.CLIMB).asProxy(),
                 intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
                 noteLift.moveToPositionCommand(() -> NoteLiftPosition.CLIMB_PREP).asProxy(),
