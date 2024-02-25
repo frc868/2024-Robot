@@ -45,17 +45,21 @@ public class Controls {
                 .whileTrue(drivetrain.controlledRotateCommand(() -> Math.toRadians(270),
                         DriveMode.FIELD_ORIENTED));
 
-        joystick.centerBottomHatButton().onTrue(drivetrain.wheelLockCommand());
+        // joystick.centerTopHatButton().whileTrue(
+        // drivetrain.targetStageCommand2(
+        // () -> -joystick.getY() * speedMultiplier,
+        // () -> -joystick.getX() * speedMultiplier));
 
-        joystick.centerTopHatUp().whileTrue(intake.moveToPositionCommand(() -> IntakePosition.STOW));
-        joystick.centerTopHatLeft().whileTrue(intake.moveToPositionCommand(() -> IntakePosition.AMP));
-        joystick.centerTopHatDown().whileTrue(intake.moveToPositionCommand(() -> IntakePosition.GROUND));
+        joystick.triggerSoftPress().and(joystick.flipTriggerIn().negate())
+                .whileTrue(RobotCommands.targetSpeakerCommand(drivetrain, shooter,
+                        shooterTilt));
+        joystick.triggerHardPress().and(joystick.flipTriggerIn().negate())
+                .whileTrue(RobotCommands.shootCommand(drivetrain,
+                        intake, shooter, shooterTilt));
 
-        joystick.triggerSoftPress()
-                .whileTrue(RobotCommands.targetSpeakerCommand(drivetrain, shooter, shooterTilt));
-        joystick.triggerHardPress().whileTrue(RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt));
-
-        joystick.blackThumbButton().whileTrue(intake.intakeNoteCommand())
+        joystick.blackThumbButton()
+                .whileTrue(intake.intakeNoteCommand()
+                        .alongWith(shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.INTAKE).asProxy()))
                 .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
 
         joystick.centerTopHatButton().whileTrue(intake.intakeFromSourceCommand())
@@ -65,6 +69,16 @@ public class Controls {
                 .alongWith(shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.AMP_EJECT)));
         joystick.pinkieButton().whileTrue(intake.ampScoreRollersCommand())
                 .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
+
+        joystick.bottomHatButton().or(joystick.bottomHatLeft())
+                .onTrue(RobotCommands.intakeToNoteLift(shooter, shooterTilt,
+                        noteLift));
+        joystick.flipTriggerIn()
+                .whileTrue(RobotCommands.prepareClimb(() -> -joystick.getY(), () -> -joystick.getX(), drivetrain,
+                        intake, shooter,
+                        shooterTilt, climber, noteLift));
+        joystick.flipTriggerIn().and(joystick.triggerSoftPress().or(joystick.triggerHardPress()))
+                .whileTrue(climber.climbToBottomCommand().andThen(noteLift.scoreNoteCommand()));
     }
 
     public static void configureTestingControl(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
@@ -75,6 +89,10 @@ public class Controls {
         controller.povUp().whileTrue(RobotCommands.deClimb(intake, shooter, shooterTilt, climber, noteLift));
         controller.povRight()
                 .whileTrue(RobotCommands.moveToHomeCommand(intake, shooter, shooterTilt, climber, noteLift));
+
+        // controller.a()
+        // .whileTrue(drivetrain.targetStageCommand2(() -> -controller.getLeftY(), () ->
+        // -controller.getLeftX()));
         // controller.povLeft().whileTrue(climber.setOverridenSpeedCommand(() ->
         // -controller.getLeftY()));
         // controller.povRight().whileTrue(shooterTilt.moveToPositionCommand(() ->
@@ -113,10 +131,10 @@ public class Controls {
         // controller.b().whileTrue(RobotCommands.targetSpeakerCommand(drivetrain,
         // shooter, shooterTilt));
 
-        // controller.x().whileTrue(climber.sysIdQuasistatic(Direction.kForward));
-        // controller.y().whileTrue(climber.sysIdQuasistatic(Direction.kReverse));
-        // controller.a().whileTrue(climber.sysIdDynamic(Direction.kForward));
-        // controller.b().whileTrue(climber.sysIdDynamic(Direction.kReverse));
+        // controller.x().whileTrue(drivetrain.sysIdDriveQuasistatic(Direction.kForward));
+        // controller.y().whileTrue(drivetrain.sysIdDriveQuasistatic(Direction.kReverse));
+        // controller.a().whileTrue(drivetrain.sysIdDriveDynamic(Direction.kForward));
+        // controller.b().whileTrue(drivetrain.sysIdDriveDynamic(Direction.kReverse));
         // controller.a().whileTrue(noteLift.moveToPositionCommand(() ->
         // NoteLiftPosition.BOTTOM));
         // controller.x().whileTrue(noteLift.moveToPositionCommand(() ->
@@ -124,11 +142,6 @@ public class Controls {
         // controller.y().whileTrue(noteLift.moveToPositionCommand(() ->
         // NoteLiftPosition.TOP));
 
-        controller.a().whileTrue(RobotCommands.intakeToNoteLift(shooter, shooterTilt,
-                noteLift));
-        controller.b().whileTrue(RobotCommands.prepareClimb(intake, shooter,
-                shooterTilt, climber, noteLift));
-        controller.x().whileTrue(climber.climbToBottomCommand());
         controller.y().whileTrue(noteLift.scoreNoteCommand());
 
         // controller.a()
