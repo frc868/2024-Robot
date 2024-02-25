@@ -63,34 +63,33 @@ public class Constants {
         public static final double BACK_RIGHT_OFFSET = 0.48583984375;
 
         /** Distance between left and right wheels. */
-        public static final double TRACK_WIDTH_METERS = 0.52832;
+        public static final double TRACK_WIDTH_METERS = 0.527;
         /** Distance between front and back wheels. */
-        public static final double WHEEL_BASE_METERS = 0.52832;
+        public static final double WHEEL_BASE_METERS = 0.527;
 
         public static final SwerveConstants SWERVE_CONSTANTS = new SwerveConstants();
         static {
-            // 2/17/24
-            SWERVE_CONSTANTS.DRIVE_kP = 1.1503 * (2.0 * Math.PI * 0.0478);
+            // 2/24/24
+            SWERVE_CONSTANTS.DRIVE_kP = 0.25245;
             SWERVE_CONSTANTS.DRIVE_kI = 0.0;
             SWERVE_CONSTANTS.DRIVE_kD = 0.0;
-            SWERVE_CONSTANTS.DRIVE_kS = 0.18819 * (2.0 * Math.PI * 0.0478);
-            SWERVE_CONSTANTS.DRIVE_kV = 2.2181 * (2.0 * Math.PI * 0.0478);
-            SWERVE_CONSTANTS.DRIVE_kA = 0.6 * (2.0 * Math.PI * 0.0478);
+            SWERVE_CONSTANTS.DRIVE_kS = 0.25;
+            SWERVE_CONSTANTS.DRIVE_kV = 0.6924;
+            SWERVE_CONSTANTS.DRIVE_kA = 0.02734;
             SWERVE_CONSTANTS.STEER_kP = 60.0; // TODO simvalue
             SWERVE_CONSTANTS.STEER_kI = 0.0;
             SWERVE_CONSTANTS.STEER_kD = 1.0; // TODO simvalue
 
             SWERVE_CONSTANTS.DRIVE_GEARING = 5.357;
             SWERVE_CONSTANTS.STEER_GEARING = 150.0 / 7.0;
-            SWERVE_CONSTANTS.WHEEL_CIRCUMFERENCE = 2.0 * Math.PI * 0.0478 * 1.01071356378; // 0.3003362577
+            SWERVE_CONSTANTS.WHEEL_CIRCUMFERENCE = 2.0 * Math.PI * 0.04883780332; // 0.3003362577
             SWERVE_CONSTANTS.DRIVE_ENCODER_ROTATIONS_TO_METERS = SWERVE_CONSTANTS.WHEEL_CIRCUMFERENCE
                     / SWERVE_CONSTANTS.DRIVE_GEARING;
             SWERVE_CONSTANTS.STEER_ENCODER_ROTATIONS_TO_RADIANS = 2 * Math.PI
                     / SWERVE_CONSTANTS.STEER_GEARING;
 
-            // 64.4
-            SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND = 5.583; // TODO simvalue
-            SWERVE_CONSTANTS.MAX_DRIVING_ACCELERATION_METERS_PER_SECOND_SQUARED = 19.3416549959; // TODO simvalue
+            SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND = 4.54; // TODO simvalue
+            SWERVE_CONSTANTS.MAX_DRIVING_ACCELERATION_METERS_PER_SECOND_SQUARED = 8; // TODO simvalue
             SWERVE_CONSTANTS.MAX_STEER_VELOCITY_RADIANS_PER_SECOND = 100 * 2 * Math.PI; // TODO simvalue
             // max velocity in 1/3 sec
             SWERVE_CONSTANTS.MAX_STEER_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 3 * 100 * 2 * Math.PI; // TODO simvalue
@@ -118,21 +117,21 @@ public class Constants {
                 SWERVE_MODULE_LOCATIONS[2],
                 SWERVE_MODULE_LOCATIONS[3]);
 
-        public static final double XY_kP = 10; // TODO
-        public static final double XY_kI = 0; // TODO
-        public static final double XY_kD = 0; // TODO
+        public static final double XY_kP = 1.4;
+        public static final double XY_kI = 0;
+        public static final double XY_kD = 0.05;
         public static final TrapezoidProfile.Constraints XY_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND,
                 SWERVE_CONSTANTS.MAX_DRIVING_ACCELERATION_METERS_PER_SECOND_SQUARED);
 
-        public static final double THETA_kP = 1.5; // TODO
+        public static final double THETA_kP = 1.0; // TODO
         public static final double THETA_kI = 0; // TODO
-        public static final double THETA_kD = 0.1; // TODO
+        public static final double THETA_kD = 0.02; // TODO
         public static final TrapezoidProfile.Constraints THETA_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND, MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED);
 
-        public static final double PATH_FOLLOWING_TRANSLATION_kP = 5; // TODO simvalue
-        public static final double PATH_FOLLOWING_ROTATION_kP = 0.5; // TODO simvalue
+        public static final double PATH_FOLLOWING_TRANSLATION_kP = 9.0; // TODO simvalue
+        public static final double PATH_FOLLOWING_ROTATION_kP = 9.0; // TODO simvalue
     }
 
     public static final class Intake {
@@ -143,7 +142,7 @@ public class Constants {
             GROUND(-0.617905),
             AMP(1.18),
             STOW(1.4),
-            SOURCE(1.578),
+            SOURCE(1.44),
             TOP(1.691);
 
             public final double value;
@@ -174,7 +173,7 @@ public class Constants {
 
         public static final double ENCODER_ROTATIONS_TO_RADIANS = 2 * Math.PI / GEARING;
         public static final int ARM_CURRENT_LIMIT = 40;
-        public static final int ROLLER_CURRENT_LIMIT = 65;
+        public static final int ROLLER_CURRENT_LIMIT = 55;
 
         // 2/14/24
         public static final double kP = 3.5;
@@ -211,7 +210,7 @@ public class Constants {
                 * Math.pow(WHEEL_RADIUS, 2);
         public static final int CURRENT_LIMIT = 40;
 
-        public static final double IDLE_RPS = 8;
+        public static final double IDLE_RPS = 15;
         public static final double BASE_SHOOTING_RPS = 50;
 
         // 2/18/24
@@ -239,9 +238,9 @@ public class Constants {
         public static final InterpolatingDoubleTreeMap SPEED_INTERPOLATOR = new InterpolatingDoubleTreeMap();
         static {
             // 2/17/24
-            SPEED_INTERPOLATOR.put(1.142, 50.0);
-            SPEED_INTERPOLATOR.put(1.511, 60.0);
-            SPEED_INTERPOLATOR.put(1.995, 60.0);
+            SPEED_INTERPOLATOR.put(1.142, 55.0);
+            SPEED_INTERPOLATOR.put(1.511, 65.0);
+            SPEED_INTERPOLATOR.put(1.995, 65.0);
             SPEED_INTERPOLATOR.put(2.2845, 65.0);
             SPEED_INTERPOLATOR.put(2.593, 65.0);
             SPEED_INTERPOLATOR.put(2.87, 75.0);
@@ -252,6 +251,8 @@ public class Constants {
             SPEED_INTERPOLATOR.put(4.597, 75.0);
             SPEED_INTERPOLATOR.put(5.1322, 75.0);
         }
+
+        public static final double MAX_SHOOTING_DISTANCE = 5.1322;
     }
 
     public static final class ShooterTilt {
@@ -260,6 +261,7 @@ public class Constants {
         public static enum ShooterTiltPosition {
             BOTTOM(0.389842), // TODO simvalue
             AMP_EJECT(0.601),
+            INTAKE(0.7033), // TODO simvalue
             STOW(Units.degreesToRadians(50)), // TODO simvalue
             CLIMB(1.176781), // TODO simvalue
             SUBWOOFER(0.987); // TODO simvalue
@@ -288,14 +290,14 @@ public class Constants {
         public static final int CURRENT_LIMIT = 25;
 
         // 2/14/2024
-        public static final double kP = 200;
+        public static final double kP = 400;
         public static final double kI = 0;
         public static final double kD = 2;
         public static final double kS = 0.14184;
         public static final double kG = 0.026363;
         public static final double kV = 75.803;
         public static final double kA = 8;
-        public static final double TOLERANCE = 0.005;
+        public static final double TOLERANCE = 0.02;
 
         public static final double MAX_VELOCITY_METERS_PER_SECOND = 0.3;
         public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0.32;
@@ -394,8 +396,8 @@ public class Constants {
             ANGLE_INTERPOLATOR.put(3.478, 0.53408);
             ANGLE_INTERPOLATOR.put(3.834, 0.506119);
             ANGLE_INTERPOLATOR.put(4.239, 0.480486);
-            ANGLE_INTERPOLATOR.put(4.597, 0.432625);
-            ANGLE_INTERPOLATOR.put(5.1322, 0.4322);
+            ANGLE_INTERPOLATOR.put(4.597, 0.46);
+            ANGLE_INTERPOLATOR.put(5.1322, 0.44);
         }
     }
 
@@ -492,8 +494,9 @@ public class Constants {
     }
 
     public static final class Vision {
-        public static final Matrix<N3, N1> SINGLE_TAG_STD_DEVS = VecBuilder.fill(6, 6, 12);
-        public static final Matrix<N3, N1> MULTI_TAG_STD_DEVS = VecBuilder.fill(0.5, 0.5, 1);
+        public static final Matrix<N3, N1> SINGLE_TAG_STD_DEVS = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE,
+                Double.MAX_VALUE);
+        public static final Matrix<N3, N1> MULTI_TAG_STD_DEVS = VecBuilder.fill(0.01, 0.01, 1);
 
         public static final PhotonCameraConstants CAMERA_CONSTANTS = new PhotonCameraConstants();
         static {
@@ -542,6 +545,7 @@ public class Constants {
         public static final double JOYSTICK_INPUT_RATE_LIMIT = 15.0; // TODO
         public static final double JOYSTICK_INPUT_DEADBAND = 0.05; // TODO
         public static final double JOYSTICK_CURVE_EXP = 2; // TODO
+        public static final double JOYSTICK_ROT_CURVE_EXP = 3; // TODO
     }
 
     public static final class LEDs {
