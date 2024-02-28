@@ -21,10 +21,12 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.NoteLift;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterTilt;
 import frc.robot.subsystems.Vision;
+import frc.robot.utils.TrajectoryCalcs;
 
 import java.util.ArrayList;
 import java.util.function.Supplier;
@@ -64,9 +66,9 @@ public class RobotContainer {
     @SendableLog(groups = { "wpilib", "subsystems" })
     private final Vision vision = new Vision();
 
-    // @Log(groups = "subsystems")
-    // @SendableLog(groups = { "wpilib", "subsystems" })
-    // private final LEDs leds = new LEDs();
+    @Log(groups = "subsystems")
+    @SendableLog(groups = { "wpilib", "subsystems" })
+    private final LEDs leds = new LEDs();
 
     @Log(groups = { "subsystems", "misc" })
     private final PowerDistribution pdh = new PowerDistribution();
@@ -82,6 +84,18 @@ public class RobotContainer {
         double loopTime = Timer.getFPGATimestamp() - prevLoopTime;
         prevLoopTime = timestamp;
         return loopTime * 1000.0;
+    };
+
+    @Log
+    private final Supplier<Pose3d> shootOnTheMovePose = () -> {
+        return TrajectoryCalcs.calculateEffectiveTargetLocation(drivetrain.getPose(),
+                drivetrain.getFieldRelativeSpeeds(), drivetrain.getFieldRelativeAccelerations());
+    };
+    @Log
+    private final Supplier<Double> shotTime = () -> {
+        return TrajectoryCalcs.getTimeToShoot(drivetrain.getPose(),
+                TrajectoryCalcs.calculateEffectiveTargetLocation(drivetrain.getPose(),
+                        drivetrain.getFieldRelativeSpeeds(), drivetrain.getFieldRelativeAccelerations()));
     };
 
     /**
@@ -118,12 +132,16 @@ public class RobotContainer {
                         noteLift.resetControllersCommand(),
                         climber.resetControllersCommand()).withName("resetControllers"));
 
+        new Trigger(() -> {
+            return intake.getInitialized();
+        }).onTrue(GlobalStates.INITIALIZED.enableCommand());
+
     }
 
     private void configureButtonBindings() {
         Controls.configureDriverControl(0, drivetrain, intake, shooter, shooterTilt, climber, noteLift);
         Controls.configureTestingControl(1, drivetrain, intake, shooter, shooterTilt, climber, noteLift);
-        NTCommands.configureNTCommands(drivetrain, intake, shooter, shooterTilt, climber, noteLift);
+        NTCommands.configureNTCommands(drivetrain, intake, shooter, shooterTilt, climber, noteLift, leds);
     }
 
     private void configureAuto() {
