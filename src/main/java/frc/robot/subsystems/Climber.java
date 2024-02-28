@@ -73,6 +73,8 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
 
     private Supplier<Double> shooterTiltAngleSupplier;
 
+    private boolean initialized = false;
+
     public Climber(Supplier<Double> shooterTiltPositionSupplier) {
         motor = SparkConfigurator.createSparkFlex(
                 MOTOR_ID, MotorType.kBrushless, true,
@@ -231,5 +233,15 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
     public Command resetControllersCommand() {
         return Commands.runOnce(() -> pidController.reset(getPosition()))
                 .andThen(Commands.runOnce(() -> pidController.setGoal(getPosition())));
+    }
+
+    public boolean getInitialized() {
+        return initialized;
+    }
+
+    public Command enableInitializedCommand() {
+        return Commands.runOnce(() -> {
+            initialized = true;
+        }).withName("climber.enableInitialized");
     }
 }

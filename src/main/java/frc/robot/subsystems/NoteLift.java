@@ -71,6 +71,8 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
 
     private final SysIdRoutine sysIdRoutine;
 
+    private boolean initialized = false;
+
     public NoteLift() {
         motor = SparkConfigurator.createSparkFlex(
                 MOTOR_ID, MotorType.kBrushless, true,
@@ -218,5 +220,15 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
     public Command resetControllersCommand() {
         return Commands.runOnce(() -> pidController.reset(getPosition()))
                 .andThen(Commands.runOnce(() -> pidController.setGoal(getPosition())));
+    }
+
+    public boolean getInitialized() {
+        return initialized;
+    }
+
+    public Command enableInitializedCommand() {
+        return Commands.runOnce(() -> {
+            initialized = true;
+        }).withName("shooterTilt.enableInitialized");
     }
 }
