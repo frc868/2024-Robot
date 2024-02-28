@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.Intake.IntakePosition;
+import frc.robot.Constants.ShooterTilt.ShooterTiltPosition;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
@@ -192,7 +193,8 @@ public class Autos {
                 // shooterTilt.targetSpeakerCommand(drivetrain::getPose),
                 Commands.sequence(
                         RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
-                        intake.moveToPositionCommand(() -> IntakePosition.GROUND),
+                        intake.moveToPositionCommand(() -> IntakePosition.GROUND).alongWith(
+                                shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.INTAKE).asProxy()),
                         drivetrain.followPathCommand(pathStartToC).alongWith(intake.intakeNoteAutoCommand()),
                         RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
                         drivetrain.followPathCommand(pathCToB).alongWith(intake.intakeNoteAutoCommand()),
