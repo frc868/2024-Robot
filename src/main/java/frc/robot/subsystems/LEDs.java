@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
+
 import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
 
 import edu.wpi.first.wpilibj.AddressableLED;
@@ -28,7 +29,11 @@ public class LEDs extends SubsystemBase {
     private ArrayList<LEDState> currentStates = new ArrayList<LEDState>();
 
     public enum LEDState {
-        OFF(solid(Color.kBlack, LEDSection.SHOOTER_RIGHT)),
+        OFF(solid(Color.kWhite, LEDSection.SHOOTER_RIGHT)),
+        CHASE(chase(Color.kPurple, Color.kPurple, 20, 0.5, 100, false, LEDSection.SHOOTER_RIGHT)),
+        BREATHE(breathe(Color.kWhite, 3, 0, 255, LEDSection.SHOOTER_RIGHT)),
+        WAVE(wave(Color.kPurple, 20, 20, 150, 255, LEDSection.SHOOTER_RIGHT)),
+        FIRE(fire(0.3, 0.02, 0.75, LEDSection.SHOOTER_RIGHT, Color.kRed, Color.kOrange, Color.kYellow, 50)),
         FLASHING_RED(flash(Color.kRed, 0.1, LEDSection.SHOOTER_RIGHT)),
         FLASHING_ORANGE(flash(Color.kOrange, 1, LEDSection.SHOOTER_RIGHT));
 
@@ -54,9 +59,26 @@ public class LEDs extends SubsystemBase {
         return Commands.run(() -> currentStates.add(LEDState.FLASHING_RED)).ignoringDisable(true);
     }
 
+    public Command requestChaseCommand() {
+        return Commands.run(() -> currentStates.add(LEDState.CHASE)).withTimeout(0.5).ignoringDisable(true);
+    }
+
+    public Command requestFireCommand() {
+        return Commands.run(() -> currentStates.add(LEDState.FIRE)).ignoringDisable(true);
+    }
+
+    public Command requestWaveCommand() {
+        return Commands.run(() -> currentStates.add(LEDState.WAVE)).ignoringDisable(true);
+    }
+
+    public Command requestBreatheCommand() {
+        return Commands.run(() -> currentStates.add(LEDState.BREATHE)).ignoringDisable(true);
+    }
+
     public Command updateStateMachineCommand() {
         return run(() -> {
             clear();
+            currentStates.add(LEDState.OFF);
             currentStates.sort((s1, s2) -> s2.ordinal() - s1.ordinal());
             currentStates.forEach((s) -> s.bufferConsumer.accept(buffer));
             leds.setData(buffer);
@@ -70,14 +92,5 @@ public class LEDs extends SubsystemBase {
         for (int i = 0; i < buffer.getLength(); i++) {
             buffer.setLED(i, Color.kBlack);
         }
-    }
-
-    /**
-     * Sets the LEDs to the current state of the buffer.
-     */
-    @Override
-    public void periodic() {
-        // super.periodic();
-        // leds.setData(buffer);
     }
 }
