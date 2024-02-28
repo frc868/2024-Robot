@@ -104,6 +104,8 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
     });
     private final Trigger noteInIntakeFromSourceTrigger = new Trigger(intakeBeam::get).negate();
 
+    private boolean initialized = false;
+
     public Intake() {
         leftArmMotor = SparkConfigurator.createSparkFlex(PRIMARY_ARM_MOTOR_ID, MotorType.kBrushless, true,
                 (s) -> s.setIdleMode(IdleMode.kBrake),
@@ -347,5 +349,15 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
     public Command resetControllersCommand() {
         return Commands.runOnce(() -> pidController.reset(getPosition()))
                 .andThen(Commands.runOnce(() -> pidController.setGoal(getPosition())));
+    }
+
+    public boolean getInitialized() {
+        return initialized;
+    }
+
+    public Command enableInitializedCommand() {
+        return Commands.runOnce(() -> {
+            initialized = true;
+        }).withName("intake.enableInitialized");
     }
 }
