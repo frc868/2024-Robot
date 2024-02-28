@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import frc.robot.Constants.NoteLift.NoteLiftPosition;
+import frc.robot.GlobalStates;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -127,14 +128,18 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
 
     @Override
     public void resetPosition() {
-        motor.getEncoder().setPosition(MAX_HEIGHT_METERS);
+        motor.getEncoder().setPosition(NoteLiftPosition.TOP.value);
     }
 
     @Override
     public void setVoltage(double voltage) {
         voltage = MathUtil.clamp(voltage, -12, 12);
         voltage = Utils.applySoftStops(voltage, getPosition(), MIN_HEIGHT_METERS,
-                MAX_HEIGHT_METERS + 0.03);
+                MAX_HEIGHT_METERS + 0.03); // allows note lift to unspool slightly
+
+        if (!GlobalStates.INITIALIZED.enabled()) {
+            voltage = 0.0;
+        }
         motor.setVoltage(voltage);
     }
 

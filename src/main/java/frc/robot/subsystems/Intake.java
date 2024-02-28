@@ -32,6 +32,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.GlobalStates;
 import frc.robot.Constants.Intake.IntakePosition;
 import static frc.robot.Constants.Intake.*;
 import static edu.wpi.first.units.Units.Radians;
@@ -189,6 +190,10 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
     public void setVoltage(double voltage) {
         voltage = MathUtil.clamp(voltage, -12, 12);
         voltage = Utils.applySoftStops(voltage, getPosition(), MIN_ANGLE_RADIANS, MAX_ANGLE_RADIANS - 0.03);
+
+        if (!GlobalStates.INITIALIZED.enabled()) {
+            voltage = 0.0;
+        }
         leftArmMotor.setVoltage(voltage);
     }
 

@@ -7,6 +7,7 @@ import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.techhounds.houndutil.houndauto.Reflector;
 import com.techhounds.houndutil.houndlib.SparkConfigurator;
+import com.techhounds.houndutil.houndlib.Utils;
 import com.techhounds.houndutil.houndlib.subsystems.BaseSingleJointedArm;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
 import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
@@ -35,6 +36,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.ShooterTilt.ShooterTiltPosition;
 import frc.robot.FieldConstants;
+import frc.robot.GlobalStates;
 
 import static frc.robot.Constants.Shooter.MAX_SHOOTING_DISTANCE;
 import static frc.robot.Constants.ShooterTilt.*;
@@ -173,7 +175,13 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
 
     @Override
     public void setVoltage(double voltage) {
-        motor.setVoltage(MathUtil.clamp(voltage, -12, 12));
+        voltage = MathUtil.clamp(voltage, -12, 12);
+        voltage = Utils.applySoftStops(voltage, getPosition(), MIN_HEIGHT_METERS, MAX_HEIGHT_METERS);
+
+        if (!GlobalStates.INITIALIZED.enabled()) {
+            voltage = 0.0;
+        }
+        motor.setVoltage(voltage);
     }
 
     @Override

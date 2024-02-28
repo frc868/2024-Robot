@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import frc.robot.Constants.Climber.ClimberPosition;
+import frc.robot.GlobalStates;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -137,13 +138,15 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
     @Override
     public void setVoltage(double voltage) {
         voltage = MathUtil.clamp(voltage, -12, 12);
-        voltage = Utils.applySoftStops(voltage, getPosition(), -5, MAX_HEIGHT_METERS);
+        voltage = Utils.applySoftStops(voltage, getPosition(), MIN_HEIGHT_METERS - 0.05, MAX_HEIGHT_METERS);
         if (getPosition() < 0.02) {
             voltage = MathUtil.clamp(voltage, -3, 12);
         }
-
         if (shooterTiltAngleSupplier.get() < 1.1) {
             voltage = 0;
+        }
+        if (!GlobalStates.INITIALIZED.enabled()) {
+            voltage = 0.0;
         }
         motor.setVoltage(voltage);
     }

@@ -133,7 +133,10 @@ public class RobotContainer {
                         climber.resetControllersCommand()).withName("resetControllers"));
 
         new Trigger(() -> {
-            return intake.getInitialized();
+            return intake.getInitialized()
+                    && shooterTilt.getInitialized()
+                    && climber.getInitialized()
+                    && noteLift.getInitialized();
         }).onTrue(GlobalStates.INITIALIZED.enableCommand());
 
     }

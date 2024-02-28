@@ -266,12 +266,11 @@ public class Constants {
         // 0.160 max movement
         // 2/15/2024
         public static enum ShooterTiltPosition {
-            BOTTOM(0.389842), // TODO simvalue
+            BOTTOM(0.389842),
             AMP_EJECT(0.601),
-            INTAKE(0.55), // TODO simvalue
-            STOW(Units.degreesToRadians(50)), // TODO simvalue
-            CLIMB(1.176781), // TODO simvalue
-            SUBWOOFER(0.987); // TODO simvalue
+            INTAKE(0.55),
+            CLIMB(1.176781),
+            SUBWOOFER(0.987);
 
             public final double value;
 
@@ -284,15 +283,15 @@ public class Constants {
 
         public static final DCMotor MOTOR_GEARBOX_REPR = DCMotor.getNeoVortex(1);
         public static final double GEARING = 9.0;
-        public static final double MASS_KG = Units.lbsToKilograms(12); // TODO simvalue
+        public static final double MASS_KG = Units.lbsToKilograms(12);
         // 1 rot = 12mm
         public static final double ENCODER_ROTATIONS_TO_METERS = Units.inchesToMeters(0.5) / GEARING;
 
-        public static final double MIN_HEIGHT_METERS = 0; // 9.921in // TODO simvalue
-        public static final double MAX_HEIGHT_METERS = 0.1445; // TODO simvalue
+        public static final double MIN_HEIGHT_METERS = 0;
+        public static final double MAX_HEIGHT_METERS = 0.14;
 
-        public static final double MIN_ANGLE_RADIANS = Units.degreesToRadians(22.0097); // TODO simvalue
-        public static final double MAX_ANGLE_RADIANS = Units.degreesToRadians(72.4199); // TODO simvalue
+        public static final double MIN_ANGLE_RADIANS = 0.389842;
+        public static final double MAX_ANGLE_RADIANS = 1.2;
 
         public static final int CURRENT_LIMIT = 25;
 
@@ -478,7 +477,7 @@ public class Constants {
         public static final double ENCODER_ROTATIONS_TO_METERS = WHEEL_CIRCUMFERENCE / GEARING;
 
         public static final double MIN_HEIGHT_METERS = 0;
-        public static final double MAX_HEIGHT_METERS = 0.53;
+        public static final double MAX_HEIGHT_METERS = 0.56;
 
         public static final int CURRENT_LIMIT = 40;
 
