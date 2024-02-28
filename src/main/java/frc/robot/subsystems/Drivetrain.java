@@ -15,6 +15,7 @@ import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 import com.techhounds.houndutil.houndauto.AutoManager;
 import com.techhounds.houndutil.houndauto.Reflector;
+import com.techhounds.houndutil.houndlib.ChassisAccelerations;
 import com.techhounds.houndutil.houndlib.MotorHoldMode;
 import com.techhounds.houndutil.houndlib.subsystems.BaseSwerveDrive;
 import com.techhounds.houndutil.houndlib.swerve.KrakenCoaxialSwerveModule;
@@ -173,6 +174,8 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     @Log
     private ProfiledPIDController yPidController = new ProfiledPIDController(XY_kP, XY_kI, XY_kD, XY_CONSTRAINTS);
 
+    private ChassisSpeeds prevFieldRelVelocities = new ChassisSpeeds();
+
     /** Initializes the drivetrain. */
     public Drivetrain() {
         poseEstimator = new SwerveDrivePoseEstimator(
@@ -304,6 +307,8 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     @Override
     public void periodic() {
         updatePoseEstimator();
+
+        prevFieldRelVelocities = getFieldRelativeSpeeds();
     }
 
     /**
@@ -376,6 +381,16 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     @Log(groups = "control")
     public ChassisSpeeds getChassisSpeeds() {
         return KINEMATICS.toChassisSpeeds(getModuleStates());
+    }
+
+    @Log(groups = "control")
+    public ChassisSpeeds getFieldRelativeSpeeds() {
+        return ChassisSpeeds.fromRobotRelativeSpeeds(KINEMATICS.toChassisSpeeds(getModuleStates()), getRotation());
+    }
+
+    @Log(groups = "control")
+    public ChassisAccelerations getFieldRelativeAccelerations() {
+        return new ChassisAccelerations(getFieldRelativeSpeeds(), prevFieldRelVelocities, 0.020);
     }
 
     @Override
@@ -752,6 +767,24 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
         Transform3d diff = new Pose3d(getPose()).minus(target);
         return new Translation2d(diff.getX(), diff.getY()).getNorm();
+    }
+
+    public Command targetSpeakerCommand() {
+        return targetSpeakerCommand(() -> FieldConstants.SPEAKER_TARGET);
+    }
+
+    public Command targetSpeakerCommand(Supplier<Pose3d> targetPose) {
+        return controlledRotateCommand(() -> {
+            Pose2d target = DriverStation.getAlliance().isPresent()
+                    && DriverStation.getAlliance().get() == Alliance.Red
+                            ? Reflector.reflectPose2d(targetPose.get().toPose2d(),
+                                    FieldConstants.FIELD_LENGTH)
+                            : targetPose.get().toPose2d();
+            Transform2d diff = getPose().minus(target);
+            Rotation2d rot = new Rotation2d(diff.getX(), diff.getY());
+            rot = rot.plus(new Rotation2d(Math.PI));
+            return rot.getRadians();
+        }, DriveMode.FIELD_ORIENTED);
     }
 
     public Command targetStageCommand(Supplier<Double> xJoystickSupplier,

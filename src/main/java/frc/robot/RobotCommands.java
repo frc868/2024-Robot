@@ -4,14 +4,6 @@ import static frc.robot.Constants.Shooter.BASE_SHOOTING_RPS;
 
 import java.util.function.Supplier;
 
-import com.techhounds.houndutil.houndauto.Reflector;
-import com.techhounds.houndutil.houndlib.subsystems.BaseSwerveDrive.DriveMode;
-
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
@@ -25,23 +17,29 @@ import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.NoteLift;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterTilt;
+import frc.robot.utils.TrajectoryCalcs;
 
 public class RobotCommands {
     public static Command targetSpeakerCommand(Drivetrain drivetrain, Shooter shooter, ShooterTilt shooterTilt) {
         return Commands.parallel(
-                drivetrain.controlledRotateCommand(() -> {
-                    Pose2d target = DriverStation.getAlliance().isPresent()
-                            && DriverStation.getAlliance().get() == Alliance.Red
-                                    ? Reflector.reflectPose2d(FieldConstants.SPEAKER_TARGET.toPose2d(),
-                                            FieldConstants.FIELD_LENGTH)
-                                    : FieldConstants.SPEAKER_TARGET.toPose2d();
-                    Transform2d diff = drivetrain.getPose().minus(target);
-                    Rotation2d rot = new Rotation2d(diff.getX(), diff.getY());
-                    rot = rot.plus(new Rotation2d(Math.PI));
-                    return rot.getRadians();
-                }, DriveMode.FIELD_ORIENTED),
+                drivetrain.targetSpeakerCommand(),
                 shooterTilt.targetSpeakerCommand(drivetrain::getPose),
                 shooter.targetSpeakerCommand(drivetrain::getPose)).withName("RobotCommands.targetSpeaker");
+    }
+
+    public static Command targetSpeakerOnTheMoveCommand(Drivetrain drivetrain, Shooter shooter,
+            ShooterTilt shooterTilt) {
+        return Commands.parallel(
+                drivetrain.targetSpeakerCommand(
+                        () -> TrajectoryCalcs.calculateEffectiveTargetLocation(drivetrain.getPose(),
+                                drivetrain.getFieldRelativeSpeeds(), drivetrain.getFieldRelativeAccelerations())),
+                shooterTilt.targetSpeakerCommand(drivetrain::getPose,
+                        () -> TrajectoryCalcs.calculateEffectiveTargetLocation(drivetrain.getPose(),
+                                drivetrain.getFieldRelativeSpeeds(), drivetrain.getFieldRelativeAccelerations())),
+                shooter.targetSpeakerCommand(drivetrain::getPose,
+                        () -> TrajectoryCalcs.calculateEffectiveTargetLocation(drivetrain.getPose(),
+                                drivetrain.getFieldRelativeSpeeds(), drivetrain.getFieldRelativeAccelerations())))
+                .withName("RobotCommands.targetSpeakerOnTheMove");
     }
 
     public static Command targetFromSubwooferCommand(Drivetrain drivetrain, Shooter shooter, ShooterTilt shooterTilt) {
@@ -52,23 +50,41 @@ public class RobotCommands {
 
     public static Command shootCommand(Drivetrain drivetrain, Intake intake, Shooter shooter, ShooterTilt shooterTilt) {
         return Commands.parallel(
-                drivetrain.controlledRotateCommand(() -> {
-                    Pose2d target = DriverStation.getAlliance().isPresent()
-                            && DriverStation.getAlliance().get() == Alliance.Red
-                                    ? Reflector.reflectPose2d(FieldConstants.SPEAKER_TARGET.toPose2d(),
-                                            FieldConstants.FIELD_LENGTH)
-                                    : FieldConstants.SPEAKER_TARGET.toPose2d();
-                    Transform2d diff = drivetrain.getPose().minus(target);
-                    Rotation2d rot = new Rotation2d(diff.getX(), diff.getY());
-                    rot = rot.plus(new Rotation2d(Math.PI));
-                    return rot.getRadians();
-                }, DriveMode.FIELD_ORIENTED),
+                // drivetrain.targetSpeakerCommand(),
                 Commands.sequence(
                         Commands.parallel(
                                 shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
                                 shooter.targetSpeakerCommand(drivetrain::getPose).asProxy())
                                 .until(() -> shooter.atGoal() && shooterTilt.atGoal()),
                         shooter.targetSpeakerCommand(drivetrain::getPose).asProxy()
+                                .alongWith(intake.runRollersCommand())
+                                .withTimeout(1)));
+    }
+
+    public static Command shootOnTheMoveCommand(Drivetrain drivetrain, Intake intake, Shooter shooter,
+            ShooterTilt shooterTilt) {
+        return Commands.parallel(
+                drivetrain.targetSpeakerCommand(
+                        () -> TrajectoryCalcs.calculateEffectiveTargetLocation(drivetrain.getPose(),
+                                drivetrain.getFieldRelativeSpeeds(), drivetrain.getFieldRelativeAccelerations())),
+                Commands.sequence(
+                        Commands.parallel(
+                                shooterTilt.targetSpeakerCommand(drivetrain::getPose,
+                                        () -> TrajectoryCalcs.calculateEffectiveTargetLocation(drivetrain.getPose(),
+                                                drivetrain.getFieldRelativeSpeeds(),
+                                                drivetrain.getFieldRelativeAccelerations()))
+                                        .asProxy(),
+                                shooter.targetSpeakerCommand(drivetrain::getPose,
+                                        () -> TrajectoryCalcs.calculateEffectiveTargetLocation(drivetrain.getPose(),
+                                                drivetrain.getFieldRelativeSpeeds(),
+                                                drivetrain.getFieldRelativeAccelerations()))
+                                        .asProxy())
+                                .until(() -> shooter.atGoal() && shooterTilt.atGoal()),
+                        shooter.targetSpeakerCommand(drivetrain::getPose,
+                                () -> TrajectoryCalcs.calculateEffectiveTargetLocation(drivetrain.getPose(),
+                                        drivetrain.getFieldRelativeSpeeds(),
+                                        drivetrain.getFieldRelativeAccelerations()))
+                                .asProxy()
                                 .alongWith(intake.runRollersCommand())
                                 .withTimeout(1)));
     }

@@ -130,8 +130,8 @@ public class Constants {
         public static final TrapezoidProfile.Constraints THETA_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND, MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED);
 
-        public static final double PATH_FOLLOWING_TRANSLATION_kP = 9.0; // TODO simvalue
-        public static final double PATH_FOLLOWING_ROTATION_kP = 9.0; // TODO simvalue
+        public static final double PATH_FOLLOWING_TRANSLATION_kP = 1.0; // TODO simvalue
+        public static final double PATH_FOLLOWING_ROTATION_kP = 1.0; // TODO simvalue
     }
 
     public static final class Intake {
@@ -163,7 +163,7 @@ public class Constants {
         public static final DCMotor MOTOR_GEARBOX_REPR = DCMotor.getNeoVortex(2);
         public static final double GEARING = 45.5;
         public static final double LENGTH_METERS = 0.23; // TODO simvalue
-        public static final double MASS_KG = 4.082; // TODO simvalue
+        public static final double MASS_KG = 4.082; // TODO simv<alue
         public static final double MOMENT_OF_INERTIA_KG_METERS_SQUARED = SingleJointedArmSim.estimateMOI(
                 LENGTH_METERS,
                 MASS_KG);
@@ -234,6 +234,9 @@ public class Constants {
         public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
 
+        public static final double GOAL_POSITION_ITERATIONS = 5;
+        public static final double ACCELERATION_COMPENSATION_FACTOR = 0.2;
+
         // key: distance, value: speed
         public static final InterpolatingDoubleTreeMap SPEED_INTERPOLATOR = new InterpolatingDoubleTreeMap();
         static {
@@ -253,6 +256,10 @@ public class Constants {
         }
 
         public static final double MAX_SHOOTING_DISTANCE = 5.1322;
+
+        public static final double getProjectileSpeed(double shooterRps) {
+            return shooterRps * 0.1446;
+        }
     }
 
     public static final class ShooterTilt {
@@ -261,7 +268,7 @@ public class Constants {
         public static enum ShooterTiltPosition {
             BOTTOM(0.389842), // TODO simvalue
             AMP_EJECT(0.601),
-            INTAKE(0.7033), // TODO simvalue
+            INTAKE(0.55), // TODO simvalue
             STOW(Units.degreesToRadians(50)), // TODO simvalue
             CLIMB(1.176781), // TODO simvalue
             SUBWOOFER(0.987); // TODO simvalue
@@ -450,9 +457,9 @@ public class Constants {
         public static enum NoteLiftPosition {
             BOTTOM(0),
             INTAKE(0.03),
-            CLIMB_PREP(0.37),
-            STOW(0.44),
-            TOP(0.48);
+            CLIMB_PREP(0.42),
+            STOW(0.49),
+            TOP(0.53);
 
             public final double value;
 
@@ -471,7 +478,7 @@ public class Constants {
         public static final double ENCODER_ROTATIONS_TO_METERS = WHEEL_CIRCUMFERENCE / GEARING;
 
         public static final double MIN_HEIGHT_METERS = 0;
-        public static final double MAX_HEIGHT_METERS = 0.48;
+        public static final double MAX_HEIGHT_METERS = 0.53;
 
         public static final int CURRENT_LIMIT = 40;
 
@@ -550,7 +557,7 @@ public class Constants {
 
     public static final class LEDs {
         public static enum LEDSection implements BaseLEDSection {
-            SHOOTER_RIGHT(0, 10),
+            SHOOTER_RIGHT(0, 33),
             SHOOTER_TOP(0, 0),
             SHOOTER_LEFT(0, 0, true),
             ELEVATOR_LEFT(0, 0),
@@ -571,18 +578,23 @@ public class Constants {
             }
 
             @Override
-            public int getStart() {
+            public int start() {
                 return startIdx;
             }
 
             @Override
-            public int getEnd() {
+            public int end() {
                 return endIdx;
             }
 
             @Override
-            public boolean getInverted() {
+            public boolean inverted() {
                 return inverted;
+            }
+
+            @Override
+            public int length() {
+                return endIdx - startIdx + 1;
             }
         }
 

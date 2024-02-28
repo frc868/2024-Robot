@@ -83,6 +83,8 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
     @Log
     private boolean beyondMaxDistance = false;
 
+    private boolean initialized = false;
+
     public ShooterTilt() {
         motor = SparkConfigurator.createSparkFlex(MOTOR_ID,
                 MotorType.kBrushless, false,
@@ -203,15 +205,19 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
                 .withName("shooterTilt.moveToArbitraryPosition");
     }
 
-    public Command targetSpeakerCommand(Supplier<Pose2d> poseSupplier) {
+    public Command targetSpeakerCommand(Supplier<Pose2d> robotPoseSupplier) {
+        return targetSpeakerCommand(robotPoseSupplier, () -> FieldConstants.SPEAKER_TARGET);
+    }
+
+    public Command targetSpeakerCommand(Supplier<Pose2d> robotPoseSupplier, Supplier<Pose3d> targetSupplier) {
         return moveToArbitraryPositionCommand(() -> {
             Pose3d target = DriverStation.getAlliance().isPresent()
                     && DriverStation.getAlliance().get() == Alliance.Red
-                            ? Reflector.reflectPose3d(FieldConstants.SPEAKER_TARGET,
+                            ? Reflector.reflectPose3d(targetSupplier.get(),
                                     FieldConstants.FIELD_LENGTH)
-                            : FieldConstants.SPEAKER_TARGET;
+                            : targetSupplier.get();
 
-            Transform3d diff = new Pose3d(poseSupplier.get()).minus(target);
+            Transform3d diff = new Pose3d(robotPoseSupplier.get()).minus(target);
             this.distance = new Translation2d(diff.getX(), diff.getY()).getNorm();
             this.beyondMaxDistance = distance > MAX_SHOOTING_DISTANCE;
             return ANGLE_INTERPOLATOR.get(distance);
@@ -272,5 +278,15 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
     public Command resetControllersCommand() {
         return Commands.runOnce(() -> pidController.reset(getPosition()))
                 .andThen(Commands.runOnce(() -> pidController.setGoal(getPosition())));
+    }
+
+    public boolean getInitialized() {
+        return initialized;
+    }
+
+    public Command enableInitializedCommand() {
+        return Commands.runOnce(() -> {
+            initialized = true;
+        }).withName("shooterTilt.enableInitialized");
     }
 }

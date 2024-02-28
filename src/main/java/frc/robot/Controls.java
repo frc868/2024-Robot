@@ -51,10 +51,10 @@ public class Controls {
         // () -> -joystick.getX() * speedMultiplier));
 
         joystick.triggerSoftPress().and(joystick.flipTriggerIn().negate())
-                .whileTrue(RobotCommands.targetSpeakerCommand(drivetrain, shooter,
+                .whileTrue(RobotCommands.targetSpeakerOnTheMoveCommand(drivetrain, shooter,
                         shooterTilt));
         joystick.triggerHardPress().and(joystick.flipTriggerIn().negate())
-                .whileTrue(RobotCommands.shootCommand(drivetrain,
+                .whileTrue(RobotCommands.shootOnTheMoveCommand(drivetrain,
                         intake, shooter, shooterTilt));
 
         joystick.blackThumbButton()
@@ -85,10 +85,22 @@ public class Controls {
             ShooterTilt shooterTilt, Climber climber, NoteLift noteLift) {
         CommandXboxController controller = new CommandXboxController(port);
 
-        controller.povDown().whileTrue(RobotCommands.resetClimb(intake, shooter, shooterTilt, climber, noteLift));
-        controller.povUp().whileTrue(RobotCommands.deClimb(intake, shooter, shooterTilt, climber, noteLift));
+        // drivetrain.setDefaultCommand(
+        // drivetrain.teleopDriveCommand(
+        // () -> -controller.getLeftY() * speedMultiplier,
+        // () -> -controller.getLeftX() * speedMultiplier,
+        // () -> -controller.getRightX() * speedMultiplier));
+
+        // controller.a().whileTrue(RobotCommands.targetSpeakerOnTheMoveCommand(drivetrain,
+        // shooter, shooterTilt));
+
+        controller.povDown().whileTrue(RobotCommands.resetClimb(intake, shooter,
+                shooterTilt, climber, noteLift));
+        controller.povUp().whileTrue(RobotCommands.deClimb(intake, shooter,
+                shooterTilt, climber, noteLift));
         controller.povRight()
-                .whileTrue(RobotCommands.moveToHomeCommand(intake, shooter, shooterTilt, climber, noteLift));
+                .whileTrue(RobotCommands.moveToHomeCommand(intake, shooter, shooterTilt,
+                        climber, noteLift));
 
         // controller.a()
         // .whileTrue(drivetrain.targetStageCommand2(() -> -controller.getLeftY(), () ->
@@ -131,10 +143,10 @@ public class Controls {
         // controller.b().whileTrue(RobotCommands.targetSpeakerCommand(drivetrain,
         // shooter, shooterTilt));
 
-        // controller.x().whileTrue(drivetrain.sysIdDriveQuasistatic(Direction.kForward));
-        // controller.y().whileTrue(drivetrain.sysIdDriveQuasistatic(Direction.kReverse));
-        // controller.a().whileTrue(drivetrain.sysIdDriveDynamic(Direction.kForward));
-        // controller.b().whileTrue(drivetrain.sysIdDriveDynamic(Direction.kReverse));
+        controller.x().whileTrue(drivetrain.sysIdDriveQuasistatic(Direction.kForward));
+        controller.y().whileTrue(drivetrain.sysIdDriveQuasistatic(Direction.kReverse));
+        controller.a().whileTrue(drivetrain.sysIdDriveDynamic(Direction.kForward));
+        controller.b().whileTrue(drivetrain.sysIdDriveDynamic(Direction.kReverse));
         // controller.a().whileTrue(noteLift.moveToPositionCommand(() ->
         // NoteLiftPosition.BOTTOM));
         // controller.x().whileTrue(noteLift.moveToPositionCommand(() ->
@@ -142,7 +154,7 @@ public class Controls {
         // controller.y().whileTrue(noteLift.moveToPositionCommand(() ->
         // NoteLiftPosition.TOP));
 
-        controller.y().whileTrue(noteLift.scoreNoteCommand());
+        // controller.y().whileTrue(noteLift.scoreNoteCommand());/
 
         // controller.a()
         // .whileTrue(drivetrain.targetStageCommand(() -> -controller.getLeftY(), () ->
