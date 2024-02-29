@@ -33,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.GlobalStates;
+import frc.robot.PositionTracker;
 import frc.robot.Constants.Intake.IntakePosition;
 import static frc.robot.Constants.Intake.*;
 import static edu.wpi.first.units.Units.Radians;
@@ -107,7 +108,9 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
 
     private boolean initialized = false;
 
-    public Intake() {
+    private PositionTracker positionTracker;
+
+    public Intake(PositionTracker positionTracker) {
         leftArmMotor = SparkConfigurator.createSparkFlex(PRIMARY_ARM_MOTOR_ID, MotorType.kBrushless, true,
                 (s) -> s.setIdleMode(IdleMode.kBrake),
                 (s) -> s.setSmartCurrentLimit(ARM_CURRENT_LIMIT),
@@ -135,6 +138,8 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
                                     .angularVelocity(sysidVelocityMeasure.mut_replace(getVelocity(), RadiansPerSecond));
                         },
                         this));
+
+        this.positionTracker = positionTracker;
 
         pidController.setTolerance(TOLERANCE);
         pidController.setGoal(IntakePosition.GROUND.value);

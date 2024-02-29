@@ -449,16 +449,16 @@ public class Constants {
         public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
 
-        public static final Pose3d BASE_COMPONENT_POSE = new Pose3d(0.177, 0, 0.18, new Rotation3d(0, 0, 0));
+        public static final Pose3d BASE_COMPONENT_POSE = new Pose3d(0.177, 0, 0.19, new Rotation3d(0, 0, 0));
     }
 
     public static final class NoteLift {
         public static enum NoteLiftPosition {
             BOTTOM(0),
-            INTAKE(0.03),
-            CLIMB_PREP(0.42),
-            STOW(0.49),
-            TOP(0.53);
+            INTAKE(0.16),
+            CLIMB_PREP(0.55),
+            STOW(0.62),
+            TOP(0.66);
 
             public final double value;
 
@@ -477,7 +477,7 @@ public class Constants {
         public static final double ENCODER_ROTATIONS_TO_METERS = WHEEL_CIRCUMFERENCE / GEARING;
 
         public static final double MIN_HEIGHT_METERS = 0;
-        public static final double MAX_HEIGHT_METERS = 0.56;
+        public static final double MAX_HEIGHT_METERS = 0.69;
 
         public static final int CURRENT_LIMIT = 40;
 
@@ -496,7 +496,7 @@ public class Constants {
         public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
 
-        public static final Pose3d BASE_COMPONENT_POSE = new Pose3d(0.177, 0, 0.41, new Rotation3d(0, 0, 0));
+        public static final Pose3d BASE_COMPONENT_POSE = new Pose3d(0.177, 0, 0.20, new Rotation3d(0, 0, 0));
     }
 
     public static final class Vision {

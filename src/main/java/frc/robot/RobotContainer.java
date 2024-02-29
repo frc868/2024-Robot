@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
-import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -35,8 +34,7 @@ import java.util.function.Supplier;
  * The container for the robot. Contains subsystems, OI devices, and commands.
  */
 public class RobotContainer {
-    @SendableLog(groups = "wpilib")
-    public static Mechanism2d mechanisms = new Mechanism2d(5, 2);
+    public final PositionTracker positionTracker = new PositionTracker();
 
     @Log(groups = "subsystems")
     @SendableLog(groups = { "wpilib", "subsystems" })
@@ -44,7 +42,7 @@ public class RobotContainer {
 
     @Log(groups = "subsystems")
     @SendableLog(groups = { "wpilib", "subsystems" })
-    private final Intake intake = new Intake();
+    private final Intake intake = new Intake(positionTracker);
 
     @Log(groups = "subsystems")
     @SendableLog(groups = { "wpilib", "subsystems" })
@@ -52,15 +50,15 @@ public class RobotContainer {
 
     @Log(groups = "subsystems")
     @SendableLog(groups = { "wpilib", "subsystems" })
-    private final ShooterTilt shooterTilt = new ShooterTilt();
+    private final ShooterTilt shooterTilt = new ShooterTilt(positionTracker);
 
     @Log(groups = "subsystems")
     @SendableLog(groups = { "wpilib", "subsystems" })
-    private final Climber climber = new Climber(shooterTilt::getAngle);
+    private final Climber climber = new Climber(positionTracker);
 
     @Log(groups = "subsystems")
     @SendableLog(groups = { "wpilib", "subsystems" })
-    private final NoteLift noteLift = new NoteLift();
+    private final NoteLift noteLift = new NoteLift(positionTracker);
 
     @Log(groups = "subsystems")
     @SendableLog(groups = { "wpilib", "subsystems" })
@@ -104,6 +102,12 @@ public class RobotContainer {
     public RobotContainer() {
         vision.setPoseEstimator(drivetrain.getPoseEstimator());
         vision.setSimPoseSupplier(drivetrain::getSimPose);
+
+        positionTracker.setIntakePositionSupplier(intake::getPosition);
+        positionTracker.setShooterTiltPositionSupplier(shooterTilt::getPosition);
+        positionTracker.setClimberPositionSupplier(climber::getPosition);
+        positionTracker.setNoteLiftPositionSupplier(noteLift::getPosition);
+
         SparkConfigurator.safeBurnFlash();
         DataLogManager.logNetworkTables(true);
         DriverStation.startDataLog(DataLogManager.getLog());

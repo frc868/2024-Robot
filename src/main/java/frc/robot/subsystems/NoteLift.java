@@ -31,6 +31,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import frc.robot.Constants.NoteLift.NoteLiftPosition;
 import frc.robot.GlobalStates;
+import frc.robot.PositionTracker;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -55,7 +56,7 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
             DRUM_RADIUS_METERS,
             MIN_HEIGHT_METERS,
             MAX_HEIGHT_METERS,
-            true,
+            false,
             MAX_HEIGHT_METERS);
 
     @Log(groups = "control")
@@ -74,13 +75,17 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
 
     private boolean initialized = false;
 
-    public NoteLift() {
+    private PositionTracker positionTracker;
+
+    public NoteLift(PositionTracker positionTracker) {
         motor = SparkConfigurator.createSparkFlex(
                 MOTOR_ID, MotorType.kBrushless, true,
                 (s) -> s.setIdleMode(IdleMode.kBrake),
                 (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
                 (s) -> s.getEncoder().setPositionConversionFactor(ENCODER_ROTATIONS_TO_METERS),
                 (s) -> s.getEncoder().setVelocityConversionFactor(ENCODER_ROTATIONS_TO_METERS / 60.0));
+
+        this.positionTracker = positionTracker;
 
         pidController.setTolerance(TOLERANCE);
 
@@ -136,6 +141,10 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
         voltage = MathUtil.clamp(voltage, -12, 12);
         voltage = Utils.applySoftStops(voltage, getPosition(), MIN_HEIGHT_METERS,
                 MAX_HEIGHT_METERS + 0.03); // allows note lift to unspool slightly
+
+        if (getPosition() - positionTracker.getClimberPosition() < 0.06 && voltage < 0) {
+            voltage = 0;
+        }
 
         if (!GlobalStates.INITIALIZED.enabled()) {
             voltage = 0.0;

@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 
 public enum GlobalStates {
     // normal
-    INITIALIZED(false);
+    INITIALIZED(true);
 
     // coast
     // DRIVETRAIN_COAST(false),

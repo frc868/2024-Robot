@@ -63,7 +63,7 @@ public class Vision extends SubsystemBase {
 
     @Override
     public void simulationPeriodic() {
-        visionSim.update(simPoseSupplier.get());
+        // visionSim.update(simPoseSupplier.get());
     }
 
     public void updatePoseEstimator() {

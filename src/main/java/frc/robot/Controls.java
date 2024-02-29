@@ -85,14 +85,19 @@ public class Controls {
             ShooterTilt shooterTilt, Climber climber, NoteLift noteLift) {
         CommandXboxController controller = new CommandXboxController(port);
 
-        // drivetrain.setDefaultCommand(
-        // drivetrain.teleopDriveCommand(
-        // () -> -controller.getLeftY() * speedMultiplier,
-        // () -> -controller.getLeftX() * speedMultiplier,
-        // () -> -controller.getRightX() * speedMultiplier));
+        controller.x().toggleOnTrue(intake.setOverridenSpeedCommand(() -> -controller.getLeftY() * 0.25)
+                .finallyDo(intake.resetControllersCommand()::schedule));
+        controller.y().toggleOnTrue(shooterTilt.setOverridenSpeedCommand(() -> -controller.getRightY() * 0.75)
+                .finallyDo(shooterTilt.resetControllersCommand()::schedule));
+        controller.a().toggleOnTrue(climber.setOverridenSpeedCommand(() -> -controller.getLeftY() * 0.75)
+                .finallyDo(climber.resetControllersCommand()::schedule));
+        controller.b().toggleOnTrue(noteLift.setOverridenSpeedCommand(() -> -controller.getRightY() * 0.75)
+                .finallyDo(noteLift.resetControllersCommand()::schedule));
 
-        // controller.a().whileTrue(RobotCommands.targetSpeakerOnTheMoveCommand(drivetrain,
-        // shooter, shooterTilt));
+        controller.x().and(controller.povDown()).whileTrue(intake.moveToPositionCommand(() -> IntakePosition.GROUND));
+        controller.x().and(controller.povUp()).whileTrue(intake.moveToPositionCommand(() -> IntakePosition.STOW));
+        controller.x().and(controller.povLeft()).whileTrue(intake.moveToPositionCommand(() -> IntakePosition.AMP));
+        controller.x().and(controller.povRight()).whileTrue(intake.moveToPositionCommand(() -> IntakePosition.SOURCE));
 
         controller.povDown().whileTrue(RobotCommands.resetClimb(intake, shooter,
                 shooterTilt, climber, noteLift));
@@ -143,10 +148,6 @@ public class Controls {
         // controller.b().whileTrue(RobotCommands.targetSpeakerCommand(drivetrain,
         // shooter, shooterTilt));
 
-        controller.x().whileTrue(drivetrain.sysIdDriveQuasistatic(Direction.kForward));
-        controller.y().whileTrue(drivetrain.sysIdDriveQuasistatic(Direction.kReverse));
-        controller.a().whileTrue(drivetrain.sysIdDriveDynamic(Direction.kForward));
-        controller.b().whileTrue(drivetrain.sysIdDriveDynamic(Direction.kReverse));
         // controller.a().whileTrue(noteLift.moveToPositionCommand(() ->
         // NoteLiftPosition.BOTTOM));
         // controller.x().whileTrue(noteLift.moveToPositionCommand(() ->

@@ -37,6 +37,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.ShooterTilt.ShooterTiltPosition;
 import frc.robot.FieldConstants;
 import frc.robot.GlobalStates;
+import frc.robot.PositionTracker;
 
 import static frc.robot.Constants.Shooter.MAX_SHOOTING_DISTANCE;
 import static frc.robot.Constants.ShooterTilt.*;
@@ -86,8 +87,9 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
     private boolean beyondMaxDistance = false;
 
     private boolean initialized = false;
+    private PositionTracker positionTracker;
 
-    public ShooterTilt() {
+    public ShooterTilt(PositionTracker positionTracker) {
         motor = SparkConfigurator.createSparkFlex(MOTOR_ID,
                 MotorType.kBrushless, false,
                 (s) -> s.setIdleMode(IdleMode.kBrake),
@@ -107,7 +109,9 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
                         },
                         this));
 
-        pidController.setTolerance(0.02);
+        this.positionTracker = positionTracker;
+
+        pidController.setTolerance(TOLERANCE);
         pidController.setGoal(getLinearActuatorLength(ShooterTiltPosition.BOTTOM.value));
 
         new Thread(() -> {

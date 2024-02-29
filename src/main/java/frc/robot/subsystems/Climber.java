@@ -31,6 +31,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import frc.robot.Constants.Climber.ClimberPosition;
 import frc.robot.GlobalStates;
+import frc.robot.PositionTracker;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -55,7 +56,7 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
             DRUM_RADIUS_METERS,
             MIN_HEIGHT_METERS,
             MAX_HEIGHT_METERS,
-            true,
+            false,
             0);
 
     @Log(groups = "control")
@@ -72,11 +73,11 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
 
     private final SysIdRoutine sysIdRoutine;
 
-    private Supplier<Double> shooterTiltAngleSupplier;
-
     private boolean initialized = false;
 
-    public Climber(Supplier<Double> shooterTiltPositionSupplier) {
+    private PositionTracker positionTracker;
+
+    public Climber(PositionTracker positionTracker) {
         motor = SparkConfigurator.createSparkFlex(
                 MOTOR_ID, MotorType.kBrushless, true,
                 (s) -> s.setIdleMode(IdleMode.kBrake),
@@ -98,7 +99,7 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
                         },
                         this));
 
-        this.shooterTiltAngleSupplier = shooterTiltPositionSupplier;
+        this.positionTracker = positionTracker;
 
         setDefaultCommand(moveToCurrentGoalCommand());
     }
@@ -142,11 +143,15 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
         if (getPosition() < 0.02) {
             voltage = MathUtil.clamp(voltage, -3, 12);
         }
-        if (shooterTiltAngleSupplier.get() < 1.1) {
+        // if (positionTracker.getShooterTiltPosition() < 1.1) {
+        // voltage = 0;
+        // }
+
+        if (positionTracker.getNoteLiftPosition() - getPosition() < 0.06 && voltage > 0) {
             voltage = 0;
         }
         if (!GlobalStates.INITIALIZED.enabled()) {
-            voltage = 0.0;
+            voltage = 0;
         }
         motor.setVoltage(voltage);
     }
