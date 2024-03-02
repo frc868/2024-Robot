@@ -100,14 +100,16 @@ public class Shooter extends SubsystemBase implements BaseShooter {
                             log.motor("left")
                                     .voltage(sysidAppliedVoltageMeasure.mut_replace(leftMotor.getAppliedOutput(),
                                             Volts))
-                                    .angularPosition(sysidPositionMeasure.mut_replace(0, Rotations))
+                                    .angularPosition(sysidPositionMeasure
+                                            .mut_replace(leftMotor.getEncoder().getPosition(), Rotations))
                                     .angularVelocity(
                                             sysidVelocityMeasure.mut_replace(leftMotor.getEncoder().getVelocity(),
                                                     RotationsPerSecond));
                             log.motor("right")
                                     .voltage(sysidAppliedVoltageMeasure.mut_replace(rightMotor.getAppliedOutput(),
                                             Volts))
-                                    .angularPosition(sysidPositionMeasure.mut_replace(0, Rotations))
+                                    .angularPosition(sysidPositionMeasure
+                                            .mut_replace(rightMotor.getEncoder().getPosition(), Rotations))
                                     .angularVelocity(
                                             sysidVelocityMeasure.mut_replace(rightMotor.getEncoder().getVelocity(),
                                                     RotationsPerSecond));

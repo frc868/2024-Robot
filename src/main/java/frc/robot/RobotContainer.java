@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Drivetrain;
@@ -29,6 +30,8 @@ import frc.robot.utils.TrajectoryCalcs;
 
 import java.util.ArrayList;
 import java.util.function.Supplier;
+
+import org.littletonrobotics.urcl.URCL;
 
 /**
  * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -68,6 +71,9 @@ public class RobotContainer {
     @SendableLog(groups = { "wpilib", "subsystems" })
     private final LEDs leds = new LEDs();
 
+    @Log(groups = "subsystems")
+    private final HoundBrian houndBrian = new HoundBrian(drivetrain, intake, shooterTilt, climber, noteLift, leds);
+
     @Log(groups = { "subsystems", "misc" })
     private final PowerDistribution pdh = new PowerDistribution();
 
@@ -104,7 +110,7 @@ public class RobotContainer {
         vision.setSimPoseSupplier(drivetrain::getSimPose);
 
         positionTracker.setIntakePositionSupplier(intake::getPosition);
-        positionTracker.setShooterTiltPositionSupplier(shooterTilt::getPosition);
+        positionTracker.setShooterTiltAngleSupplier(shooterTilt::getAngle);
         positionTracker.setClimberPositionSupplier(climber::getPosition);
         positionTracker.setNoteLiftPositionSupplier(noteLift::getPosition);
 
@@ -112,8 +118,7 @@ public class RobotContainer {
         DataLogManager.logNetworkTables(true);
         DriverStation.startDataLog(DataLogManager.getLog());
         DataLogManager.start();
-        // URCL.start();
-        SignalLogger.setPath("/media/sda1/ctre-logs/");
+        URCL.start();
         SignalLogger.start();
 
         LoggingManager.getInstance().registerRobotContainer(this);
@@ -143,11 +148,18 @@ public class RobotContainer {
                     && noteLift.getInitialized();
         }).onTrue(GlobalStates.INITIALIZED.enableCommand());
 
+        new Trigger(() -> intake.getRollerCurrent() > 40).debounce(0.1)
+                .whileTrue(leds.requestFlashingGreenCommand().withTimeout(2));
+        new Trigger(intake::getNoteInIntake).whileTrue(leds.requestFlashingBlueCommand().withTimeout(1));
+
+        new CommandXboxController(1).povLeft().whileTrue(houndBrian.simTriggerIntakeButton());
+
     }
 
     private void configureButtonBindings() {
         Controls.configureDriverControl(0, drivetrain, intake, shooter, shooterTilt, climber, noteLift);
-        Controls.configureTestingControl(1, drivetrain, intake, shooter, shooterTilt, climber, noteLift);
+        Controls.configureOperatorControl(1, drivetrain, intake, shooter, shooterTilt, climber, noteLift);
+        Controls.configureTestingControl(2, drivetrain, intake, shooter, shooterTilt, climber, noteLift);
         NTCommands.configureNTCommands(drivetrain, intake, shooter, shooterTilt, climber, noteLift, leds);
     }
 

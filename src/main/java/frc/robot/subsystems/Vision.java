@@ -19,10 +19,12 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Quaternion;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static frc.robot.Constants.Vision.*;
@@ -48,6 +50,20 @@ public class Vision extends SubsystemBase {
 
     public Vision() {
         AprilTagFieldLayout tagLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
+        // "x": -0.038099999999999995,
+        // "y": 5.547867999999999,
+        // "z": 1.4511020000000001
+        // AprilTagFieldLayout tagLayout = new AprilTagFieldLayout(
+        // List.of(
+        // new AprilTag(7,
+        // new Pose3d(0, 5.547867999999999-4.982717999999999,
+        // 1.4511020000000001,
+        // new Rotation3d(new Quaternion(1, 0, 0, 0)))),
+        // new AprilTag(8,
+        // new Pose3d(0, ,
+        // 1.4511020000000001,
+        // new Rotation3d(new Quaternion(1, 0, 0, 0))))),
+        // 16.541, 8.211);
         if (RobotBase.isSimulation()) {
             visionSim.addAprilTags(tagLayout);
             for (AprilTagPhotonCamera camera : cameras) {
@@ -78,9 +94,13 @@ public class Vision extends SubsystemBase {
 
             if (result.isPresent()) {
                 EstimatedRobotPose estPose = result.get();
-                Matrix<N3, N1> stddevs = photonCamera.getEstimationStdDevs(estPose.estimatedPose.toPose2d(),
+                Pose2d oldPose = estPose.estimatedPose.toPose2d();
+                Pose2d pose = new Pose2d(oldPose.getX() + Units.inchesToMeters(1.5), oldPose.getY(),
+                        oldPose.getRotation());
+
+                Matrix<N3, N1> stddevs = photonCamera.getEstimationStdDevs(pose,
                         SINGLE_TAG_STD_DEVS, MULTI_TAG_STD_DEVS);
-                poseEstimator.addVisionMeasurement(estPose.estimatedPose.toPose2d(),
+                poseEstimator.addVisionMeasurement(pose,
                         estPose.timestampSeconds, stddevs);
             }
         }

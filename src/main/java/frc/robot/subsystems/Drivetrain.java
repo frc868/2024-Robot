@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.commands.FollowPathHolonomic;
 import com.pathplanner.lib.path.GoalEndState;
@@ -175,6 +176,9 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
     private ChassisSpeeds prevFieldRelVelocities = new ChassisSpeeds();
 
+    @Log
+    private double effectiveWheelRadius = 0.0;
+
     /** Initializes the drivetrain. */
     public Drivetrain() {
         poseEstimator = new SwerveDrivePoseEstimator(
@@ -194,7 +198,8 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
         }
 
         sysIdDrive = new SysIdRoutine(
-                new SysIdRoutine.Config(),
+                new SysIdRoutine.Config(null, Volts.of(3), null,
+                        (state) -> SignalLogger.writeString("sysid_state", state.toString())),
                 new SysIdRoutine.Mechanism(
                         (Measure<Voltage> volts) -> {
                             drive(new ChassisSpeeds(
@@ -570,7 +575,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
             ySpeed *= SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND;
             thetaSpeed *= SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND;
 
-            drive(new ChassisSpeeds(xSpeed, ySpeed, thetaSpeed), driveMode);
+            driveClosedLoop(new ChassisSpeeds(xSpeed, ySpeed, thetaSpeed), driveMode);
         }).withName("drivetrain.teleopDrive");
     }
 

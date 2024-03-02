@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 
 public enum GlobalStates {
     // normal
-    INITIALIZED(true);
+    INITIALIZED(false);
 
     // coast
     // DRIVETRAIN_COAST(false),
@@ -28,10 +28,10 @@ public enum GlobalStates {
     }
 
     public Command enableCommand() {
-        return Commands.runOnce(() -> this.isEnabled = true);
+        return Commands.runOnce(() -> this.isEnabled = true).ignoringDisable(true);
     }
 
     public Command disableCommand() {
-        return Commands.runOnce(() -> this.isEnabled = false);
+        return Commands.runOnce(() -> this.isEnabled = false).ignoringDisable(true);
     }
 }

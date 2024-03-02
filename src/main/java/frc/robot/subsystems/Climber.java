@@ -134,6 +134,7 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
     @Override
     public void resetPosition() {
         motor.getEncoder().setPosition(0);
+        initialized = true;
     }
 
     @Override
@@ -143,9 +144,13 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
         if (getPosition() < 0.02) {
             voltage = MathUtil.clamp(voltage, -3, 12);
         }
-        // if (positionTracker.getShooterTiltPosition() < 1.1) {
-        // voltage = 0;
-        // }
+
+        if (getPosition() < 0.293 && positionTracker.getShooterTiltAngle() < 1.11 && voltage > 0) {
+            voltage = 0;
+        }
+        if (getPosition() > 0.293 && positionTracker.getShooterTiltAngle() < 1.11 && voltage < 0) {
+            voltage = 0;
+        }
 
         if (positionTracker.getNoteLiftPosition() - getPosition() < 0.06 && voltage > 0) {
             voltage = 0;

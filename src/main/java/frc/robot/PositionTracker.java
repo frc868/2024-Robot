@@ -4,7 +4,7 @@ import java.util.function.Supplier;
 
 public class PositionTracker {
     private Supplier<Double> intakePositionSupplier;
-    private Supplier<Double> shooterTiltPositionSupplier;
+    private Supplier<Double> shooterTiltAngleSupplier;
     private Supplier<Double> climberPositionSupplier;
     private Supplier<Double> noteLiftPositionSupplier;
 
@@ -12,8 +12,8 @@ public class PositionTracker {
         this.intakePositionSupplier = intakePositionSupplier;
     }
 
-    public void setShooterTiltPositionSupplier(Supplier<Double> shooterTiltPositionSupplier) {
-        this.shooterTiltPositionSupplier = shooterTiltPositionSupplier;
+    public void setShooterTiltAngleSupplier(Supplier<Double> shooterTiltAngleSupplier) {
+        this.shooterTiltAngleSupplier = shooterTiltAngleSupplier;
     }
 
     public void setClimberPositionSupplier(Supplier<Double> climberPositionSupplier) {
@@ -28,8 +28,8 @@ public class PositionTracker {
         return intakePositionSupplier.get();
     }
 
-    public double getShooterTiltPosition() {
-        return shooterTiltPositionSupplier.get();
+    public double getShooterTiltAngle() {
+        return shooterTiltAngleSupplier.get();
     }
 
     public double getClimberPosition() {

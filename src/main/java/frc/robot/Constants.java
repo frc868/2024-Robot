@@ -70,36 +70,36 @@ public class Constants {
         public static final SwerveConstants SWERVE_CONSTANTS = new SwerveConstants();
         static {
             // 2/24/24
-            SWERVE_CONSTANTS.DRIVE_kP = 0.25245;
+            SWERVE_CONSTANTS.DRIVE_kP = 0.84056;
             SWERVE_CONSTANTS.DRIVE_kI = 0.0;
             SWERVE_CONSTANTS.DRIVE_kD = 0.0;
-            SWERVE_CONSTANTS.DRIVE_kS = 0.25;
-            SWERVE_CONSTANTS.DRIVE_kV = 0.6924;
-            SWERVE_CONSTANTS.DRIVE_kA = 0.02734;
-            SWERVE_CONSTANTS.STEER_kP = 60.0; // TODO simvalue
+            SWERVE_CONSTANTS.DRIVE_kS = 0.24857;
+            SWERVE_CONSTANTS.DRIVE_kV = 0.66681;
+            SWERVE_CONSTANTS.DRIVE_kA = 0.092325;
+            SWERVE_CONSTANTS.STEER_kP = 60.0;
             SWERVE_CONSTANTS.STEER_kI = 0.0;
-            SWERVE_CONSTANTS.STEER_kD = 1.0; // TODO simvalue
+            SWERVE_CONSTANTS.STEER_kD = 1.0;
 
             SWERVE_CONSTANTS.DRIVE_GEARING = 5.357;
             SWERVE_CONSTANTS.STEER_GEARING = 150.0 / 7.0;
-            SWERVE_CONSTANTS.WHEEL_CIRCUMFERENCE = 2.0 * Math.PI * 0.04883780332; // 0.3003362577
+            SWERVE_CONSTANTS.WHEEL_CIRCUMFERENCE = 2.0 * Math.PI * 0.04762663828; // 0.3003362577
             SWERVE_CONSTANTS.DRIVE_ENCODER_ROTATIONS_TO_METERS = SWERVE_CONSTANTS.WHEEL_CIRCUMFERENCE
                     / SWERVE_CONSTANTS.DRIVE_GEARING;
             SWERVE_CONSTANTS.STEER_ENCODER_ROTATIONS_TO_RADIANS = 2 * Math.PI
                     / SWERVE_CONSTANTS.STEER_GEARING;
 
-            SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND = 4.54; // TODO simvalue
-            SWERVE_CONSTANTS.MAX_DRIVING_ACCELERATION_METERS_PER_SECOND_SQUARED = 8; // TODO simvalue
-            SWERVE_CONSTANTS.MAX_STEER_VELOCITY_RADIANS_PER_SECOND = 100 * 2 * Math.PI; // TODO simvalue
+            SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND = 4.54;
+            SWERVE_CONSTANTS.MAX_DRIVING_ACCELERATION_METERS_PER_SECOND_SQUARED = 8;
+            SWERVE_CONSTANTS.MAX_STEER_VELOCITY_RADIANS_PER_SECOND = 100 * 2 * Math.PI;
             // max velocity in 1/3 sec
-            SWERVE_CONSTANTS.MAX_STEER_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 3 * 100 * 2 * Math.PI; // TODO simvalue
+            SWERVE_CONSTANTS.MAX_STEER_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 3 * 100 * 2 * Math.PI;
 
-            SWERVE_CONSTANTS.DRIVE_CURRENT_LIMIT = 50; // TODO simvalue
-            SWERVE_CONSTANTS.STEER_CURRENT_LIMIT = 20; // TODO simvalue
+            SWERVE_CONSTANTS.DRIVE_CURRENT_LIMIT = 50;
+            SWERVE_CONSTANTS.STEER_CURRENT_LIMIT = 20;
             SWERVE_CONSTANTS.DRIVE_GEARBOX_REPR = DCMotor.getKrakenX60(1);
             SWERVE_CONSTANTS.STEER_GEARBOX_REPR = DCMotor.getKrakenX60(1);
-            SWERVE_CONSTANTS.DRIVE_MOI = 0.04; // TODO simvalue
-            SWERVE_CONSTANTS.STEER_MOI = 0.025; // TODO simvalue
+            SWERVE_CONSTANTS.DRIVE_MOI = 0.04;
+            SWERVE_CONSTANTS.STEER_MOI = 0.025;
         }
 
         public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = 20 * Math.PI; // TODO
@@ -128,7 +128,8 @@ public class Constants {
         public static final double THETA_kI = 0; // TODO
         public static final double THETA_kD = 0.02; // TODO
         public static final TrapezoidProfile.Constraints THETA_CONSTRAINTS = new TrapezoidProfile.Constraints(
-                MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND, MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED);
+                MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+                MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED);
 
         public static final double PATH_FOLLOWING_TRANSLATION_kP = 1.0; // TODO simvalue
         public static final double PATH_FOLLOWING_ROTATION_kP = 1.0; // TODO simvalue
@@ -173,7 +174,7 @@ public class Constants {
 
         public static final double ENCODER_ROTATIONS_TO_RADIANS = 2 * Math.PI / GEARING;
         public static final int ARM_CURRENT_LIMIT = 40;
-        public static final int ROLLER_CURRENT_LIMIT = 55;
+        public static final int ROLLER_CURRENT_LIMIT = 65;
 
         // 2/14/24
         public static final double kP = 3.5;
@@ -235,7 +236,7 @@ public class Constants {
                 MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
 
         public static final double GOAL_POSITION_ITERATIONS = 5;
-        public static final double ACCELERATION_COMPENSATION_FACTOR = 0.2;
+        public static final double ACCELERATION_COMPENSATION_FACTOR = 0.0;
 
         // key: distance, value: speed
         public static final InterpolatingDoubleTreeMap SPEED_INTERPOLATOR = new InterpolatingDoubleTreeMap();
@@ -317,30 +318,39 @@ public class Constants {
 
         public static final Transform3d OUTER_LEAD_SCREW_TO_INNER_LEAD_SCREW = new Transform3d(0.047, 0, 0.0127,
                 new Rotation3d());
-        public static final Transform3d LEAD_SCREW_PIVOT_TO_EXTENSION = new Transform3d(0, 0, 0.0127, new Rotation3d());
-        public static final Transform3d SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT = new Transform3d(0.2572, 0, -0.0984,
+        public static final Transform3d LEAD_SCREW_PIVOT_TO_EXTENSION = new Transform3d(0, 0, 0.0127,
+                new Rotation3d());
+        public static final Transform3d SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT = new Transform3d(0.2572, 0,
+                -0.0984,
                 new Rotation3d());
         public static final double INITIAL_LEAD_SCREW_LENGTH = 0.2519;
 
-        public static final Transform3d SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT = new Transform3d(0.09906, 0, -0.1737,
+        public static final Transform3d SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT = new Transform3d(0.09906, 0,
+                -0.1737,
                 new Rotation3d());
 
         public static final double getLinearActuatorLength(double angle) {
-            double shooterToBottomLeadScrewAngle = Math.atan(Math.abs(SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getX())
-                    / Math.abs(SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getZ()));
-            double shooterToTopLeadScrewAngle = Math.atan(Math.abs(SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT.getZ())
-                    / Math.abs(SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT.getX()));
+            double shooterToBottomLeadScrewAngle = Math
+                    .atan(Math.abs(SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getX())
+                            / Math.abs(SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getZ()));
+            double shooterToTopLeadScrewAngle = Math
+                    .atan(Math.abs(SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT.getZ())
+                            / Math.abs(SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT.getX()));
 
             double shooterInteriorAngle = angle - shooterToBottomLeadScrewAngle - shooterToTopLeadScrewAngle
                     + Math.PI / 2.0;
 
-            double shooterPivotToBottomPivot = SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getTranslation().getNorm(); // a
-            double shooterPivotToTopPivot = SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT.getTranslation().getNorm(); // b
+            double shooterPivotToBottomPivot = SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getTranslation()
+                    .getNorm(); // a
+            double shooterPivotToTopPivot = SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT.getTranslation()
+                    .getNorm(); // b
 
             return Math.sqrt(
                     Math.pow(shooterPivotToBottomPivot, 2)
-                            - (2 * shooterPivotToBottomPivot * shooterPivotToTopPivot * Math.cos(shooterInteriorAngle))
-                            + Math.pow(shooterPivotToTopPivot, 2) - Math.pow(LEAD_SCREW_PIVOT_TO_EXTENSION.getZ(), 2))
+                            - (2 * shooterPivotToBottomPivot * shooterPivotToTopPivot
+                                    * Math.cos(shooterInteriorAngle))
+                            + Math.pow(shooterPivotToTopPivot, 2)
+                            - Math.pow(LEAD_SCREW_PIVOT_TO_EXTENSION.getZ(), 2))
                     - INITIAL_LEAD_SCREW_LENGTH;
         }
 
@@ -348,10 +358,13 @@ public class Constants {
         public static final double getShooterAngle(double linearActuatorLength) {
             double fullLeadScrewLength = INITIAL_LEAD_SCREW_LENGTH + linearActuatorLength;
 
-            double shooterPivotToBottomPivot = SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getTranslation().getNorm(); // a
-            double shooterPivotToTopPivot = SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT.getTranslation().getNorm(); // b
+            double shooterPivotToBottomPivot = SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getTranslation()
+                    .getNorm(); // a
+            double shooterPivotToTopPivot = SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT.getTranslation()
+                    .getNorm(); // b
             double leadScrewHyp = Math
-                    .sqrt(Math.pow(LEAD_SCREW_PIVOT_TO_EXTENSION.getZ(), 2) + Math.pow(fullLeadScrewLength, 2)); // c
+                    .sqrt(Math.pow(LEAD_SCREW_PIVOT_TO_EXTENSION.getZ(), 2)
+                            + Math.pow(fullLeadScrewLength, 2)); // c
 
             double shooterInteriorAngle = Math.acos(
                     (Math.pow(shooterPivotToBottomPivot, 2)
@@ -359,22 +372,28 @@ public class Constants {
                             - Math.pow(leadScrewHyp, 2))
                             / (2 * shooterPivotToBottomPivot * shooterPivotToTopPivot));
 
-            double shooterToBottomLeadScrewAngle = Math.atan(Math.abs(SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getX())
-                    / Math.abs(SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getZ()));
-            double shooterToTopLeadScrewAngle = Math.atan(Math.abs(SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT.getZ())
-                    / Math.abs(SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT.getX()));
+            double shooterToBottomLeadScrewAngle = Math
+                    .atan(Math.abs(SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getX())
+                            / Math.abs(SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getZ()));
+            double shooterToTopLeadScrewAngle = Math
+                    .atan(Math.abs(SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT.getZ())
+                            / Math.abs(SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT.getX()));
 
-            return shooterInteriorAngle + shooterToBottomLeadScrewAngle + shooterToTopLeadScrewAngle - Math.PI / 2.0;
+            return shooterInteriorAngle + shooterToBottomLeadScrewAngle + shooterToTopLeadScrewAngle
+                    - Math.PI / 2.0;
         }
 
         // used only in simulation
         public static final double getLeadScrewAngle(double linearActuatorLength) {
             double fullLeadScrewLength = INITIAL_LEAD_SCREW_LENGTH + linearActuatorLength;
 
-            double shooterPivotToBottomPivot = SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getTranslation().getNorm(); // a
-            double shooterPivotToTopPivot = SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT.getTranslation().getNorm(); // b
+            double shooterPivotToBottomPivot = SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getTranslation()
+                    .getNorm(); // a
+            double shooterPivotToTopPivot = SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT.getTranslation()
+                    .getNorm(); // b
             double leadScrewHyp = Math
-                    .sqrt(Math.pow(LEAD_SCREW_PIVOT_TO_EXTENSION.getZ(), 2) + Math.pow(fullLeadScrewLength, 2)); // c
+                    .sqrt(Math.pow(LEAD_SCREW_PIVOT_TO_EXTENSION.getZ(), 2)
+                            + Math.pow(fullLeadScrewLength, 2)); // c
 
             double leadScrewInteriorAngle = Math.acos(
                     (Math.pow(shooterPivotToBottomPivot, 2)
@@ -382,8 +401,9 @@ public class Constants {
                             - Math.pow(shooterPivotToTopPivot, 2))
                             / (2 * shooterPivotToBottomPivot * leadScrewHyp));
 
-            double bottomLeadScrewToShooterAngle = Math.atan(Math.abs(SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getZ())
-                    / Math.abs(SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getX()));
+            double bottomLeadScrewToShooterAngle = Math
+                    .atan(Math.abs(SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getZ())
+                            / Math.abs(SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getX()));
 
             return Math.PI - leadScrewInteriorAngle - bottomLeadScrewToShooterAngle;
         }
@@ -392,18 +412,18 @@ public class Constants {
         public static final InterpolatingDoubleTreeMap ANGLE_INTERPOLATOR = new InterpolatingDoubleTreeMap();
         static {
             // 2/17/24
-            ANGLE_INTERPOLATOR.put(1.142, 0.988);
-            ANGLE_INTERPOLATOR.put(1.511, 0.8889);
-            ANGLE_INTERPOLATOR.put(1.995, 0.7909);
-            ANGLE_INTERPOLATOR.put(2.2845, 0.71647);
-            ANGLE_INTERPOLATOR.put(2.593, 0.63854);
-            ANGLE_INTERPOLATOR.put(2.87, 0.59609);
-            ANGLE_INTERPOLATOR.put(3.128, 0.57226);
-            ANGLE_INTERPOLATOR.put(3.478, 0.53408);
-            ANGLE_INTERPOLATOR.put(3.834, 0.506119);
-            ANGLE_INTERPOLATOR.put(4.239, 0.480486);
-            ANGLE_INTERPOLATOR.put(4.597, 0.46);
-            ANGLE_INTERPOLATOR.put(5.1322, 0.44);
+            ANGLE_INTERPOLATOR.put(1.142, 0.988 + 0.02);
+            ANGLE_INTERPOLATOR.put(1.511, 0.8889 + 0.02);
+            ANGLE_INTERPOLATOR.put(1.995, 0.7909 + 0.02);
+            ANGLE_INTERPOLATOR.put(2.2845, 0.71647 + 0.02);
+            ANGLE_INTERPOLATOR.put(2.593, 0.63854 + 0.02);
+            ANGLE_INTERPOLATOR.put(2.87, 0.59609 + 0.02);
+            ANGLE_INTERPOLATOR.put(3.128, 0.57226 + 0.02);
+            ANGLE_INTERPOLATOR.put(3.478, 0.53408 + 0.02);
+            ANGLE_INTERPOLATOR.put(3.834, 0.506119 + 0.02);
+            ANGLE_INTERPOLATOR.put(4.239, 0.480486 + 0.02);
+            ANGLE_INTERPOLATOR.put(4.597, 0.46 + 0.02);
+            ANGLE_INTERPOLATOR.put(5.1322, 0.44 + 0.02);
         }
     }
 
@@ -500,7 +520,8 @@ public class Constants {
     }
 
     public static final class Vision {
-        public static final Matrix<N3, N1> SINGLE_TAG_STD_DEVS = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE,
+        public static final Matrix<N3, N1> SINGLE_TAG_STD_DEVS = VecBuilder.fill(Double.MAX_VALUE,
+                Double.MAX_VALUE,
                 Double.MAX_VALUE);
         public static final Matrix<N3, N1> MULTI_TAG_STD_DEVS = VecBuilder.fill(0.01, 0.01, 1);
 
@@ -522,21 +543,24 @@ public class Constants {
                                 Units.inchesToMeters(11.886316),
                                 -Units.inchesToMeters(7.507594),
                                 Units.inchesToMeters(9.541569)),
-                        new Rotation3d(0, Units.degreesToRadians(-25), Units.degreesToRadians(10))),
+                        new Rotation3d(0, Units.degreesToRadians(-25),
+                                Units.degreesToRadians(10))),
                 // left camera
                 new Transform3d(
                         new Translation3d(
                                 -Units.inchesToMeters(1.765373),
                                 Units.inchesToMeters(10.707761),
                                 Units.inchesToMeters(12.116848)),
-                        new Rotation3d(0, Units.degreesToRadians(-20), Units.degreesToRadians(70))),
+                        new Rotation3d(0, Units.degreesToRadians(-20),
+                                Units.degreesToRadians(70))),
                 // right camera
                 new Transform3d(
                         new Translation3d(
                                 -Units.inchesToMeters(1.765373),
                                 -Units.inchesToMeters(10.707761),
                                 Units.inchesToMeters(12.116848)),
-                        new Rotation3d(0, Units.degreesToRadians(-20), Units.degreesToRadians(-70)))
+                        new Rotation3d(0, Units.degreesToRadians(-20),
+                                Units.degreesToRadians(-70)))
         };
     }
 
@@ -556,7 +580,7 @@ public class Constants {
 
     public static final class LEDs {
         public static enum LEDSection implements BaseLEDSection {
-            SHOOTER_RIGHT(0, 33),
+            SHOOTER_RIGHT(0, 299),
             SHOOTER_TOP(0, 0),
             SHOOTER_LEFT(0, 0, true),
             ELEVATOR_LEFT(0, 0),
@@ -598,6 +622,16 @@ public class Constants {
         }
 
         public static final int PORT = 0;
-        public static final int LENGTH = 100; // TODO
+        public static final int LENGTH = 300; // TODO
+    }
+
+    public static final class HoundBrian {
+        public static final int BUTTON_1 = 3;
+        public static final int BUTTON_2 = 4;
+        public static final int BUTTON_3 = 5;
+        public static final int BUTTON_4 = 6;
+        public static final int BUTTON_5 = 7;
+        public static final int BUTTON_6 = 8;
+        public static final int BUTTON_7 = 9;
     }
 }

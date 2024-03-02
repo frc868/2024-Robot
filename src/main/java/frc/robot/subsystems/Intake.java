@@ -106,6 +106,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
     });
     private final Trigger noteInIntakeFromSourceTrigger = new Trigger(intakeBeam::get).negate();
 
+    @Log
     private boolean initialized = false;
 
     private PositionTracker positionTracker;
@@ -188,7 +189,8 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
 
     @Override
     public void resetPosition() {
-        leftArmMotor.getEncoder().setPosition(IntakePosition.GROUND.value);
+        leftArmMotor.getEncoder().setPosition(IntakePosition.TOP.value);
+        initialized = true;
     }
 
     @Override
@@ -251,7 +253,9 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
 
     @Override
     public Command resetPositionCommand() {
-        return runOnce(this::resetPosition).withName("intake.resetPosition");
+        return runOnce(this::resetPosition)
+                .ignoringDisable(true)
+                .withName("intake.resetPosition");
     }
 
     @Override
@@ -272,6 +276,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
                     rightArmMotor.setIdleMode(IdleMode.kBrake);
                     pidController.reset(getPosition());
                 })
+                .ignoringDisable(true)
                 .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
                 .withName("intake.coastMotors");
     }
@@ -369,5 +374,13 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
         return Commands.runOnce(() -> {
             initialized = true;
         }).withName("intake.enableInitialized");
+    }
+
+    public double getRollerCurrent() {
+        return rollerMotor.getOutputCurrent();
+    }
+
+    public boolean getNoteInIntake() {
+        return noteInIntakeTrigger.getAsBoolean();
     }
 }

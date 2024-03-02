@@ -175,6 +175,7 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
     @Override
     public void resetPosition() {
         motor.getEncoder().setPosition(0);
+        initialized = true;
     }
 
     @Override
@@ -255,7 +256,9 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
 
     @Override
     public Command resetPositionCommand() {
-        return runOnce(this::resetPosition).withName("shooterTilt.resetPosition");
+        return runOnce(this::resetPosition)
+                .ignoringDisable(true)
+                .withName("shooterTilt.resetPosition");
     }
 
     @Override
@@ -271,7 +274,9 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
                 .finallyDo((d) -> {
                     motor.setIdleMode(IdleMode.kBrake);
                     pidController.reset(getPosition());
-                }).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
+                })
+                .ignoringDisable(true)
+                .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
                 .withName("shooterTilt.coastMotors");
     }
 

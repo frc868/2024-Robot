@@ -1,5 +1,13 @@
 {
   "HALProvider": {
+    "Addressable LEDs": {
+      "0": {
+        "columns": 42
+      },
+      "window": {
+        "visible": true
+      }
+    },
     "Other Devices": {
       "window": {
         "visible": false
@@ -23,6 +31,11 @@
       "/HoundLog/autonomous/field": "Field2d",
       "/HoundLog/commands/climber/resetPosition": "Command",
       "/HoundLog/commands/intake/resetPosition": "Command",
+      "/HoundLog/commands/leds/breathe": "Command",
+      "/HoundLog/commands/leds/chase": "Command",
+      "/HoundLog/commands/leds/fire": "Command",
+      "/HoundLog/commands/leds/red": "Command",
+      "/HoundLog/commands/leds/wave": "Command",
       "/HoundLog/commands/noteLift/resetPosition": "Command",
       "/HoundLog/commands/shooterTilt/resetPosition": "Command",
       "/SmartDashboard/VisionSystemSim-main/Sim Field": "Field2d"

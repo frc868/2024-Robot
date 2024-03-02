@@ -134,6 +134,7 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
     @Override
     public void resetPosition() {
         motor.getEncoder().setPosition(NoteLiftPosition.TOP.value);
+        initialized = true;
     }
 
     @Override
@@ -143,6 +144,12 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
                 MAX_HEIGHT_METERS + 0.03); // allows note lift to unspool slightly
 
         if (getPosition() - positionTracker.getClimberPosition() < 0.06 && voltage < 0) {
+            voltage = 0;
+        }
+        if (getPosition() < 0.233 && positionTracker.getShooterTiltAngle() < 1.11 && voltage > 0) {
+            voltage = 0;
+        }
+        if (getPosition() > 0.233 && positionTracker.getShooterTiltAngle() < 1.11 && voltage < 0) {
             voltage = 0;
         }
 
