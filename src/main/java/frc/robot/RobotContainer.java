@@ -118,7 +118,7 @@ public class RobotContainer {
         DataLogManager.logNetworkTables(true);
         DriverStation.startDataLog(DataLogManager.getLog());
         DataLogManager.start();
-        URCL.start();
+        // URCL.start();
         SignalLogger.start();
 
         LoggingManager.getInstance().registerRobotContainer(this);
@@ -170,12 +170,12 @@ public class RobotContainer {
         // shooter, shooterTilt));
         // AutoManager.getInstance().addRoutine(Autos.autoBA123(drivetrain, intake,
         // shooter, shooterTilt));
-        // AutoManager.getInstance().addRoutine(Autos.autoCBA123(drivetrain, intake,
-        // shooter, shooterTilt));
+        AutoManager.getInstance().addRoutine(Autos.auto213(drivetrain, intake,
+                shooter, shooterTilt));
         AutoManager.getInstance().addRoutine(Autos.autoCBA(drivetrain, intake,
                 shooter, shooterTilt));
-        // AutoManager.getInstance().addRoutine(Autos.auto453(drivetrain, intake,
-        // shooter, shooterTilt));
+        AutoManager.getInstance().addRoutine(Autos.auto453(drivetrain, intake,
+                shooter, shooterTilt));
         // AutoManager.getInstance().addRoutine(Autos.autoBAC(drivetrain, intake,
         // shooter, shooterTilt));
         // AutoManager.getInstance().addRoutine(Autos.auto1234(drivetrain, intake,
