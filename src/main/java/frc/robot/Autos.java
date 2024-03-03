@@ -176,19 +176,6 @@ public class Autos {
         PathPlannerPath pathBToA = PathPlannerPath.fromChoreoTrajectory("CBA.3");
         Pose2d startingPose = pathStartToC.getPreviewStartingHolonomicPose();
 
-        // Command command = Commands.sequence(
-        // RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
-        // // Commands.parallel(
-        // //
-        // shooterTilt.targetSpeakerCommand(drivetrain::getPose).until(shooterTilt::atGoal),
-        // // shooter.targetSpeakerCommand(drivetrain::getPose),
-        // // .until(() -> shooter.atGoal() && shooterTilt.atGoal()),
-        // drivetrain.followPathCommand(pathStartToC),
-        // Commands.waitSeconds(1),
-        // drivetrain.followPathCommand(pathCToB),
-        // Commands.waitSeconds(1),
-        // drivetrain.followPathCommand(pathBToA));
-
         Command command = Commands.parallel(
                 // shooterTilt.targetSpeakerCommand(drivetrain::getPose),
                 Commands.sequence(
@@ -207,38 +194,68 @@ public class Autos {
                 new Pose2d(startingPose.getX(), startingPose.getY(), new Rotation2d(Math.PI)));
     }
 
-    // public static AutoRoutine auto453(Drivetrain drivetrain, Intake intake,
-    // Shooter shooter, ShooterTilt shooterTilt) {
-    // PathPlannerPath pathStartTo4 = PathPlannerPath.fromChoreoTrajectory("453.1");
-    // PathPlannerPath path4ToScore = PathPlannerPath.fromChoreoTrajectory("453.2");
-    // PathPlannerPath pathScoreTo5 = PathPlannerPath.fromChoreoTrajectory("453.3");
-    // PathPlannerPath path5ToScore = PathPlannerPath.fromChoreoTrajectory("453.4");
-    // PathPlannerPath pathScoreTo3 = PathPlannerPath.fromChoreoTrajectory("453.5");
-    // PathPlannerPath path3ToScore = PathPlannerPath.fromChoreoTrajectory("453.6");
+    public static AutoRoutine auto213(Drivetrain drivetrain, Intake intake, Shooter shooter,
+            ShooterTilt shooterTilt) {
+        PathPlannerPath pathStartTo2 = PathPlannerPath.fromChoreoTrajectory("213.1");
+        PathPlannerPath path2ToScore = PathPlannerPath.fromChoreoTrajectory("213.2");
+        PathPlannerPath pathScoreTo3 = PathPlannerPath.fromChoreoTrajectory("213.3");
+        PathPlannerPath path3ToScore = PathPlannerPath.fromChoreoTrajectory("213.4");
+        PathPlannerPath pathScoreTo1 = PathPlannerPath.fromChoreoTrajectory("213.5");
+        PathPlannerPath path1ToScore = PathPlannerPath.fromChoreoTrajectory("213.6");
+        Pose2d startingPose = pathStartTo2.getPreviewStartingHolonomicPose();
 
-    // Pose2d startingPose = pathStartTo4.getPreviewStartingHolonomicPose();
+        Command command = Commands.parallel(
+                // shooterTilt.targetSpeakerCommand(drivetrain::getPose),
+                Commands.sequence(
+                        RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
+                        intake.moveToPositionCommand(() -> IntakePosition.GROUND).alongWith(
+                                shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.INTAKE).asProxy()),
+                        drivetrain.followPathCommand(pathStartTo2).alongWith(intake.intakeNoteAutoCommand()),
+                        drivetrain.followPathCommand(path2ToScore),
+                        RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
+                        drivetrain.followPathCommand(pathScoreTo3).alongWith(intake.intakeNoteAutoCommand()),
+                        drivetrain.followPathCommand(path3ToScore),
+                        RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
+                        drivetrain.followPathCommand(pathScoreTo1).alongWith(intake.intakeNoteAutoCommand()),
+                        drivetrain.followPathCommand(path1ToScore),
+                        RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt)));
 
-    // Command command = Commands.parallel(
-    // Commands.sequence(
-    // RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt)
-    // .alongWith(intake.moveToPositionCommand(() -> IntakePosition.GROUND)),
-    // drivetrain.followPathCommand(pathStartTo4).alongWith(intake.intakeNoteAutoCommand()),
-    // drivetrain.followPathCommand(path4ToScore),
-    // RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
-    // drivetrain.followPathCommand(pathScoreTo5).alongWith(intake.intakeNoteAutoCommand()),
-    // drivetrain.followPathCommand(path5ToScore),
-    // RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
-    // drivetrain.followPathCommand(pathScoreTo3).alongWith(intake.intakeNoteAutoCommand()),
-    // drivetrain.followPathCommand(path3ToScore),
-    // RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt)),
-    // shooterTilt.targetSpeakerCommand(drivetrain::getPose));
+        return new AutoRoutine("213", command,
+                List.of(pathStartTo2, path2ToScore, pathScoreTo3, path3ToScore, pathScoreTo1, path1ToScore),
+                new Pose2d(startingPose.getX(), startingPose.getY(), new Rotation2d(Math.PI)));
+    }
 
-    // return new AutoRoutine("453", command,
-    // List.of(pathStartTo4, path4ToScore, pathScoreTo5, path5ToScore, pathScoreTo3,
-    // path3ToScore),
-    // new Pose2d(startingPose.getX(), startingPose.getY(), new
-    // Rotation2d(1.986288)));
-    // }
+    public static AutoRoutine auto453(Drivetrain drivetrain, Intake intake,
+            Shooter shooter, ShooterTilt shooterTilt) {
+        PathPlannerPath pathStartTo4 = PathPlannerPath.fromChoreoTrajectory("453.1");
+        PathPlannerPath path4ToScore = PathPlannerPath.fromChoreoTrajectory("453.2");
+        PathPlannerPath pathScoreTo5 = PathPlannerPath.fromChoreoTrajectory("453.3");
+        PathPlannerPath path5ToScore = PathPlannerPath.fromChoreoTrajectory("453.4");
+        PathPlannerPath pathScoreTo3 = PathPlannerPath.fromChoreoTrajectory("453.5");
+        PathPlannerPath path3ToScore = PathPlannerPath.fromChoreoTrajectory("453.6");
+
+        Pose2d startingPose = pathStartTo4.getPreviewStartingHolonomicPose();
+
+        Command command = Commands.parallel(
+                Commands.sequence(
+                        RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
+                        intake.moveToPositionCommand(() -> IntakePosition.GROUND).alongWith(
+                                shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.INTAKE).asProxy()),
+                        drivetrain.followPathCommand(pathStartTo4).alongWith(intake.intakeNoteAutoCommand()),
+                        drivetrain.followPathCommand(path4ToScore),
+                        RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
+                        drivetrain.followPathCommand(pathScoreTo5).alongWith(intake.intakeNoteAutoCommand()),
+                        drivetrain.followPathCommand(path5ToScore),
+                        RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
+                        drivetrain.followPathCommand(pathScoreTo3).alongWith(intake.intakeNoteAutoCommand()),
+                        drivetrain.followPathCommand(path3ToScore),
+                        RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt)));
+
+        return new AutoRoutine("453", command,
+                List.of(pathStartTo4, path4ToScore, pathScoreTo5, path5ToScore, pathScoreTo3,
+                        path3ToScore),
+                new Pose2d(startingPose.getX(), startingPose.getY(), new Rotation2d(Math.PI)));
+    }
 
     // public static AutoRoutine auto1234(Drivetrain drivetrain, Intake intake,
     // Shooter shooter, ShooterTilt shooterTilt) {
