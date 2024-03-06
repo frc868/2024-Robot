@@ -304,7 +304,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
 
     public Command ampScoreRollersCommand() {
         return Commands.startEnd(
-                () -> setRollerVoltage(-4.25),
+                () -> setRollerVoltage(-3.5),
                 () -> setRollerVoltage(0))
                 .withName("intake.reverseRollers");
     }
