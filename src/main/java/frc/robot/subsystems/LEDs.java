@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -30,8 +31,9 @@ public class LEDs extends SubsystemBase {
     private ArrayList<LEDState> currentStates = new ArrayList<LEDState>();
 
     public enum LEDState {
-        FLASHING_BLUE(flash(Color.kBlue, 0.05, LEDSection.ALL)),
-        FLASHING_GREEN(flash(Color.kGreen, 0.05, LEDSection.ALL)),
+        OFF(solid(Color.kBlack, LEDSection.ALL)),
+        SOLID_BLUE(solid(Color.kBlue, LEDSection.ALL)),
+        SOLID_GREEN(solid(Color.kGreen, LEDSection.ALL)),
         PURPLE_WAVE(wave(new Color("#9000DD"), 30, 20, 100, 255,
                 LEDSection.SHOOTER)),
         GREEN_WAVE(wave(Color.kGreen, 30, 20, 100, 255,
@@ -42,31 +44,32 @@ public class LEDs extends SubsystemBase {
                 LEDSection.ELEVATOR_LEFT)),
         RED_WAVE(wave(Color.kRed, 30, 20, 100, 255,
                 LEDSection.ELEVATOR_RIGHT)),
-        RAINBOW(rainbow(255, 3, LEDSection.SHOOTER_RIGHT)),
-        // RAINBOW(fire(255, 3, LEDSection.SHOOTER_RIGHT)),
-        OFF(solid(Color.kBlack, LEDSection.SHOOTER_RIGHT)),
+        RAINBOW(rainbow(255, 3, LEDSection.ALL)),
         // CHASE(chase(Color.kPurple, Color.kPurple, 20, 0.5, 100, false,
         // LEDSection.SHOOTER_RIGHT)),
         // BREATHE(breathe(Color.kWhite, 3, 0, 255, LEDSection.SHOOTER_RIGHT)),
         // WAVE(wave(Color.kPurple, 20, 20, 150, 255, LEDSection.SHOOTER_RIGHT)),
-        PURPLE_FIRE1(fire2012Palette(0.8, 0.8, List.of(Color.kBlack, Color.kMediumPurple, Color.kPurple, Color.kWhite),
-                LEDSection.ELEVATOR_LEFT)),
-        PURPLE_FIRE2(fire2012Palette(0.8, 0.8, List.of(Color.kBlack, Color.kMediumPurple, Color.kPurple, Color.kWhite),
-                LEDSection.ELEVATOR_RIGHT)),
-        FIRE1(fire2012Palette(0.8, 0.4, List.of(Color.kBlack, Color.kRed, Color.kOrange, Color.kWhite),
-                LEDSection.ELEVATOR_LEFT)),
-        FIRE2(fire2012Palette(0.8, 0.4, List.of(Color.kBlack, Color.kRed, Color.kOrange, Color.kWhite),
-                LEDSection.ELEVATOR_RIGHT)),
+        PURPLE_FIRE1(
+                fire2012Palette(0.8, 0.8, List.of(Color.kBlack, Color.kMediumPurple, Color.kPurple, Color.kWhite),
+                        LEDSection.ELEVATOR_LEFT),
+                fire2012Palette(0.8, 0.8, List.of(Color.kBlack, Color.kMediumPurple, Color.kPurple, Color.kWhite),
+                        LEDSection.ELEVATOR_RIGHT)),
+        FIRE(
+                fire2012Palette(0.8, 0.4, List.of(Color.kBlack, Color.kRed, Color.kOrange, Color.kWhite),
+                        LEDSection.ELEVATOR_LEFT),
+                fire2012Palette(0.8, 0.4, List.of(Color.kBlack, Color.kRed, Color.kOrange, Color.kWhite),
+                        LEDSection.ELEVATOR_RIGHT)),
         TEST_FIRE(fire2012Palette(0.8, 0.8, List.of(Color.kBlack, Color.kRed, Color.kYellow, Color.kWhite),
                 LEDSection.SHOOTER_RIGHT)),
         NORMAL_FIRE(fire2012(0.8, 0.8, LEDSection.SHOOTER_RIGHT));
         // FLASHING_RED(flash(Color.kRed, 0.1, LEDSection.SHOOTER_RIGHT)),
         // FLASHING_ORANGE(flash(Color.kOrange, 1, LEDSection.SHOOTER_RIGHT));
 
-        private Consumer<AddressableLEDBuffer> bufferConsumer;
+        private List<Consumer<AddressableLEDBuffer>> bufferConsumers;
 
-        private LEDState(Consumer<AddressableLEDBuffer> bufferConsumer) {
-            this.bufferConsumer = bufferConsumer;
+        @SafeVarargs
+        private LEDState(Consumer<AddressableLEDBuffer>... bufferConsumer) {
+            this.bufferConsumers = Arrays.asList(bufferConsumer);
         }
     }
 
@@ -81,42 +84,21 @@ public class LEDs extends SubsystemBase {
         setDefaultCommand(updateStateMachineCommand());
     }
 
-    public Command requestFlashingGreenCommand() {
-        return Commands.run(() -> currentStates.add(LEDState.FLASHING_GREEN)).ignoringDisable(true);
+    public Command requestGreenCommand() {
+        return Commands.run(() -> currentStates.add(LEDState.SOLID_GREEN)).ignoringDisable(true);
     }
 
-    public Command requestFlashingBlueCommand() {
-        return Commands.run(() -> currentStates.add(LEDState.FLASHING_BLUE)).ignoringDisable(true);
+    public Command requestBlueCommand() {
+        return Commands.run(() -> currentStates.add(LEDState.SOLID_BLUE)).ignoringDisable(true);
     }
-
-    // public Command requestChaseCommand() {
-    // return Commands.run(() ->
-    // currentStates.add(LEDState.CHASE)).withTimeout(0.5).ignoringDisable(true);
-    // }
-
-    // public Command requestFireCommand() {
-    // return Commands.run(() ->
-    // currentStates.add(LEDState.FIRE)).ignoringDisable(true);
-    // }
-
-    // public Command requestWaveCommand() {
-    // return Commands.run(() ->
-    // currentStates.add(LEDState.WAVE)).ignoringDisable(true);
-    // }
-
-    // public Command requestBreatheCommand() {
-    // return Commands.run(() ->
-    // currentStates.add(LEDState.BREATHE)).ignoringDisable(true);
-    // }
 
     public Command updateStateMachineCommand() {
         return run(() -> {
             clear();
             currentStates.add(LEDState.PURPLE_WAVE);
-            currentStates.add(LEDState.FIRE1);
-            currentStates.add(LEDState.FIRE2);
+            currentStates.add(LEDState.FIRE);
             currentStates.sort((s1, s2) -> s2.ordinal() - s1.ordinal());
-            currentStates.forEach((s) -> s.bufferConsumer.accept(buffer));
+            currentStates.forEach(s -> s.bufferConsumers.forEach(c -> c.accept(buffer)));
             leds.setData(buffer);
             currentStates.clear();
         })
