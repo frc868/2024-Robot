@@ -95,6 +95,7 @@ public class Constants {
 
             SWERVE_CONSTANTS.DRIVE_GEARING = 5.357;
             SWERVE_CONSTANTS.STEER_GEARING = 150.0 / 7.0;
+            SWERVE_CONSTANTS.COUPLING_RATIO = 50.0 / 16.0;
             SWERVE_CONSTANTS.WHEEL_CIRCUMFERENCE = 2.0 * Math.PI * 0.04762663828;
             SWERVE_CONSTANTS.DRIVE_ENCODER_ROTATIONS_TO_METERS = SWERVE_CONSTANTS.WHEEL_CIRCUMFERENCE
                     / SWERVE_CONSTANTS.DRIVE_GEARING;
@@ -241,7 +242,7 @@ public class Constants {
         public static final double right_kS = 0.12047;
         public static final double right_kV = 0.10746;
         public static final double right_kA = 0.021566;
-        public static final double TOLERANCE = 1;
+        public static final double TOLERANCE = 5;
 
         public static final double MAX_VELOCITY_METERS_PER_SECOND = 80;
         public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 10;
