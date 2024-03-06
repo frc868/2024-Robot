@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
+import com.ctre.phoenix6.Orchestra;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.commands.FollowPathHolonomic;
@@ -55,6 +56,7 @@ import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.FieldConstants;
+import frc.robot.utils.TrajectoryCalcs;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 
 import static frc.robot.Constants.Drivetrain.*;
@@ -163,6 +165,8 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     private final MutableMeasure<Velocity<Angle>> sysidSteerVelocityMeasure = mutable(RotationsPerSecond.of(0));
 
     private final SysIdRoutine sysIdSteer;
+
+    private final Orchestra orchestra = new Orchestra();
 
     @Log
     private Pose2d targettedStagePose = new Pose2d();
@@ -306,6 +310,16 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
                                                     RotationsPerSecond));
                         },
                         this));
+
+        orchestra.addInstrument(frontLeft.getDriveMotor(), 1);
+        orchestra.addInstrument(frontRight.getDriveMotor(), 1);
+        orchestra.addInstrument(backLeft.getDriveMotor(), 1);
+        orchestra.addInstrument(backRight.getDriveMotor(), 2);
+
+        orchestra.addInstrument(frontLeft.getSteerMotor(), 2);
+        orchestra.addInstrument(backRight.getSteerMotor(), 2);
+        orchestra.addInstrument(backLeft.getSteerMotor(), 3);
+        orchestra.addInstrument(frontRight.getSteerMotor(), 4);
     }
 
     @Override
@@ -867,6 +881,18 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
             drive(new ChassisSpeeds(xSpeed, ySpeed, thetaSpeed), DriveMode.FIELD_ORIENTED);
         })).withName("drivetrain.teleopDrive");
+    }
+
+    public Command playMusicCommand(MusicTrack track) {
+        return startEnd(() -> {
+            orchestra.loadMusic(track.filename);
+            orchestra.play();
+        }, orchestra::pause);
+    }
+
+    public Pose3d calculateEffectiveTargetLocation() {
+        return TrajectoryCalcs.calculateEffectiveTargetLocation(getPose(), getFieldRelativeSpeeds(),
+                getFieldRelativeAccelerations());
     }
 
 }
