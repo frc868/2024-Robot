@@ -2,14 +2,18 @@ package frc.robot;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.techhounds.houndutil.houndauto.AutoManager;
+import com.techhounds.houndutil.houndauto.Reflector;
 import com.techhounds.houndutil.houndlib.SparkConfigurator;
 import com.techhounds.houndutil.houndlog.LoggingManager;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
 import com.techhounds.houndutil.houndlog.interfaces.SendableLog;
 
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
@@ -89,6 +93,17 @@ public class RobotContainer {
         prevLoopTime = timestamp;
         return loopTime * 1000.0;
     };
+    @Log
+    private final Supplier<Double> dist = () -> {
+        Pose3d target = DriverStation.getAlliance().isPresent()
+                && DriverStation.getAlliance().get() == Alliance.Red
+                        ? Reflector.reflectPose3d(FieldConstants.SPEAKER_TARGET,
+                                FieldConstants.FIELD_LENGTH)
+                        : FieldConstants.SPEAKER_TARGET;
+
+        Transform3d diff = new Pose3d(drivetrain.getPose()).minus(target);
+        return new Translation2d(diff.getX(), diff.getY()).getNorm();
+    };
 
     @Log
     private final Supplier<Pose3d> shootOnTheMovePose = () -> {
@@ -148,12 +163,9 @@ public class RobotContainer {
                     && noteLift.getInitialized();
         }).onTrue(GlobalStates.INITIALIZED.enableCommand());
 
-        new Trigger(() -> intake.getRollerCurrent() > 40).debounce(0.1)
-                .whileTrue(leds.requestFlashingGreenCommand().withTimeout(2));
-        new Trigger(intake::getNoteInIntake).whileTrue(leds.requestFlashingBlueCommand().withTimeout(1));
-
-        new CommandXboxController(1).povLeft().whileTrue(houndBrian.simTriggerIntakeButton());
-
+        new Trigger(() -> intake.getRollerCurrent() > 40).debounce(0.15)
+                .onTrue(leds.requestGreenCommand().withTimeout(1));
+        new Trigger(intake::getNoteInShooter).onTrue(leds.requestBlueCommand().withTimeout(1));
     }
 
     private void configureButtonBindings() {
