@@ -34,6 +34,19 @@ public class Constants {
     public static final ControllerType CONTROLLER_TYPE = ControllerType.FlightStick;
 
     public static final class Drivetrain {
+        public static enum MusicTrack {
+            IMPERIAL_MARCH("imperial_march.chrp"),
+            MEGALOVANIA("megalovania.chrp"),
+            NATIONAL_ANTHEM("national_anthem.chrp"),
+            SHAKE_IT_OFF("shake_it_off.chrp");
+
+            private MusicTrack(String filename) {
+                this.filename = filename;
+            }
+
+            public final String filename;
+        }
+
         public static final int FRONT_LEFT_DRIVE_MOTOR_ID = 1;
         public static final int FRONT_LEFT_STEER_MOTOR_ID = 2;
         public static final int FRONT_RIGHT_DRIVE_MOTOR_ID = 3;
@@ -82,7 +95,7 @@ public class Constants {
 
             SWERVE_CONSTANTS.DRIVE_GEARING = 5.357;
             SWERVE_CONSTANTS.STEER_GEARING = 150.0 / 7.0;
-            SWERVE_CONSTANTS.WHEEL_CIRCUMFERENCE = 2.0 * Math.PI * 0.04762663828; // 0.3003362577
+            SWERVE_CONSTANTS.WHEEL_CIRCUMFERENCE = 2.0 * Math.PI * 0.04762663828;
             SWERVE_CONSTANTS.DRIVE_ENCODER_ROTATIONS_TO_METERS = SWERVE_CONSTANTS.WHEEL_CIRCUMFERENCE
                     / SWERVE_CONSTANTS.DRIVE_GEARING;
             SWERVE_CONSTANTS.STEER_ENCODER_ROTATIONS_TO_RADIANS = 2 * Math.PI
@@ -131,7 +144,7 @@ public class Constants {
                 MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
                 MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED);
 
-        public static final double PATH_FOLLOWING_TRANSLATION_kP = 1.0; // TODO simvalue
+        public static final double PATH_FOLLOWING_TRANSLATION_kP = 8.0; // TODO simvalue
         public static final double PATH_FOLLOWING_ROTATION_kP = 1.0; // TODO simvalue
     }
 
@@ -212,23 +225,23 @@ public class Constants {
         public static final int CURRENT_LIMIT = 40;
 
         public static final double IDLE_RPS = 15;
-        public static final double BASE_SHOOTING_RPS = 50;
+        public static final double BASE_SHOOTING_RPS = 55;
 
-        // 2/18/24
-        public static final double left_kP = 0.00016938;
+        // 3/3/24
+        public static final double left_kP = 0.00001;
         public static final double left_kI = 0;
         public static final double left_kD = 0;
-        public static final double left_kS = 0.070681;
-        public static final double left_kV = 0.1068;
-        public static final double left_kA = 0.021904;
+        public static final double left_kS = 0.14652;
+        public static final double left_kV = 0.10797;
+        public static final double left_kA = 0.022635;
 
         public static final double right_kP = 0.00001;
         public static final double right_kI = 0;
         public static final double right_kD = 0;
-        public static final double right_kS = 0.057727;
-        public static final double right_kV = 0.10764;
-        public static final double right_kA = 0.021661;
-        public static final double TOLERANCE = 5;
+        public static final double right_kS = 0.12047;
+        public static final double right_kV = 0.10746;
+        public static final double right_kA = 0.021566;
+        public static final double TOLERANCE = 1;
 
         public static final double MAX_VELOCITY_METERS_PER_SECOND = 80;
         public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 10;
@@ -241,19 +254,19 @@ public class Constants {
         // key: distance, value: speed
         public static final InterpolatingDoubleTreeMap SPEED_INTERPOLATOR = new InterpolatingDoubleTreeMap();
         static {
-            // 2/17/24
+            // 3/5/24
             SPEED_INTERPOLATOR.put(1.142, 55.0);
-            SPEED_INTERPOLATOR.put(1.511, 65.0);
-            SPEED_INTERPOLATOR.put(1.995, 65.0);
-            SPEED_INTERPOLATOR.put(2.2845, 65.0);
-            SPEED_INTERPOLATOR.put(2.593, 65.0);
-            SPEED_INTERPOLATOR.put(2.87, 75.0);
-            SPEED_INTERPOLATOR.put(3.128, 75.0);
-            SPEED_INTERPOLATOR.put(3.478, 75.0);
-            SPEED_INTERPOLATOR.put(3.834, 75.0);
-            SPEED_INTERPOLATOR.put(4.239, 75.0);
-            SPEED_INTERPOLATOR.put(4.597, 75.0);
-            SPEED_INTERPOLATOR.put(5.1322, 75.0);
+            SPEED_INTERPOLATOR.put(1.511, 84.0);
+            SPEED_INTERPOLATOR.put(1.995, 84.0);
+            SPEED_INTERPOLATOR.put(2.2845, 84.0);
+            SPEED_INTERPOLATOR.put(2.593, 84.0);
+            SPEED_INTERPOLATOR.put(2.87, 84.0);
+            SPEED_INTERPOLATOR.put(3.128, 84.0);
+            SPEED_INTERPOLATOR.put(3.478, 84.0);
+            SPEED_INTERPOLATOR.put(3.834, 84.0);
+            SPEED_INTERPOLATOR.put(4.239, 84.0);
+            SPEED_INTERPOLATOR.put(4.597, 84.0);
+            SPEED_INTERPOLATOR.put(5.1322, 84.0);
         }
 
         public static final double MAX_SHOOTING_DISTANCE = 5.1322;
@@ -411,19 +424,17 @@ public class Constants {
         // key: distance, value: angle
         public static final InterpolatingDoubleTreeMap ANGLE_INTERPOLATOR = new InterpolatingDoubleTreeMap();
         static {
-            // 2/17/24
-            ANGLE_INTERPOLATOR.put(1.142, 0.988 + 0.02);
-            ANGLE_INTERPOLATOR.put(1.511, 0.8889 + 0.02);
-            ANGLE_INTERPOLATOR.put(1.995, 0.7909 + 0.02);
-            ANGLE_INTERPOLATOR.put(2.2845, 0.71647 + 0.02);
-            ANGLE_INTERPOLATOR.put(2.593, 0.63854 + 0.02);
-            ANGLE_INTERPOLATOR.put(2.87, 0.59609 + 0.02);
-            ANGLE_INTERPOLATOR.put(3.128, 0.57226 + 0.02);
-            ANGLE_INTERPOLATOR.put(3.478, 0.53408 + 0.02);
-            ANGLE_INTERPOLATOR.put(3.834, 0.506119 + 0.02);
-            ANGLE_INTERPOLATOR.put(4.239, 0.480486 + 0.02);
-            ANGLE_INTERPOLATOR.put(4.597, 0.46 + 0.02);
-            ANGLE_INTERPOLATOR.put(5.1322, 0.44 + 0.02);
+            // 3/5/24
+            ANGLE_INTERPOLATOR.put(1.1795122686667598, 1.0157209208113183);
+            ANGLE_INTERPOLATOR.put(1.7062360399365777, 0.850934764294403);
+            ANGLE_INTERPOLATOR.put(2.235756419155122, 0.7453064051470202);
+            ANGLE_INTERPOLATOR.put(2.9124685062916904, 0.6497289478451282);
+            ANGLE_INTERPOLATOR.put(3.419734229712845, 0.59811378496391);
+            ANGLE_INTERPOLATOR.put(3.948809911586509, 0.544307740832874);
+            ANGLE_INTERPOLATOR.put(4.239, 0.480486);
+            ANGLE_INTERPOLATOR.put(4.597, 0.46);
+            ANGLE_INTERPOLATOR.put(5.1322, 0.44);
+
         }
     }
 
@@ -580,11 +591,13 @@ public class Constants {
 
     public static final class LEDs {
         public static enum LEDSection implements BaseLEDSection {
-            SHOOTER_RIGHT(0, 299),
-            SHOOTER_TOP(0, 0),
-            SHOOTER_LEFT(0, 0, true),
-            ELEVATOR_LEFT(0, 0),
-            ELEVATOR_RIGHT(0, 0);
+            SHOOTER_RIGHT(0, 27),
+            SHOOTER_TOP(28, 77),
+            SHOOTER_LEFT(78, 110, true),
+            SHOOTER(0, 110),
+            ELEVATOR_LEFT(111, 221),
+            ELEVATOR_RIGHT(222, 332),
+            ALL(0, 332);
 
             private final int startIdx;
             private final int endIdx;
@@ -622,7 +635,7 @@ public class Constants {
         }
 
         public static final int PORT = 0;
-        public static final int LENGTH = 300; // TODO
+        public static final int LENGTH = 333;
     }
 
     public static final class HoundBrian {
