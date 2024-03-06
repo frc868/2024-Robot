@@ -380,7 +380,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
         return rollerMotor.getOutputCurrent();
     }
 
-    public boolean getNoteInIntake() {
-        return noteInIntakeTrigger.getAsBoolean();
+    public boolean getNoteInShooter() {
+        return noteInShooterTrigger.getAsBoolean();
     }
 }
