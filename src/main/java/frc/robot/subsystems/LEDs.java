@@ -30,10 +30,18 @@ public class LEDs extends SubsystemBase {
     private ArrayList<LEDState> currentStates = new ArrayList<LEDState>();
 
     public enum LEDState {
-        FLASHING_BLUE(flash(Color.kBlue, 0.05, LEDSection.SHOOTER_RIGHT)),
-        FLASHING_GREEN(flash(Color.kGreen, 0.05, LEDSection.SHOOTER_RIGHT)),
-        PURPLE_WAVE(wave(new Color("#FF00FF"), 30, 20, 100, 255,
-                LEDSection.SHOOTER_RIGHT)),
+        FLASHING_BLUE(flash(Color.kBlue, 0.05, LEDSection.ALL)),
+        FLASHING_GREEN(flash(Color.kGreen, 0.05, LEDSection.ALL)),
+        PURPLE_WAVE(wave(new Color("#9000DD"), 30, 20, 100, 255,
+                LEDSection.SHOOTER)),
+        GREEN_WAVE(wave(Color.kGreen, 30, 20, 100, 255,
+                LEDSection.SHOOTER_TOP)),
+        BLUE_WAVE(wave(Color.kBlue, 30, 20, 100, 255,
+                LEDSection.SHOOTER_LEFT)),
+        YELLOW_WAVE(wave(Color.kYellow, 30, 20, 100, 255,
+                LEDSection.ELEVATOR_LEFT)),
+        RED_WAVE(wave(Color.kRed, 30, 20, 100, 255,
+                LEDSection.ELEVATOR_RIGHT)),
         RAINBOW(rainbow(255, 3, LEDSection.SHOOTER_RIGHT)),
         // RAINBOW(fire(255, 3, LEDSection.SHOOTER_RIGHT)),
         OFF(solid(Color.kBlack, LEDSection.SHOOTER_RIGHT)),
@@ -41,8 +49,14 @@ public class LEDs extends SubsystemBase {
         // LEDSection.SHOOTER_RIGHT)),
         // BREATHE(breathe(Color.kWhite, 3, 0, 255, LEDSection.SHOOTER_RIGHT)),
         // WAVE(wave(Color.kPurple, 20, 20, 150, 255, LEDSection.SHOOTER_RIGHT)),
-        PURPLE_FIRE(fire2012Palette(0.8, 0.8, List.of(Color.kBlack, Color.kMediumPurple, Color.kPurple, Color.kWhite),
-                LEDSection.SHOOTER_RIGHT)),
+        PURPLE_FIRE1(fire2012Palette(0.8, 0.8, List.of(Color.kBlack, Color.kMediumPurple, Color.kPurple, Color.kWhite),
+                LEDSection.ELEVATOR_LEFT)),
+        PURPLE_FIRE2(fire2012Palette(0.8, 0.8, List.of(Color.kBlack, Color.kMediumPurple, Color.kPurple, Color.kWhite),
+                LEDSection.ELEVATOR_RIGHT)),
+        FIRE1(fire2012Palette(0.8, 0.4, List.of(Color.kBlack, Color.kRed, Color.kOrange, Color.kWhite),
+                LEDSection.ELEVATOR_LEFT)),
+        FIRE2(fire2012Palette(0.8, 0.4, List.of(Color.kBlack, Color.kRed, Color.kOrange, Color.kWhite),
+                LEDSection.ELEVATOR_RIGHT)),
         TEST_FIRE(fire2012Palette(0.8, 0.8, List.of(Color.kBlack, Color.kRed, Color.kYellow, Color.kWhite),
                 LEDSection.SHOOTER_RIGHT)),
         NORMAL_FIRE(fire2012(0.8, 0.8, LEDSection.SHOOTER_RIGHT));
@@ -99,6 +113,8 @@ public class LEDs extends SubsystemBase {
         return run(() -> {
             clear();
             currentStates.add(LEDState.PURPLE_WAVE);
+            currentStates.add(LEDState.FIRE1);
+            currentStates.add(LEDState.FIRE2);
             currentStates.sort((s1, s2) -> s2.ordinal() - s1.ordinal());
             currentStates.forEach((s) -> s.bufferConsumer.accept(buffer));
             leds.setData(buffer);
