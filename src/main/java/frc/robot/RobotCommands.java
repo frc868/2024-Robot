@@ -26,6 +26,24 @@ public class RobotCommands {
                 shooter.targetSpeakerCommand(drivetrain::getPose)).withName("RobotCommands.targetSpeaker");
     }
 
+    public static Command targetSpeakerAutoCommand(Drivetrain drivetrain, Shooter shooter, ShooterTilt shooterTilt) {
+        return Commands.parallel(
+                shooterTilt.targetSpeakerCommand(drivetrain::getPose),
+                shooter.targetSpeakerCommand(drivetrain::getPose)).withName("RobotCommands.targetSpeakerAuto");
+    }
+
+    public static Command intakeNoteCommand(Intake intake, ShooterTilt shooterTilt) {
+        return intake.intakeNoteCommand()
+                .alongWith(shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.INTAKE))
+                .withName("RobotCommands.intakeNote");
+    }
+
+    public static Command intakeNoteAutoCommand(Intake intake, ShooterTilt shooterTilt) {
+        return intake.intakeNoteAutoCommand()
+                .alongWith(shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.INTAKE))
+                .withName("RobotCommands.intakeNoteAuto");
+    }
+
     public static Command targetSpeakerOnTheMoveCommand(Drivetrain drivetrain, Shooter shooter,
             ShooterTilt shooterTilt) {
         return Commands.parallel(
@@ -39,43 +57,38 @@ public class RobotCommands {
     public static Command targetFromSubwooferCommand(Drivetrain drivetrain, Shooter shooter, ShooterTilt shooterTilt) {
         return Commands.parallel(
                 shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.SUBWOOFER),
-                shooter.spinAtVelocityCommand(() -> BASE_SHOOTING_RPS));
+                shooter.spinAtVelocityCommand(() -> BASE_SHOOTING_RPS)).withName("RobotCommands.targetFromSubwoofer");
     }
 
     public static Command shootCommand(Drivetrain drivetrain, Intake intake, Shooter shooter, ShooterTilt shooterTilt) {
-        return Commands.parallel(
+        return Commands.deadline(
+                Commands.waitUntil(() -> shooter.atGoal() && shooterTilt.atGoal())
+                        .andThen(intake.runRollersCommand().withTimeout(1)),
                 // drivetrain.targetSpeakerCommand(),
-                Commands.sequence(
-                        Commands.parallel(
-                                shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
-                                shooter.targetSpeakerCommand(drivetrain::getPose).asProxy())
-                                .until(() -> shooter.atGoal() && shooterTilt.atGoal()),
-                        shooter.targetSpeakerCommand(drivetrain::getPose).asProxy()
-                                .alongWith(intake.runRollersCommand())
-                                .withTimeout(1)));
+                shooterTilt.targetSpeakerCommand(drivetrain::getPose),
+                shooter.targetSpeakerCommand(drivetrain::getPose))
+                .withName("RobotCommands.shoot");
     }
 
     public static Command shootOnTheMoveCommand(Drivetrain drivetrain, Intake intake, Shooter shooter,
             ShooterTilt shooterTilt) {
         return Commands.parallel(
                 drivetrain.targetSpeakerCommand(drivetrain::calculateEffectiveTargetLocation),
-                Commands.sequence(
-                        Commands.parallel(
-                                shooterTilt.targetSpeakerCommand(drivetrain::getPose,
-                                        drivetrain::calculateEffectiveTargetLocation),
-                                shooter.targetSpeakerCommand(drivetrain::getPose,
-                                        drivetrain::calculateEffectiveTargetLocation))
-                                .until(() -> shooter.atGoal() && shooterTilt.atGoal()),
-                        shooter.targetSpeakerCommand(drivetrain::getPose, drivetrain::calculateEffectiveTargetLocation)
-                                .alongWith(intake.runRollersCommand())
-                                .withTimeout(1)));
+                shooterTilt.targetSpeakerCommand(drivetrain::getPose,
+                        drivetrain::calculateEffectiveTargetLocation),
+                shooter.targetSpeakerCommand(drivetrain::getPose,
+                        drivetrain::calculateEffectiveTargetLocation),
+                Commands.waitUntil(() -> shooter.atGoal() && shooterTilt.atGoal())
+                        .andThen(intake.runRollersCommand().withTimeout(1)))
+                .withName("RobotCommands.shootOnTheMove");
     }
 
     public static Command intakeToNoteLift(Shooter shooter, ShooterTilt shooterTilt, NoteLift noteLift) {
+        // proxying to allow shooterTilt to hold position while note lift moves down
         return Commands.sequence(
                 new ScheduleCommand(shooter.stopCommand()),
-                shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.CLIMB),
-                noteLift.moveToPositionCommand(() -> NoteLiftPosition.INTAKE));
+                shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.CLIMB).asProxy(),
+                noteLift.moveToPositionCommand(() -> NoteLiftPosition.INTAKE).asProxy());
     }
 
     public static Command prepareClimb(Supplier<Double> xSpeedSupplier, Supplier<Double> ySpeedSupplier,
@@ -92,27 +105,25 @@ public class RobotCommands {
 
     public static Command resetClimb(Intake intake, Shooter shooter, ShooterTilt shooterTilt, Climber climber,
             NoteLift noteLift) {
-        return Commands.parallel(
-                Commands.sequence(
-                        shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.CLIMB),
-                        climber.moveToPositionCommand(() -> ClimberPosition.BOTTOM)));
+        return Commands.sequence(
+                shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.CLIMB),
+                climber.moveToPositionCommand(() -> ClimberPosition.BOTTOM));
     }
 
     public static Command deClimb(Intake intake, Shooter shooter, ShooterTilt shooterTilt, Climber climber,
             NoteLift noteLift) {
-        return Commands.parallel(
-                Commands.sequence(
-                        shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.CLIMB),
-                        climber.moveToPositionCommand(() -> ClimberPosition.CLIMB_PREP)));
+        return Commands.sequence(
+                shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.CLIMB),
+                climber.moveToPositionCommand(() -> ClimberPosition.CLIMB_PREP));
     }
 
     public static Command moveToHomeCommand(Intake intake, Shooter shooter, ShooterTilt shooterTilt, Climber climber,
             NoteLift noteLift) {
         return Commands.sequence(
-                shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.CLIMB),
-                climber.moveToPositionCommand(() -> ClimberPosition.BOTTOM),
-                noteLift.moveToPositionCommand(() -> NoteLiftPosition.TOP),
-                shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.BOTTOM),
-                intake.moveToPositionCommand(() -> IntakePosition.TOP));
+                shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.CLIMB).asProxy(),
+                climber.moveToPositionCommand(() -> ClimberPosition.BOTTOM).asProxy(),
+                noteLift.moveToPositionCommand(() -> NoteLiftPosition.TOP).asProxy(),
+                shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.BOTTOM).asProxy(),
+                intake.moveToPositionCommand(() -> IntakePosition.TOP).asProxy());
     }
 }
