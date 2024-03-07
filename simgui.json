@@ -3,9 +3,6 @@
     "Addressable LEDs": {
       "0": {
         "columns": 42
-      },
-      "window": {
-        "visible": true
       }
     },
     "Other Devices": {
@@ -30,7 +27,9 @@
       "/HoundLog/autonomous/chooser": "String Chooser",
       "/HoundLog/autonomous/field": "Field2d",
       "/HoundLog/commands/climber/resetPosition": "Command",
+      "/HoundLog/commands/initialize": "Command",
       "/HoundLog/commands/intake/resetPosition": "Command",
+      "/HoundLog/commands/intake/triggerShooterBeam": "Command",
       "/HoundLog/commands/leds/breathe": "Command",
       "/HoundLog/commands/leds/chase": "Command",
       "/HoundLog/commands/leds/fire": "Command",
@@ -92,6 +91,16 @@
           "style": "Line"
         },
         "width": 16.541748046875,
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/commands/initialize": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/commands/intake/triggerShooterBeam": {
         "window": {
           "visible": true
         }
