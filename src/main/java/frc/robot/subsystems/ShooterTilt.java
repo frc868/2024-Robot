@@ -64,8 +64,8 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
             1 / (2.0 * Math.PI),
             MIN_HEIGHT_METERS,
             MAX_HEIGHT_METERS,
-            true,
-            0);
+            false,
+            ShooterTiltPosition.SUBWOOFER.value);
 
     @Log(groups = "control")
     private double feedbackVoltage = 0;
@@ -288,8 +288,11 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
         return sysIdRoutine.dynamic(direction).withName("shooterTilt.sysIdDynamic");
     }
 
+    @Log
     public boolean atGoal() {
-        return pidController.atSetpoint() && !beyondMaxDistance;
+        return pidController.atSetpoint()
+                && Math.abs(pidController.getGoal().position - pidController.getSetpoint().position) <= TOLERANCE
+                && !beyondMaxDistance;
     }
 
     public Command resetControllersCommand() {
