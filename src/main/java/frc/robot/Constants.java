@@ -33,6 +33,8 @@ public class Constants {
 
     public static final ControllerType CONTROLLER_TYPE = ControllerType.FlightStick;
 
+    public static final double PERIOD = 0.020;
+
     public static final class Drivetrain {
         public static enum MusicTrack {
             IMPERIAL_MARCH("imperial_march.chrp"),
