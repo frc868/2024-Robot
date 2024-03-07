@@ -108,11 +108,11 @@ public class Constants {
             // max velocity in 1/3 sec
             SWERVE_CONSTANTS.MAX_STEER_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 3 * 100 * 2 * Math.PI;
 
-            SWERVE_CONSTANTS.DRIVE_CURRENT_LIMIT = 50;
-            SWERVE_CONSTANTS.STEER_CURRENT_LIMIT = 20;
+            SWERVE_CONSTANTS.DRIVE_CURRENT_LIMIT = 75;
+            SWERVE_CONSTANTS.STEER_CURRENT_LIMIT = 30;
             SWERVE_CONSTANTS.DRIVE_GEARBOX_REPR = DCMotor.getKrakenX60(1);
             SWERVE_CONSTANTS.STEER_GEARBOX_REPR = DCMotor.getKrakenX60(1);
-            SWERVE_CONSTANTS.DRIVE_MOI = 0.04;
+            SWERVE_CONSTANTS.DRIVE_MOI = 0.01;
             SWERVE_CONSTANTS.STEER_MOI = 0.025;
         }
 
@@ -285,7 +285,7 @@ public class Constants {
             AMP_EJECT(0.601),
             INTAKE(0.55),
             CLIMB(1.176781),
-            SUBWOOFER(0.987);
+            SUBWOOFER(1.01572);
 
             public final double value;
 
