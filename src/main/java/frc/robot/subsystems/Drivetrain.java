@@ -55,6 +55,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants.Drivetrain.MusicTrack;
 import frc.robot.FieldConstants;
 import frc.robot.utils.TrajectoryCalcs;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
@@ -685,7 +686,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
                         SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND,
                         0.3727,
                         new ReplanningConfig()),
-                () -> false,
+                () -> true,
                 this).finallyDo(this::stop).withName("drivetrain.followPath");
     }
 
@@ -747,16 +748,16 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
         field.getObject("modules").setPoses(
                 getPose().transformBy(
                         new Transform2d(SWERVE_MODULE_LOCATIONS[0],
-                                getModuleStates()[0].angle)),
+                                getModulePositions()[0].angle)),
                 getPose().transformBy(
                         new Transform2d(SWERVE_MODULE_LOCATIONS[1],
-                                getModuleStates()[1].angle)),
+                                getModulePositions()[1].angle)),
                 getPose().transformBy(
                         new Transform2d(SWERVE_MODULE_LOCATIONS[2],
-                                getModuleStates()[2].angle)),
+                                getModulePositions()[2].angle)),
                 getPose().transformBy(
                         new Transform2d(SWERVE_MODULE_LOCATIONS[3],
-                                getModuleStates()[3].angle)));
+                                getModulePositions()[3].angle)));
     }
 
     public Command sysIdDriveQuasistatic(SysIdRoutine.Direction direction) {
