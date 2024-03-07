@@ -176,18 +176,26 @@ public class Autos {
         PathPlannerPath pathBToA = PathPlannerPath.fromChoreoTrajectory("CBA.3");
         Pose2d startingPose = pathStartToC.getPreviewStartingHolonomicPose();
 
-        Command command = Commands.parallel(
-                // shooterTilt.targetSpeakerCommand(drivetrain::getPose),
-                Commands.sequence(
-                        RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
-                        intake.moveToPositionCommand(() -> IntakePosition.GROUND).alongWith(
-                                shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.INTAKE).asProxy()),
-                        drivetrain.followPathCommand(pathStartToC).alongWith(intake.intakeNoteAutoCommand()),
-                        RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
-                        drivetrain.followPathCommand(pathCToB).alongWith(intake.intakeNoteAutoCommand()),
-                        RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
-                        drivetrain.followPathCommand(pathBToA).alongWith(intake.intakeNoteAutoCommand()),
-                        RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt)));
+        Command command = Commands.sequence(
+                RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
+                drivetrain.followPathCommand(pathStartToC).andThen(Commands.waitSeconds(0.2))
+                        .deadlineWith(
+                                intake.moveToPositionCommand(() -> IntakePosition.GROUND),
+                                intake.runRollersCommand(),
+                                shooterTilt.targetSpeakerCommand(drivetrain::getPose),
+                                shooter.targetSpeakerCommand(drivetrain::getPose)),
+                drivetrain.followPathCommand(pathCToB).andThen(Commands.waitSeconds(0.2))
+                        .deadlineWith(
+                                intake.moveToPositionCommand(() -> IntakePosition.GROUND),
+                                intake.runRollersCommand(),
+                                shooterTilt.targetSpeakerCommand(drivetrain::getPose),
+                                shooter.targetSpeakerCommand(drivetrain::getPose)),
+                drivetrain.followPathCommand(pathBToA).andThen(Commands.waitSeconds(0.2))
+                        .deadlineWith(
+                                intake.moveToPositionCommand(() -> IntakePosition.GROUND),
+                                intake.runRollersCommand(),
+                                shooterTilt.targetSpeakerCommand(drivetrain::getPose),
+                                shooter.targetSpeakerCommand(drivetrain::getPose)));
 
         return new AutoRoutine("CBA", command,
                 List.of(pathStartToC, pathCToB, pathBToA),
@@ -208,15 +216,16 @@ public class Autos {
                 // shooterTilt.targetSpeakerCommand(drivetrain::getPose),
                 Commands.sequence(
                         RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
-                        intake.moveToPositionCommand(() -> IntakePosition.GROUND).alongWith(
-                                shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.INTAKE).asProxy()),
-                        drivetrain.followPathCommand(pathStartTo2).alongWith(intake.intakeNoteAutoCommand()),
+                        drivetrain.followPathCommand(pathStartTo2)
+                                .alongWith(RobotCommands.intakeNoteAutoCommand(intake, shooterTilt)),
                         drivetrain.followPathCommand(path2ToScore),
                         RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
-                        drivetrain.followPathCommand(pathScoreTo3).alongWith(intake.intakeNoteAutoCommand()),
+                        drivetrain.followPathCommand(pathScoreTo3)
+                                .alongWith(RobotCommands.intakeNoteAutoCommand(intake, shooterTilt)),
                         drivetrain.followPathCommand(path3ToScore),
                         RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
-                        drivetrain.followPathCommand(pathScoreTo1).alongWith(intake.intakeNoteAutoCommand()),
+                        drivetrain.followPathCommand(pathScoreTo1)
+                                .alongWith(RobotCommands.intakeNoteAutoCommand(intake, shooterTilt)),
                         drivetrain.followPathCommand(path1ToScore),
                         RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt)));
 
@@ -239,15 +248,16 @@ public class Autos {
         Command command = Commands.parallel(
                 Commands.sequence(
                         RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
-                        intake.moveToPositionCommand(() -> IntakePosition.GROUND).alongWith(
-                                shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.INTAKE).asProxy()),
-                        drivetrain.followPathCommand(pathStartTo4).alongWith(intake.intakeNoteAutoCommand()),
+                        drivetrain.followPathCommand(pathStartTo4)
+                                .alongWith(RobotCommands.intakeNoteAutoCommand(intake, shooterTilt)),
                         drivetrain.followPathCommand(path4ToScore),
                         RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
-                        drivetrain.followPathCommand(pathScoreTo5).alongWith(intake.intakeNoteAutoCommand()),
+                        drivetrain.followPathCommand(pathScoreTo5)
+                                .alongWith(RobotCommands.intakeNoteAutoCommand(intake, shooterTilt)),
                         drivetrain.followPathCommand(path5ToScore),
                         RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
-                        drivetrain.followPathCommand(pathScoreTo3).alongWith(intake.intakeNoteAutoCommand()),
+                        drivetrain.followPathCommand(pathScoreTo3)
+                                .alongWith(RobotCommands.intakeNoteAutoCommand(intake, shooterTilt)),
                         drivetrain.followPathCommand(path3ToScore),
                         RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt)));
 
