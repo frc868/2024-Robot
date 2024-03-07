@@ -720,9 +720,9 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
             // physical velocity to output in m/s.
             xSpeed *= SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND;
             ySpeed *= SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND;
-            thetaSpeed *= SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND;
+            thetaSpeed *= MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
 
-            driveClosedLoop(new ChassisSpeeds(xSpeed, ySpeed, thetaSpeed), driveMode);
+            drive(new ChassisSpeeds(xSpeed, ySpeed, thetaSpeed), driveMode);
         }).withName("drivetrain.teleopDrive");
     }
 
@@ -816,7 +816,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
                         new PIDConstants(PATH_FOLLOWING_TRANSLATION_kP, 0, 0),
                         new PIDConstants(PATH_FOLLOWING_ROTATION_kP, 0, 0),
                         SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND,
-                        0.3727,
+                        DRIVE_BASE_RADIUS_METERS,
                         new ReplanningConfig()),
                 () -> true,
                 this).finallyDo(this::stop).withName("drivetrain.followPath");

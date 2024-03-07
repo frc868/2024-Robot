@@ -81,6 +81,7 @@ public class Constants {
         public static final double TRACK_WIDTH_METERS = 0.527;
         /** Distance between front and back wheels. */
         public static final double WHEEL_BASE_METERS = 0.527;
+        public static final double DRIVE_BASE_RADIUS_METERS = 0.3727;
 
         public static final SwerveConstants SWERVE_CONSTANTS = new SwerveConstants();
         static {
@@ -105,10 +106,10 @@ public class Constants {
                     / SWERVE_CONSTANTS.STEER_GEARING;
 
             SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND = 4.54;
-            SWERVE_CONSTANTS.MAX_DRIVING_ACCELERATION_METERS_PER_SECOND_SQUARED = 8;
-            SWERVE_CONSTANTS.MAX_STEER_VELOCITY_RADIANS_PER_SECOND = 100 * 2 * Math.PI;
+            SWERVE_CONSTANTS.MAX_DRIVING_ACCELERATION_METERS_PER_SECOND_SQUARED = 8; // TODO
+            SWERVE_CONSTANTS.MAX_STEER_VELOCITY_RADIANS_PER_SECOND = 100 * 2 * Math.PI; // TODO
             // max velocity in 1/3 sec
-            SWERVE_CONSTANTS.MAX_STEER_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 3 * 100 * 2 * Math.PI;
+            SWERVE_CONSTANTS.MAX_STEER_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 3 * 100 * 2 * Math.PI; // TODO
 
             SWERVE_CONSTANTS.DRIVE_CURRENT_LIMIT = 75;
             SWERVE_CONSTANTS.STEER_CURRENT_LIMIT = 30;
@@ -118,8 +119,8 @@ public class Constants {
             SWERVE_CONSTANTS.STEER_MOI = 0.025;
         }
 
-        public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = 20 * Math.PI; // TODO
-        public static final double MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 20 * Math.PI; // TODO
+        public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = 14.37;
+        public static final double MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 14.37 * 7; // TODO
 
         public static final Translation2d[] SWERVE_MODULE_LOCATIONS = new Translation2d[] {
                 new Translation2d(WHEEL_BASE_METERS / 2, TRACK_WIDTH_METERS / 2),
