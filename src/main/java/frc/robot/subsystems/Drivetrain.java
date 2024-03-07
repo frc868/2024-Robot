@@ -2,11 +2,15 @@ package frc.robot.subsystems;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.Orchestra;
 import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.commands.FollowPathHolonomic;
 import com.pathplanner.lib.path.GoalEndState;
@@ -26,6 +30,8 @@ import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.math.filter.LinearFilter;
+import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -48,6 +54,8 @@ import edu.wpi.first.units.Velocity;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.Threads;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -120,19 +128,40 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
             SWERVE_CONSTANTS);
 
     @Log
-    private Pigeon2 pigeon = new Pigeon2(0, CAN_BUS_NAME);
+    private final Pigeon2 pigeon = new Pigeon2(0, CAN_BUS_NAME);
 
-    private SwerveDrivePoseEstimator poseEstimator;
+    private SwerveDriveOdometry simOdometry;
+    private SwerveModulePosition[] lastModulePositions = getModulePositions();
+
+    private final MutableMeasure<Voltage> sysidDriveAppliedVoltageMeasure = mutable(Volts.of(0));
+    private final MutableMeasure<Distance> sysidDrivePositionMeasure = mutable(Meters.of(0));
+    private final MutableMeasure<Velocity<Distance>> sysidDriveVelocityMeasure = mutable(MetersPerSecond.of(0));
+
+    private final SysIdRoutine sysIdDrive;
+
+    private final MutableMeasure<Voltage> sysidSteerAppliedVoltageMeasure = mutable(Volts.of(0));
+    private final MutableMeasure<Angle> sysidSteerPositionMeasure = mutable(Rotations.of(0));
+    private final MutableMeasure<Velocity<Angle>> sysidSteerVelocityMeasure = mutable(RotationsPerSecond.of(0));
+
+    private final SysIdRoutine sysIdSteer;
+
+    private final Orchestra orchestra = new Orchestra();
+
+    private final SwerveDrivePoseEstimator poseEstimator;
+
+    private final ReadWriteLock stateLock = new ReentrantReadWriteLock();
+
+    private final OdometryThread odometryThread;
 
     @Log(groups = "control")
-    private ProfiledPIDController driveController = new ProfiledPIDController(
+    private final ProfiledPIDController driveController = new ProfiledPIDController(
             XY_kP, XY_kI, XY_kD, XY_CONSTRAINTS);
 
     @Log(groups = "control")
-    private double poseDistance = 0.0;
+    private double driveToPoseDistance = 0.0;
 
     @Log(groups = "control")
-    private ProfiledPIDController rotationController = new ProfiledPIDController(
+    private final ProfiledPIDController rotationController = new ProfiledPIDController(
             THETA_kP, THETA_kI, THETA_kD, THETA_CONSTRAINTS);
 
     @Log(groups = "control")
@@ -152,37 +181,21 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     @Log
     private boolean isControlledRotationEnabled = false;
 
-    private SwerveDriveOdometry simOdometry;
-    private SwerveModulePosition[] lastModulePositions = getModulePositions();
-
-    private final MutableMeasure<Voltage> sysidDriveAppliedVoltageMeasure = mutable(Volts.of(0));
-    private final MutableMeasure<Distance> sysidDrivePositionMeasure = mutable(Meters.of(0));
-    private final MutableMeasure<Velocity<Distance>> sysidDriveVelocityMeasure = mutable(MetersPerSecond.of(0));
-
-    private final SysIdRoutine sysIdDrive;
-
-    private final MutableMeasure<Voltage> sysidSteerAppliedVoltageMeasure = mutable(Volts.of(0));
-    private final MutableMeasure<Angle> sysidSteerPositionMeasure = mutable(Rotations.of(0));
-    private final MutableMeasure<Velocity<Angle>> sysidSteerVelocityMeasure = mutable(RotationsPerSecond.of(0));
-
-    private final SysIdRoutine sysIdSteer;
-
-    private final Orchestra orchestra = new Orchestra();
-
     @Log
     private Pose2d targettedStagePose = new Pose2d();
-    @Log
-    private Pose2d targettedPose = new Pose2d();
 
     @Log
-    private double distance = 0.0;
-    @Log
-    private ProfiledPIDController yPidController = new ProfiledPIDController(XY_kP, XY_kI, XY_kD, XY_CONSTRAINTS);
+    private final ProfiledPIDController xyPidController = new ProfiledPIDController(XY_kP, XY_kI, XY_kD,
+            XY_CONSTRAINTS);
 
     private ChassisSpeeds prevFieldRelVelocities = new ChassisSpeeds();
 
     @Log
-    private double effectiveWheelRadius = 0.0;
+    private double averageOdometryLoopTime = 0;
+    @Log
+    private int successfulDaqs = 0;
+    @Log
+    private int failedDaqs = 0;
 
     /** Initializes the drivetrain. */
     public Drivetrain() {
@@ -216,42 +229,31 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
                             log.motor("frontLeft")
                                     .voltage(sysidDriveAppliedVoltageMeasure
                                             .mut_replace(frontLeft.getDriveMotorVoltage(), Volts))
-                                    .linearPosition(
-                                            sysidDrivePositionMeasure.mut_replace(frontLeft.getDriveMotorPosition(),
-                                                    Meters))
+                                    .linearPosition(sysidDrivePositionMeasure
+                                            .mut_replace(frontLeft.getDriveMotorPosition(), Meters))
                                     .linearVelocity(sysidDriveVelocityMeasure
                                             .mut_replace(frontLeft.getDriveMotorVelocity(), MetersPerSecond));
                             log.motor("frontRight")
-                                    .voltage(sysidDriveAppliedVoltageMeasure.mut_replace(
-                                            frontRight.getDriveMotorVoltage(),
-                                            Volts))
-                                    .linearPosition(
-                                            sysidDrivePositionMeasure.mut_replace(frontRight.getDriveMotorPosition(),
-                                                    Meters))
-                                    .linearVelocity(
-                                            sysidDriveVelocityMeasure.mut_replace(frontRight.getDriveMotorVelocity(),
-                                                    MetersPerSecond));
+                                    .voltage(sysidDriveAppliedVoltageMeasure
+                                            .mut_replace(frontRight.getDriveMotorVoltage(), Volts))
+                                    .linearPosition(sysidDrivePositionMeasure
+                                            .mut_replace(frontRight.getDriveMotorPosition(), Meters))
+                                    .linearVelocity(sysidDriveVelocityMeasure
+                                            .mut_replace(frontRight.getDriveMotorVelocity(), MetersPerSecond));
                             log.motor("backLeft")
-                                    .voltage(
-                                            sysidDriveAppliedVoltageMeasure.mut_replace(backLeft.getDriveMotorVoltage(),
-                                                    Volts))
-                                    .linearPosition(
-                                            sysidDrivePositionMeasure.mut_replace(backLeft.getDriveMotorPosition(),
-                                                    Meters))
-                                    .linearVelocity(
-                                            sysidDriveVelocityMeasure.mut_replace(backLeft.getDriveMotorVelocity(),
-                                                    MetersPerSecond));
+                                    .voltage(sysidDriveAppliedVoltageMeasure
+                                            .mut_replace(backLeft.getDriveMotorVoltage(), Volts))
+                                    .linearPosition(sysidDrivePositionMeasure
+                                            .mut_replace(backLeft.getDriveMotorPosition(), Meters))
+                                    .linearVelocity(sysidDriveVelocityMeasure
+                                            .mut_replace(backLeft.getDriveMotorVelocity(), MetersPerSecond));
                             log.motor("backRight")
-                                    .voltage(
-                                            sysidDriveAppliedVoltageMeasure.mut_replace(
-                                                    backRight.getDriveMotorVoltage(),
-                                                    Volts))
-                                    .linearPosition(
-                                            sysidDrivePositionMeasure.mut_replace(backRight.getDriveMotorPosition(),
-                                                    Meters))
-                                    .linearVelocity(
-                                            sysidDriveVelocityMeasure.mut_replace(backRight.getDriveMotorVelocity(),
-                                                    MetersPerSecond));
+                                    .voltage(sysidDriveAppliedVoltageMeasure
+                                            .mut_replace(backRight.getDriveMotorVoltage(), Volts))
+                                    .linearPosition(sysidDrivePositionMeasure
+                                            .mut_replace(backRight.getDriveMotorPosition(), Meters))
+                                    .linearVelocity(sysidDriveVelocityMeasure
+                                            .mut_replace(backRight.getDriveMotorVelocity(), MetersPerSecond));
                         },
                         this));
 
@@ -267,48 +269,33 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
                         },
                         log -> {
                             log.motor("frontLeft")
-                                    .voltage(
-                                            sysidSteerAppliedVoltageMeasure.mut_replace(
-                                                    frontLeft.getSteerMotorVoltage(),
-                                                    Volts))
-                                    .angularPosition(
-                                            sysidSteerPositionMeasure.mut_replace(frontLeft.getSteerMotorPosition(),
-                                                    Rotations))
-                                    .angularVelocity(
-                                            sysidSteerVelocityMeasure.mut_replace(frontLeft.getSteerMotorVelocity(),
-                                                    RotationsPerSecond));
+                                    .voltage(sysidSteerAppliedVoltageMeasure
+                                            .mut_replace(frontLeft.getSteerMotorVoltage(), Volts))
+                                    .angularPosition(sysidSteerPositionMeasure
+                                            .mut_replace(frontLeft.getSteerMotorPosition(), Rotations))
+                                    .angularVelocity(sysidSteerVelocityMeasure
+                                            .mut_replace(frontLeft.getSteerMotorVelocity(), RotationsPerSecond));
                             log.motor("frontRight")
-                                    .voltage(
-                                            sysidSteerAppliedVoltageMeasure.mut_replace(
-                                                    frontRight.getSteerMotorVoltage(),
-                                                    Volts))
-                                    .angularPosition(
-                                            sysidSteerPositionMeasure.mut_replace(frontRight.getSteerMotorPosition(),
-                                                    Rotations))
-                                    .angularVelocity(
-                                            sysidSteerVelocityMeasure.mut_replace(frontRight.getSteerMotorVelocity(),
-                                                    RotationsPerSecond));
+                                    .voltage(sysidSteerAppliedVoltageMeasure
+                                            .mut_replace(frontRight.getSteerMotorVoltage(), Volts))
+                                    .angularPosition(sysidSteerPositionMeasure
+                                            .mut_replace(frontRight.getSteerMotorPosition(), Rotations))
+                                    .angularVelocity(sysidSteerVelocityMeasure
+                                            .mut_replace(frontRight.getSteerMotorVelocity(), RotationsPerSecond));
                             log.motor("backLeft")
-                                    .voltage(
-                                            sysidSteerAppliedVoltageMeasure.mut_replace(backLeft.getSteerMotorVoltage(),
-                                                    Volts))
-                                    .angularPosition(
-                                            sysidSteerPositionMeasure.mut_replace(backLeft.getSteerMotorPosition(),
-                                                    Rotations))
-                                    .angularVelocity(
-                                            sysidSteerVelocityMeasure.mut_replace(backLeft.getSteerMotorVelocity(),
-                                                    RotationsPerSecond));
+                                    .voltage(sysidSteerAppliedVoltageMeasure
+                                            .mut_replace(backLeft.getSteerMotorVoltage(), Volts))
+                                    .angularPosition(sysidSteerPositionMeasure
+                                            .mut_replace(backLeft.getSteerMotorPosition(), Rotations))
+                                    .angularVelocity(sysidSteerVelocityMeasure
+                                            .mut_replace(backLeft.getSteerMotorVelocity(), RotationsPerSecond));
                             log.motor("backRight")
-                                    .voltage(
-                                            sysidSteerAppliedVoltageMeasure.mut_replace(
-                                                    backRight.getSteerMotorVoltage(),
-                                                    Volts))
-                                    .angularPosition(
-                                            sysidSteerPositionMeasure.mut_replace(backRight.getSteerMotorPosition(),
-                                                    Rotations))
-                                    .angularVelocity(
-                                            sysidSteerVelocityMeasure.mut_replace(backRight.getSteerMotorVelocity(),
-                                                    RotationsPerSecond));
+                                    .voltage(sysidSteerAppliedVoltageMeasure
+                                            .mut_replace(backRight.getSteerMotorVoltage(), Volts))
+                                    .angularPosition(sysidSteerPositionMeasure
+                                            .mut_replace(backRight.getSteerMotorPosition(), Rotations))
+                                    .angularVelocity(sysidSteerVelocityMeasure
+                                            .mut_replace(backRight.getSteerMotorVelocity(), RotationsPerSecond));
                         },
                         this));
 
@@ -321,12 +308,162 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
         orchestra.addInstrument(backRight.getSteerMotor(), 2);
         orchestra.addInstrument(backLeft.getSteerMotor(), 3);
         orchestra.addInstrument(frontRight.getSteerMotor(), 4);
+
+        odometryThread = new OdometryThread();
+        odometryThread.start();
+
+    }
+
+    public class OdometryThread {
+        // Testing shows 1 (minimum realtime) is sufficient for tighter odometry loops.
+        // If the odometry period is far away from the desired frequency, increasing
+        // this may help
+        private static final int START_THREAD_PRIORITY = 1;
+
+        private final Thread m_thread;
+        private volatile boolean m_running = false;
+
+        private final BaseStatusSignal[] allSignals;
+
+        private final MedianFilter peakRemover = new MedianFilter(3);
+        private final LinearFilter lowPass = LinearFilter.movingAverage(50);
+        private double lastTime = 0;
+        private double currentTime = 0;
+
+        private KrakenCoaxialSwerveModule[] modules = new KrakenCoaxialSwerveModule[] {
+                frontLeft, frontRight, backLeft, backRight };
+        private SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
+
+        private int lastThreadPriority = START_THREAD_PRIORITY;
+        private volatile int threadPriorityToSet = START_THREAD_PRIORITY;
+        private final int UPDATE_FREQUENCY = 250;
+
+        public OdometryThread() {
+            m_thread = new Thread(this::run);
+            /*
+             * Mark this thread as a "daemon" (background) thread
+             * so it doesn't hold up program shutdown
+             */
+            m_thread.setDaemon(true);
+
+            /* 4 signals for each module + 2 for Pigeon2 */
+
+            allSignals = new BaseStatusSignal[(4 * 4) + 2];
+            for (int i = 0; i < 4; ++i) {
+                BaseStatusSignal[] signals = modules[i].getSignals();
+                allSignals[(i * 4) + 0] = signals[0];
+                allSignals[(i * 4) + 1] = signals[1];
+                allSignals[(i * 4) + 2] = signals[2];
+                allSignals[(i * 4) + 3] = signals[3];
+            }
+            allSignals[allSignals.length - 2] = pigeon.getYaw();
+            allSignals[allSignals.length - 1] = pigeon.getAngularVelocityZWorld();
+        }
+
+        /**
+         * Starts the odometry thread.
+         */
+        public void start() {
+            m_running = true;
+            m_thread.start();
+        }
+
+        /**
+         * Stops the odometry thread.
+         */
+        public void stop() {
+            stop(0);
+        }
+
+        /**
+         * Stops the odometry thread with a timeout.
+         *
+         * @param millis The time to wait in milliseconds
+         */
+        public void stop(long millis) {
+            m_running = false;
+            try {
+                m_thread.join(millis);
+            } catch (final InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        public void run() {
+            /* Make sure all signals update at the correct update frequency */
+            BaseStatusSignal.setUpdateFrequencyForAll(UPDATE_FREQUENCY, allSignals);
+            Threads.setCurrentThreadPriority(true, START_THREAD_PRIORITY);
+
+            /* Run as fast as possible, our signals will control the timing */
+            while (m_running) {
+                /* Synchronously wait for all signals in drivetrain */
+                /* Wait up to twice the period of the update frequency */
+                StatusCode status;
+                status = BaseStatusSignal.waitForAll(2.0 / UPDATE_FREQUENCY, allSignals);
+
+                try {
+                    stateLock.writeLock().lock();
+
+                    lastTime = currentTime;
+                    currentTime = Timer.getFPGATimestamp();
+                    /*
+                     * We don't care about the peaks, as they correspond to GC events, and we want
+                     * the period generally low passed
+                     */
+                    averageOdometryLoopTime = lowPass.calculate(peakRemover.calculate(currentTime - lastTime));
+
+                    /* Get status of first element */
+                    if (status.isOK()) {
+                        successfulDaqs++;
+                    } else {
+                        failedDaqs++;
+                    }
+
+                    /* Now update odometry */
+                    /* Keep track of the change in azimuth rotations */
+
+                    for (int i = 0; i < 4; ++i) {
+                        modulePositions[i] = modules[i].getPosition();
+                    }
+                    double yawDegrees = BaseStatusSignal.getLatencyCompensatedValue(
+                            pigeon.getYaw(), pigeon.getAngularVelocityZWorld());
+
+                    /* Keep track of previous and current pose to account for the carpet vector */
+                    poseEstimator.update(Rotation2d.fromDegrees(yawDegrees), modulePositions);
+                    if (RobotBase.isSimulation()) {
+                        simOdometry.update(getRotation(), getModulePositions());
+                        drawRobotOnField(AutoManager.getInstance().getField());
+                    }
+                } finally {
+                    stateLock.writeLock().unlock();
+                }
+
+                /**
+                 * This is inherently synchronous, since lastThreadPriority
+                 * is only written here and threadPriorityToSet is only read here
+                 */
+                if (threadPriorityToSet != lastThreadPriority) {
+                    Threads.setCurrentThreadPriority(true, threadPriorityToSet);
+                    lastThreadPriority = threadPriorityToSet;
+                }
+            }
+        }
+
+        /**
+         * Sets the DAQ thread priority to a real time priority under the specified
+         * priority level
+         *
+         * @param priority Priority level to set the DAQ thread to.
+         *                 This is a value between 0 and 99, with 99 indicating higher
+         *                 priority and 0 indicating lower priority.
+         */
+        public void setThreadPriority(int priority) {
+            threadPriorityToSet = priority;
+        }
     }
 
     @Override
     public void periodic() {
-        updatePoseEstimator();
-
         prevFieldRelVelocities = getFieldRelativeSpeeds();
     }
 
@@ -419,11 +556,6 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
     @Override
     public void updatePoseEstimator() {
-        poseEstimator.update(getRotation(), getModulePositions());
-        if (RobotBase.isSimulation()) {
-            simOdometry.update(getRotation(), getModulePositions());
-            drawRobotOnField(AutoManager.getInstance().getField());
-        }
     }
 
     @Override
@@ -648,9 +780,9 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
             driveController.reset(getPose().getTranslation().getDistance(poseSupplier.get().getTranslation()));
             rotationController.reset(getPose().getRotation().getRadians());
         }).andThen(run(() -> {
-            poseDistance = getPose().getTranslation().getDistance(poseSupplier.get().getTranslation());
+            driveToPoseDistance = getPose().getTranslation().getDistance(poseSupplier.get().getTranslation());
             double driveVelocityScalar = driveController.getSetpoint().velocity + driveController.calculate(
-                    poseDistance, 0.0);
+                    driveToPoseDistance, 0.0);
             if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red) {
                 driveVelocityScalar *= -1;
             }
@@ -844,7 +976,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
             double C = -(A * targettedStagePose.getX() + B * targettedStagePose.getY());
 
             // formula for distance between point and line given Ax + By + C = 0
-            distance = (A * getPose().getX() + B * getPose().getY() + C) / Math.sqrt(A * A + B * B);
+            double distance = (A * getPose().getX() + B * getPose().getY() + C) / Math.sqrt(A * A + B * B);
 
             double ySpeedRelStage = yPidController.calculate(distance, 0.0);
 
