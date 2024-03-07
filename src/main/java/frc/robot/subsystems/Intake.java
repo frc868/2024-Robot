@@ -154,9 +154,9 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
             }
         }).start();
 
-        intakeBeamSim.setValue(false);
-        shooterPrimaryBeamSim.setValue(false);
-        shooterSecondaryBeamSim.setValue(false);
+        intakeBeamSim.setValue(true);
+        shooterPrimaryBeamSim.setValue(true);
+        shooterSecondaryBeamSim.setValue(true);
         setDefaultCommand(moveToCurrentGoalCommand());
     }
 
@@ -348,16 +348,16 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
     }
 
     public Command simTriggerIntakeBeamCommand() {
-        return Commands.runOnce(() -> intakeBeamSim.setValue(true))
+        return Commands.runOnce(() -> intakeBeamSim.setValue(false))
                 .andThen(Commands.waitSeconds(1))
-                .andThen(Commands.runOnce(() -> intakeBeamSim.setValue(false)))
+                .andThen(Commands.runOnce(() -> intakeBeamSim.setValue(true)))
                 .withName("intake.simTriggerIntakeBeam");
     }
 
     public Command simTriggerShooterBeamCommand() {
-        return Commands.runOnce(() -> shooterPrimaryBeamSim.setValue(true))
+        return Commands.runOnce(() -> shooterSecondaryBeamSim.setValue(false))
                 .andThen(Commands.waitSeconds(1))
-                .andThen(Commands.runOnce(() -> shooterPrimaryBeamSim.setValue(false)))
+                .andThen(Commands.runOnce(() -> shooterSecondaryBeamSim.setValue(true)))
                 .withName("intake.simTriggerShooterBeam");
     }
 
