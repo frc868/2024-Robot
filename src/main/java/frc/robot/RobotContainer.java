@@ -20,7 +20,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Drivetrain;
@@ -122,6 +121,7 @@ public class RobotContainer {
      */
     public RobotContainer() {
         vision.setPoseEstimator(drivetrain.getPoseEstimator());
+        vision.setVisionMeasurementConsumer(drivetrain::addVisionMeasurement);
         vision.setSimPoseSupplier(drivetrain::getSimPose);
 
         positionTracker.setIntakePositionSupplier(intake::getPosition);
@@ -133,7 +133,7 @@ public class RobotContainer {
         DataLogManager.logNetworkTables(true);
         DriverStation.startDataLog(DataLogManager.getLog());
         DataLogManager.start();
-        // URCL.start();
+        URCL.start();
         SignalLogger.start();
 
         LoggingManager.getInstance().registerRobotContainer(this);

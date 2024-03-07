@@ -9,6 +9,7 @@ import org.photonvision.EstimatedRobotPose;
 import org.photonvision.simulation.VisionSystemSim;
 
 import com.techhounds.houndutil.houndlib.AprilTagPhotonCamera;
+import com.techhounds.houndutil.houndlib.TriConsumer;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
 import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
 
@@ -19,7 +20,6 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Quaternion;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
@@ -32,6 +32,7 @@ import static frc.robot.Constants.Vision.*;
 @LoggedObject
 public class Vision extends SubsystemBase {
     private SwerveDrivePoseEstimator poseEstimator = null;
+    private TriConsumer<Pose2d, Double, Matrix<N3, N1>> visionMeasurementConsumer = null;
     private Supplier<Pose2d> simPoseSupplier = null;
     private final VisionSystemSim visionSim = new VisionSystemSim("main");
 
@@ -79,7 +80,7 @@ public class Vision extends SubsystemBase {
 
     @Override
     public void simulationPeriodic() {
-        // visionSim.update(simPoseSupplier.get());
+        visionSim.update(simPoseSupplier.get());
     }
 
     public void updatePoseEstimator() {
@@ -100,8 +101,7 @@ public class Vision extends SubsystemBase {
 
                 Matrix<N3, N1> stddevs = photonCamera.getEstimationStdDevs(pose,
                         SINGLE_TAG_STD_DEVS, MULTI_TAG_STD_DEVS);
-                poseEstimator.addVisionMeasurement(pose,
-                        estPose.timestampSeconds, stddevs);
+                visionMeasurementConsumer.accept(pose, estPose.timestampSeconds, stddevs);
             }
         }
     }
@@ -129,6 +129,10 @@ public class Vision extends SubsystemBase {
 
     public void setPoseEstimator(SwerveDrivePoseEstimator poseEstimator) {
         this.poseEstimator = poseEstimator;
+    }
+
+    public void setVisionMeasurementConsumer(TriConsumer<Pose2d, Double, Matrix<N3, N1>> visionMeasurementConsumer) {
+        this.visionMeasurementConsumer = visionMeasurementConsumer;
     }
 
     public void setSimPoseSupplier(Supplier<Pose2d> simPoseSupplier) {

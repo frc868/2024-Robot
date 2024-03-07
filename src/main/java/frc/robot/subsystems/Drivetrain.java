@@ -28,6 +28,7 @@ import com.techhounds.houndutil.houndlib.swerve.KrakenCoaxialSwerveModule;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
 import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.LinearFilter;
@@ -44,6 +45,8 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.Angle;
@@ -552,6 +555,17 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     @Override
     public SwerveDrivePoseEstimator getPoseEstimator() {
         return poseEstimator;
+    }
+
+    public void addVisionMeasurement(Pose2d visionRobotPoseMeters,
+            double timestampSeconds,
+            Matrix<N3, N1> visionMeasurementStdDevs) {
+        try {
+            stateLock.writeLock().lock();
+            poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
+        } finally {
+            stateLock.writeLock().unlock();
+        }
     }
 
     @Override
