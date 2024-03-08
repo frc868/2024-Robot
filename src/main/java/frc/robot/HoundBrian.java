@@ -48,26 +48,26 @@ public class HoundBrian {
     public HoundBrian(Drivetrain drivetrain, Intake intake, ShooterTilt shooterTilt, Climber climber, NoteLift noteLift,
             LEDs leds) {
 
-        // new Trigger(intakeButton::get)
-        // .and(new Trigger(intakeButton::get).negate().debounce(2,
-        // DebounceType.kFalling))
-        // .and(DriverStation::isDisabled)
-        // .onTrue(intake.resetPositionCommand());
-        // new Trigger(shooterTiltButton::get)
-        // .and(new Trigger(shooterTiltButton::get).negate().debounce(2,
-        // DebounceType.kFalling))
-        // .and(DriverStation::isDisabled)
-        // .onTrue(shooterTilt.resetPositionCommand());
-        // new Trigger(climberButton::get)
-        // .and(new Trigger(climberButton::get).negate().debounce(2,
-        // DebounceType.kFalling))
-        // .and(DriverStation::isDisabled)
-        // .onTrue(climber.resetPositionCommand());
-        // new Trigger(noteLiftButton::get)
-        // .and(new Trigger(noteLiftButton::get).negate().debounce(2,
-        // DebounceType.kFalling))
-        // .and(DriverStation::isDisabled)
-        // .onTrue(noteLift.resetPositionCommand());
+        new Trigger(intakeButton::get).negate()
+                // .and(new Trigger(intakeButton::get).negate().debounce(2,
+                // DebounceType.kFalling))
+                .and(DriverStation::isDisabled)
+                .onTrue(intake.resetPositionCommand());
+        new Trigger(shooterTiltButton::get).negate()
+                // .and(new Trigger(shooterTiltButton::get).negate().debounce(2,
+                // DebounceType.kFalling))
+                .and(DriverStation::isDisabled)
+                .onTrue(shooterTilt.resetPositionCommand());
+        new Trigger(climberButton::get).negate()
+                // .and(new Trigger(climberButton::get).negate().debounce(2,
+                // DebounceType.kFalling))
+                .and(DriverStation::isDisabled)
+                .onTrue(climber.resetPositionCommand());
+        new Trigger(noteLiftButton::get).negate()
+                // .and(new Trigger(noteLiftButton::get).negate().debounce(2,
+                // DebounceType.kFalling))
+                .and(DriverStation::isDisabled)
+                .onTrue(noteLift.resetPositionCommand());
 
         // new Trigger(intakeButton::get).debounce(3, DebounceType.kBoth)
         // .and(DriverStation::isDisabled)
