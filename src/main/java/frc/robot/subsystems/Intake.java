@@ -65,7 +65,6 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
     @Log(groups = "control")
     private final ProfiledPIDController pidController = new ProfiledPIDController(kP, kI, kD, MOVEMENT_CONSTRAINTS);
 
-    @Log(groups = "control")
     private final ArmFeedforward feedforwardController = new ArmFeedforward(kS, kG, kV, kA);
 
     private final SingleJointedArmSim armSim = new SingleJointedArmSim(

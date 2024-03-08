@@ -73,6 +73,7 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
 
     private final SysIdRoutine sysIdRoutine;
 
+    @Log
     private boolean initialized = false;
 
     private PositionTracker positionTracker;

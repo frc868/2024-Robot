@@ -85,7 +85,7 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
     private double distance = 0.0;
     @Log
     private boolean beyondMaxDistance = false;
-
+    @Log
     private boolean initialized = false;
     private PositionTracker positionTracker;
 

@@ -174,7 +174,6 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     @Log(groups = "control")
     private ChassisSpeeds commandedChassisSpeeds = new ChassisSpeeds();
 
-    @Log
     private DriveMode driveMode = DriveMode.FIELD_ORIENTED;
 
     /**
@@ -186,10 +185,6 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
     @Log
     private Pose2d targettedStagePose = new Pose2d();
-
-    @Log
-    private final ProfiledPIDController xyPidController = new ProfiledPIDController(XY_kP, XY_kI, XY_kD,
-            XY_CONSTRAINTS);
 
     private ChassisSpeeds prevFieldRelVelocities = new ChassisSpeeds();
 
@@ -423,7 +418,6 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
                     /* Now update odometry */
                     /* Keep track of the change in azimuth rotations */
-
                     for (int i = 0; i < 4; ++i) {
                         modulePositions[i] = modules[i].getPosition();
                     }

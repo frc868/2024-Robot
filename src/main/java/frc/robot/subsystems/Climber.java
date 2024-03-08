@@ -46,7 +46,6 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
     @Log(groups = "control")
     private ProfiledPIDController pidController = new ProfiledPIDController(kP, kI, kD, MOVEMENT_CONSTRAINTS);
 
-    @Log(groups = "control")
     private ElevatorFeedforward feedforwardController = new ElevatorFeedforward(kS, kG, kV, kA);
 
     private ElevatorSim elevatorSim = new ElevatorSim(
