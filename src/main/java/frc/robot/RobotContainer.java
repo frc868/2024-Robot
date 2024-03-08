@@ -116,6 +116,11 @@ public class RobotContainer {
                         drivetrain.getFieldRelativeSpeeds(), drivetrain.getFieldRelativeAccelerations()));
     };
 
+    @Log
+    private final Supplier<Boolean> initialized = () -> {
+        return GlobalStates.INITIALIZED.enabled();
+    };
+
     /**
      * Constructs the robot container.
      */
@@ -166,6 +171,7 @@ public class RobotContainer {
         new Trigger(() -> intake.getRollerCurrent() > 40).debounce(0.15)
                 .onTrue(leds.requestGreenCommand().withTimeout(1));
         new Trigger(intake::getNoteInShooter).onTrue(leds.requestBlueCommand().withTimeout(1));
+        new Trigger(() -> !GlobalStates.INITIALIZED.enabled()).whileTrue(leds.requestRedBreatheCommand());
     }
 
     private void configureButtonBindings() {
