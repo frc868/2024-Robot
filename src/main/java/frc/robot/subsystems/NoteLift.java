@@ -127,7 +127,6 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
             return simVelocity;
     }
 
-    @Log
     public Pose3d getComponentPose() {
         return BASE_COMPONENT_POSE.plus(new Transform3d(0, 0, getPosition(), new Rotation3d()));
     }

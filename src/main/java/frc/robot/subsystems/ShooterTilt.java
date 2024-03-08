@@ -134,12 +134,10 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
         simVelocity = elevatorSim.getVelocityMetersPerSecond();
     }
 
-    @Log
     public Pose3d getShooterComponentPose() {
         return BASE_SHOOTER_POSE.plus(new Transform3d(0, 0, 0, new Rotation3d(0, -getAngle(), 0)));
     }
 
-    @Log
     public Pose3d getOuterLeadScrewComponentPose() {
         // small offset of 0.03rad added to fix an alignment issue between the two;
         // since this is constant, it's likely a CAD zeroing problem
@@ -147,7 +145,6 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
                 .plus(new Transform3d(0, 0, 0, new Rotation3d(0, -getLeadScrewAngle(getPosition()) + 0.03, 0)));
     }
 
-    @Log
     public Pose3d getInnerLeadScrewComponentPose() {
         return getOuterLeadScrewComponentPose().plus(OUTER_LEAD_SCREW_TO_INNER_LEAD_SCREW)
                 .plus(new Transform3d(getPosition(), 0, 0, new Rotation3d()));

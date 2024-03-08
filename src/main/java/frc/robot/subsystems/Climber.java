@@ -125,7 +125,6 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
             return simVelocity;
     }
 
-    @Log
     public Pose3d getComponentPose() {
         return BASE_COMPONENT_POSE.plus(new Transform3d(0, 0, getPosition(), new Rotation3d()));
     }

@@ -167,7 +167,6 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
         simVelocity = armSim.getVelocityRadPerSec();
     }
 
-    @Log
     public Pose3d getComponentPose() {
         return BASE_COMPONENT_POSE.plus(new Transform3d(0, 0, 0, new Rotation3d(0, -getPosition(), 0)));
     }
