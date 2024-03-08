@@ -6,6 +6,7 @@ import com.techhounds.houndutil.houndlib.subsystems.BaseSwerveDrive.DriveMode;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.Constants.Drivetrain.MusicTrack;
 import frc.robot.Constants.Intake.IntakePosition;
 import frc.robot.Constants.ShooterTilt.ShooterTiltPosition;
 import frc.robot.subsystems.Climber;
@@ -36,13 +37,13 @@ public class Controls {
                 .whileTrue(drivetrain.controlledRotateCommand(() -> Math.toRadians(0),
                         DriveMode.FIELD_ORIENTED));
         joystick.centerBottomHatLeft()
-                .whileTrue(drivetrain.controlledRotateCommand(() -> Math.toRadians(90),
+                .whileTrue(drivetrain.controlledRotateCommand(() -> Math.toRadians(270),
                         DriveMode.FIELD_ORIENTED));
         joystick.centerBottomHatDown()
                 .whileTrue(drivetrain.controlledRotateCommand(() -> Math.toRadians(180),
                         DriveMode.FIELD_ORIENTED));
         joystick.centerBottomHatRight()
-                .whileTrue(drivetrain.controlledRotateCommand(() -> Math.toRadians(270),
+                .whileTrue(drivetrain.controlledRotateCommand(() -> Math.toRadians(90),
                         DriveMode.FIELD_ORIENTED));
 
         joystick.triggerSoftPress().and(joystick.flipTriggerIn().negate())
@@ -97,6 +98,8 @@ public class Controls {
                 .whileTrue(RobotCommands.moveToHomeCommand(intake, shooter, shooterTilt,
                         climber, noteLift));
         controller.povLeft().onTrue(GlobalStates.INITIALIZED.enableCommand());
+
+        controller.leftStick().toggleOnTrue(drivetrain.playMusicCommand(MusicTrack.IMPERIAL_MARCH));
 
     }
 
