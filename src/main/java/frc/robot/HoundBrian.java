@@ -83,18 +83,18 @@ public class HoundBrian {
         // .toggleOnTrue(noteLift.coastMotorsCommand());
 
         if (RobotBase.isSimulation()) {
-            drivetrainButtonSim.setValue(false);
-            intakeButtonSim.setValue(false);
-            shooterTiltButtonSim.setValue(false);
-            climberButtonSim.setValue(false);
-            noteLiftButtonSim.setValue(false);
-            actionButtonSim.setValue(false);
-            actionButton2Sim.setValue(false);
+            drivetrainButtonSim.setValue(true);
+            intakeButtonSim.setValue(true);
+            shooterTiltButtonSim.setValue(true);
+            climberButtonSim.setValue(true);
+            noteLiftButtonSim.setValue(true);
+            actionButtonSim.setValue(true);
+            actionButton2Sim.setValue(true);
         }
     }
 
     public Command simTriggerIntakeButton() {
-        return Commands.startEnd(() -> intakeButtonSim.setValue(true), () -> intakeButtonSim.setValue(false))
+        return Commands.startEnd(() -> intakeButtonSim.setValue(false), () -> intakeButtonSim.setValue(true))
                 .ignoringDisable(true);
     }
 
