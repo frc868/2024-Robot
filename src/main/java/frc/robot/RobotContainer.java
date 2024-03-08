@@ -43,35 +43,27 @@ public class RobotContainer {
     public final PositionTracker positionTracker = new PositionTracker();
 
     @Log(groups = "subsystems")
-    @SendableLog(groups = { "wpilib", "subsystems" })
     private final Drivetrain drivetrain = new Drivetrain();
 
     @Log(groups = "subsystems")
-    @SendableLog(groups = { "wpilib", "subsystems" })
     private final Intake intake = new Intake(positionTracker);
 
     @Log(groups = "subsystems")
-    @SendableLog(groups = { "wpilib", "subsystems" })
     private final Shooter shooter = new Shooter();
 
     @Log(groups = "subsystems")
-    @SendableLog(groups = { "wpilib", "subsystems" })
     private final ShooterTilt shooterTilt = new ShooterTilt(positionTracker);
 
     @Log(groups = "subsystems")
-    @SendableLog(groups = { "wpilib", "subsystems" })
     private final Climber climber = new Climber(positionTracker);
 
     @Log(groups = "subsystems")
-    @SendableLog(groups = { "wpilib", "subsystems" })
     private final NoteLift noteLift = new NoteLift(positionTracker);
 
     @Log(groups = "subsystems")
-    @SendableLog(groups = { "wpilib", "subsystems" })
     private final Vision vision = new Vision();
 
     @Log(groups = "subsystems")
-    @SendableLog(groups = { "wpilib", "subsystems" })
     private final LEDs leds = new LEDs();
 
     @Log(groups = "subsystems")
