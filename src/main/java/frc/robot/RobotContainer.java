@@ -135,7 +135,6 @@ public class RobotContainer {
 
         LoggingManager.getInstance().registerRobotContainer(this);
         LoggingManager.getInstance().registerClass(LoggingManager.class, "houndlog", new ArrayList<>());
-        LoggingManager.getInstance().registerClass(FieldConstants.class, "fieldConstants", new ArrayList<>());
 
         LiveWindow.disableAllTelemetry(); // livewindow is basically deprecated. using houndlog instead.
 
