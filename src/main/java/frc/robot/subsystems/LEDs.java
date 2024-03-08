@@ -32,6 +32,7 @@ public class LEDs extends SubsystemBase {
 
     public enum LEDState {
         OFF(solid(Color.kBlack, LEDSection.ALL)),
+        RED_BREATHE(breathe(Color.kRed, 10, 0, 150, LEDSection.ALL)),
         SOLID_BLUE(solid(Color.kBlue, LEDSection.ALL)),
         SOLID_GREEN(solid(Color.kGreen, LEDSection.ALL)),
         PURPLE_WAVE(wave(new Color("#9000DD"), 30, 20, 100, 255,
@@ -49,10 +50,12 @@ public class LEDs extends SubsystemBase {
         // LEDSection.SHOOTER_RIGHT)),
         // BREATHE(breathe(Color.kWhite, 3, 0, 255, LEDSection.SHOOTER_RIGHT)),
         // WAVE(wave(Color.kPurple, 20, 20, 150, 255, LEDSection.SHOOTER_RIGHT)),
-        PURPLE_FIRE1(
-                fire2012Palette(0.8, 0.8, List.of(Color.kBlack, Color.kMediumPurple, Color.kPurple, Color.kWhite),
+        PURPLE_FIRE(
+                fire2012Palette(0.8, 0.4,
+                        List.of(Color.kBlack, new Color("#ad3fe8"), new Color("#9000DD"), new Color("#400063")),
                         LEDSection.ELEVATOR_LEFT),
-                fire2012Palette(0.8, 0.8, List.of(Color.kBlack, Color.kMediumPurple, Color.kPurple, Color.kWhite),
+                fire2012Palette(0.8, 0.4,
+                        List.of(Color.kBlack, new Color("#ad3fe8"), new Color("#9000DD"), new Color("#400063")),
                         LEDSection.ELEVATOR_RIGHT)),
         FIRE(
                 fire2012Palette(0.8, 0.4, List.of(Color.kBlack, Color.kRed, Color.kOrange, Color.kWhite),
@@ -92,11 +95,15 @@ public class LEDs extends SubsystemBase {
         return Commands.run(() -> currentStates.add(LEDState.SOLID_BLUE)).ignoringDisable(true);
     }
 
+    public Command requestRedBreatheCommand() {
+        return Commands.run(() -> currentStates.add(LEDState.RED_BREATHE)).ignoringDisable(true);
+    }
+
     public Command updateStateMachineCommand() {
         return run(() -> {
             clear();
             currentStates.add(LEDState.PURPLE_WAVE);
-            currentStates.add(LEDState.FIRE);
+            currentStates.add(LEDState.PURPLE_FIRE);
             currentStates.sort((s1, s2) -> s2.ordinal() - s1.ordinal());
             currentStates.forEach(s -> s.bufferConsumers.forEach(c -> c.accept(buffer)));
             leds.setData(buffer);
