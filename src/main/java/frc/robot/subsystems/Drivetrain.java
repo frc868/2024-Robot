@@ -305,12 +305,11 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
         orchestra.addInstrument(frontLeft.getDriveMotor(), 1);
         orchestra.addInstrument(frontRight.getDriveMotor(), 1);
         orchestra.addInstrument(backLeft.getDriveMotor(), 1);
-        orchestra.addInstrument(backRight.getDriveMotor(), 2);
-
-        orchestra.addInstrument(frontLeft.getSteerMotor(), 2);
-        orchestra.addInstrument(backRight.getSteerMotor(), 2);
-        orchestra.addInstrument(backLeft.getSteerMotor(), 3);
-        orchestra.addInstrument(frontRight.getSteerMotor(), 4);
+        orchestra.addInstrument(backRight.getDriveMotor(), 1);
+        orchestra.addInstrument(frontLeft.getSteerMotor(), 1);
+        orchestra.addInstrument(frontRight.getSteerMotor(), 1);
+        orchestra.addInstrument(backLeft.getSteerMotor(), 1);
+        orchestra.addInstrument(backRight.getSteerMotor(), 1);
 
         odometryThread = new OdometryThread();
         odometryThread.start();
@@ -734,7 +733,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
             // physical velocity to output in m/s.
             xSpeed *= SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND;
             ySpeed *= SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND;
-            thetaSpeed *= MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
+            thetaSpeed *= MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND * 0.5;
 
             drive(new ChassisSpeeds(xSpeed, ySpeed, thetaSpeed), driveMode);
         }).withName("drivetrain.teleopDrive");
@@ -832,7 +831,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
                         SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND,
                         DRIVE_BASE_RADIUS_METERS,
                         new ReplanningConfig()),
-                () -> true,
+                () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
                 this).finallyDo(this::stop).withName("drivetrain.followPath");
     }
 
