@@ -178,19 +178,19 @@ public class Autos {
 
         Command command = Commands.sequence(
                 RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
-                drivetrain.followPathCommand(pathStartToC).andThen(Commands.waitSeconds(0.2))
+                drivetrain.followPathCommand(pathStartToC).andThen(Commands.waitSeconds(1.5))
                         .deadlineWith(
                                 intake.moveToPositionCommand(() -> IntakePosition.GROUND),
                                 intake.runRollersCommand(),
                                 shooterTilt.targetSpeakerCommand(drivetrain::getPose),
                                 shooter.targetSpeakerCommand(drivetrain::getPose)),
-                drivetrain.followPathCommand(pathCToB).andThen(Commands.waitSeconds(0.2))
+                drivetrain.followPathCommand(pathCToB).andThen(Commands.waitSeconds(1.5))
                         .deadlineWith(
                                 intake.moveToPositionCommand(() -> IntakePosition.GROUND),
                                 intake.runRollersCommand(),
                                 shooterTilt.targetSpeakerCommand(drivetrain::getPose),
                                 shooter.targetSpeakerCommand(drivetrain::getPose)),
-                drivetrain.followPathCommand(pathBToA).andThen(Commands.waitSeconds(0.2))
+                drivetrain.followPathCommand(pathBToA).andThen(Commands.waitSeconds(1.5))
                         .deadlineWith(
                                 intake.moveToPositionCommand(() -> IntakePosition.GROUND),
                                 intake.runRollersCommand(),
