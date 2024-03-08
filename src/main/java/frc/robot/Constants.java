@@ -91,7 +91,7 @@ public class Constants {
             SWERVE_CONSTANTS.DRIVE_kD = 0.0;
             SWERVE_CONSTANTS.DRIVE_kS = 0.24857;
             SWERVE_CONSTANTS.DRIVE_kV = 0.66681;
-            SWERVE_CONSTANTS.DRIVE_kA = 0.092325;
+            SWERVE_CONSTANTS.DRIVE_kA = 0.10325;
             SWERVE_CONSTANTS.STEER_kP = 60.0;
             SWERVE_CONSTANTS.STEER_kI = 0.0;
             SWERVE_CONSTANTS.STEER_kD = 1.0;
@@ -149,7 +149,7 @@ public class Constants {
                 MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED);
 
         public static final double PATH_FOLLOWING_TRANSLATION_kP = 8.0; // TODO simvalue
-        public static final double PATH_FOLLOWING_ROTATION_kP = 1.0; // TODO simvalue
+        public static final double PATH_FOLLOWING_ROTATION_kP = 8.0; // TODO simvalue
     }
 
     public static final class Intake {
@@ -179,7 +179,7 @@ public class Constants {
         public static final int INTAKE_BEAM_ID = 2;
 
         public static final DCMotor MOTOR_GEARBOX_REPR = DCMotor.getNeoVortex(2);
-        public static final double GEARING = 45.5;
+        public static final double GEARING = 43.2;
         public static final double LENGTH_METERS = 0.23; // TODO simvalue
         public static final double MASS_KG = 4.082; // TODO simv<alue
         public static final double MOMENT_OF_INERTIA_KG_METERS_SQUARED = SingleJointedArmSim.estimateMOI(
@@ -190,23 +190,23 @@ public class Constants {
         public static final double MAX_ANGLE_RADIANS = 1.691;
 
         public static final double ENCODER_ROTATIONS_TO_RADIANS = 2 * Math.PI / GEARING;
-        public static final int ARM_CURRENT_LIMIT = 40;
+        public static final int ARM_CURRENT_LIMIT = 30;
         public static final int ROLLER_CURRENT_LIMIT = 65;
 
         // 2/14/24
         public static final double kP = 3.5;
         public static final double kI = 0.0;
         public static final double kD = 0.1;
-        public static final double kS = 0.14936;
-        public static final double kG = 0.2114;
-        public static final double kV = 0.78401;
-        public static final double kA = 0.077465;
+        public static final double kS = 0.0;
+        public static final double kG = 0.320004;
+        public static final double kV = 0.861492;
+        public static final double kA = 0.0848256;
         public static final double TOLERANCE = 0.05;
 
         // max theoretical velocity: 15.777 rad/s
         // 2/14/24
         public static final double MAX_VELOCITY_RADIANS_PER_SECOND = 7;
-        public static final double MAX_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 17;
+        public static final double MAX_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 14;
         public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_VELOCITY_RADIANS_PER_SECOND, MAX_ACCELERATION_RADIANS_PER_SECOND_SQUARED);
 
@@ -317,10 +317,10 @@ public class Constants {
         public static final double kP = 400;
         public static final double kI = 0;
         public static final double kD = 2;
-        public static final double kS = 0.14184;
-        public static final double kG = 0.026363;
-        public static final double kV = 75.803;
-        public static final double kA = 8;
+        public static final double kS = 0.0760704;
+        public static final double kG = 0.07851;
+        public static final double kV = 76.9668;
+        public static final double kA = 6.00096;
         public static final double TOLERANCE = 0.02;
 
         public static final double MAX_VELOCITY_METERS_PER_SECOND = 0.3;
@@ -590,7 +590,7 @@ public class Constants {
         public static final double JOYSTICK_INPUT_RATE_LIMIT = 15.0; // TODO
         public static final double JOYSTICK_INPUT_DEADBAND = 0.05; // TODO
         public static final double JOYSTICK_CURVE_EXP = 2; // TODO
-        public static final double JOYSTICK_ROT_CURVE_EXP = 3; // TODO
+        public static final double JOYSTICK_ROT_CURVE_EXP = 1; // TODO
     }
 
     public static final class LEDs {
