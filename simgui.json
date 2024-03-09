@@ -3,6 +3,9 @@
     "Addressable LEDs": {
       "0": {
         "columns": 42
+      },
+      "window": {
+        "visible": true
       }
     },
     "Other Devices": {
