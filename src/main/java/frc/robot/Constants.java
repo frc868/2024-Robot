@@ -134,6 +134,9 @@ public class Constants {
                 SWERVE_MODULE_LOCATIONS[2],
                 SWERVE_MODULE_LOCATIONS[3]);
 
+        public static final double PATH_FOLLOWING_TRANSLATION_kP = 8.0; // TODO simvalue
+        public static final double PATH_FOLLOWING_ROTATION_kP = 8.0; // TODO simvalue
+
         public static final double XY_kP = 1.4;
         public static final double XY_kI = 0;
         public static final double XY_kD = 0.05;
@@ -148,8 +151,6 @@ public class Constants {
                 MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
                 MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED);
 
-        public static final double PATH_FOLLOWING_TRANSLATION_kP = 8.0; // TODO simvalue
-        public static final double PATH_FOLLOWING_ROTATION_kP = 8.0; // TODO simvalue
     }
 
     public static final class Intake {
