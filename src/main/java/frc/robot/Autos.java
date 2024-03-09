@@ -41,22 +41,22 @@ public class Autos {
                 RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
                 drivetrain.followPathCommand(pathStartToC).andThen(Commands.waitSeconds(1.5))
                         .deadlineWith(
-                                intake.moveToPositionCommand(() -> IntakePosition.GROUND),
+                                intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
                                 intake.runRollersCommand(),
-                                shooterTilt.targetSpeakerCommand(drivetrain::getPose),
-                                shooter.targetSpeakerCommand(drivetrain::getPose)),
+                                shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
+                                shooter.targetSpeakerCommand(drivetrain::getPose).asProxy()),
                 drivetrain.followPathCommand(pathCToB).andThen(Commands.waitSeconds(1.5))
                         .deadlineWith(
-                                intake.moveToPositionCommand(() -> IntakePosition.GROUND),
+                                intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
                                 intake.runRollersCommand(),
-                                shooterTilt.targetSpeakerCommand(drivetrain::getPose),
-                                shooter.targetSpeakerCommand(drivetrain::getPose)),
+                                shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
+                                shooter.targetSpeakerCommand(drivetrain::getPose).asProxy()),
                 drivetrain.followPathCommand(pathBToA).andThen(Commands.waitSeconds(1.5))
                         .deadlineWith(
-                                intake.moveToPositionCommand(() -> IntakePosition.GROUND),
+                                intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
                                 intake.runRollersCommand(),
-                                shooterTilt.targetSpeakerCommand(drivetrain::getPose),
-                                shooter.targetSpeakerCommand(drivetrain::getPose)));
+                                shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
+                                shooter.targetSpeakerCommand(drivetrain::getPose).asProxy()));
 
         return new AutoRoutine("CBA", command,
                 List.of(pathStartToC, pathCToB, pathBToA),
