@@ -1,11 +1,12 @@
 package frc.robot;
 
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
 public enum GlobalStates {
     // normal
-    INITIALIZED(false);
+    INITIALIZED(RobotBase.isReal() ? false : true);
 
     // coast
     // DRIVETRAIN_COAST(false),
