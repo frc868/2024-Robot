@@ -187,17 +187,17 @@ public class Shooter extends SubsystemBase implements BaseShooter {
     }
 
     public Command targetSpeakerCommand(Supplier<Pose2d> robotPoseSupplier) {
-        return targetSpeakerCommand(robotPoseSupplier, () -> FieldConstants.SPEAKER_TARGET);
+        return targetSpeakerCommand(robotPoseSupplier,
+                () -> DriverStation.getAlliance().isPresent()
+                        && DriverStation.getAlliance().get() == Alliance.Red
+                                ? Reflector.reflectPose3d(FieldConstants.SPEAKER_TARGET,
+                                        FieldConstants.FIELD_LENGTH)
+                                : FieldConstants.SPEAKER_TARGET);
     }
 
     public Command targetSpeakerCommand(Supplier<Pose2d> robotPoseSupplier, Supplier<Pose3d> targetSupplier) {
         return spinAtVelocityCommand(() -> {
-            Pose3d target = DriverStation.getAlliance().isPresent()
-                    && DriverStation.getAlliance().get() == Alliance.Red
-                            ? Reflector.reflectPose3d(targetSupplier.get(),
-                                    FieldConstants.FIELD_LENGTH)
-                            : targetSupplier.get();
-
+            Pose3d target = targetSupplier.get();
             Transform3d diff = new Pose3d(robotPoseSupplier.get()).minus(target);
             return SPEED_INTERPOLATOR.get(new Translation2d(diff.getX(), diff.getY()).getNorm());
         }).withName("shooter.targetSpeaker");
