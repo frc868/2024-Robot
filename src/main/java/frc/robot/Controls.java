@@ -34,17 +34,13 @@ public class Controls {
         joystick.stickButton().onTrue(drivetrain.resetGyroCommand());
 
         joystick.centerBottomHatUp()
-                .whileTrue(drivetrain.controlledRotateCommand(() -> Math.toRadians(0),
-                        DriveMode.FIELD_ORIENTED));
+                .whileTrue(drivetrain.controlledRotateCommand(() -> Math.toRadians(0)));
         joystick.centerBottomHatLeft()
-                .whileTrue(drivetrain.controlledRotateCommand(() -> Math.toRadians(270),
-                        DriveMode.FIELD_ORIENTED));
+                .whileTrue(drivetrain.controlledRotateCommand(() -> Math.toRadians(270)));
         joystick.centerBottomHatDown()
-                .whileTrue(drivetrain.controlledRotateCommand(() -> Math.toRadians(180),
-                        DriveMode.FIELD_ORIENTED));
+                .whileTrue(drivetrain.controlledRotateCommand(() -> Math.toRadians(180)));
         joystick.centerBottomHatRight()
-                .whileTrue(drivetrain.controlledRotateCommand(() -> Math.toRadians(90),
-                        DriveMode.FIELD_ORIENTED));
+                .whileTrue(drivetrain.controlledRotateCommand(() -> Math.toRadians(90)));
 
         joystick.triggerSoftPress().and(joystick.flipTriggerIn().negate())
                 .whileTrue(RobotCommands.targetSpeakerOnTheMoveCommand(drivetrain, shooter,

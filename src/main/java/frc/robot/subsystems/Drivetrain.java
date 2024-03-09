@@ -734,18 +734,32 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     @Override
-    public Command controlledRotateCommand(DoubleSupplier angle, DriveMode driveMode) {
+    public Command controlledRotateCommand(DoubleSupplier angle) {
         return Commands.run(() -> {
             if (!isControlledRotationEnabled) {
                 rotationController.reset(getRotation().getRadians());
             }
             isControlledRotationEnabled = true;
-            if (driveMode == DriveMode.FIELD_ORIENTED && DriverStation.getAlliance().isPresent()
-                    && DriverStation.getAlliance().get() == Alliance.Red)
+            if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red)
                 rotationController.setGoal(angle.getAsDouble() + Math.PI);
             else
                 rotationController.setGoal(angle.getAsDouble());
         }).withName("drivetrain.controlledRotate");
+    }
+
+    public Command standaloneControlledRotateCommand(DoubleSupplier angle) {
+        return runOnce(() -> {
+            if (!isControlledRotationEnabled) {
+                rotationController.reset(getRotation().getRadians());
+            }
+            isControlledRotationEnabled = true;
+            if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red)
+                rotationController.setGoal(angle.getAsDouble() + Math.PI);
+            else
+                rotationController.setGoal(angle.getAsDouble());
+        }).andThen(run(() -> {
+            drive(new ChassisSpeeds(0, 0, rotationController.calculate(getRotation().getRadians())), driveMode);
+        })).withName("drivetrain.standaloneControlledRotate");
     }
 
     @Override
@@ -942,7 +956,25 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
             Rotation2d rot = new Rotation2d(diff.getX(), diff.getY());
             rot = rot.plus(new Rotation2d(Math.PI));
             return rot.getRadians();
-        }, DriveMode.FIELD_ORIENTED);
+        });
+    }
+
+    public Command standaloneTargetSpeakerCommand() {
+        return standaloneTargetSpeakerCommand(() -> FieldConstants.SPEAKER_TARGET);
+    }
+
+    public Command standaloneTargetSpeakerCommand(Supplier<Pose3d> targetPose) {
+        return standaloneControlledRotateCommand(() -> {
+            Pose2d target = DriverStation.getAlliance().isPresent()
+                    && DriverStation.getAlliance().get() == Alliance.Red
+                            ? Reflector.reflectPose2d(targetPose.get().toPose2d(),
+                                    FieldConstants.FIELD_LENGTH)
+                            : targetPose.get().toPose2d();
+            Transform2d diff = getPose().minus(target);
+            Rotation2d rot = new Rotation2d(diff.getX(), diff.getY());
+            rot = rot.plus(new Rotation2d(Math.PI));
+            return rot.getRadians();
+        });
     }
 
     public Command targetStageCommand(Supplier<Double> xJoystickSupplier,
