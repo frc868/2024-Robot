@@ -95,6 +95,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
     private final SysIdRoutine sysIdRoutine;
 
     private final Trigger noteInShooterTrigger = new Trigger(shooterSecondaryBeam::get).negate();
+    private final Trigger noteFullyInShooterTrigger = new Trigger(shooterPrimaryBeam::get).negate();
 
     private boolean prevIntakeBeamState = true;
 
@@ -187,7 +188,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
 
     @Override
     public void resetPosition() {
-        leftArmMotor.getEncoder().setPosition(IntakePosition.GROUND.value);
+        leftArmMotor.getEncoder().setPosition(IntakePosition.TOP.value);
         initialized = true;
     }
 
@@ -286,6 +287,13 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
                 .withName("intake.runRollers");
     }
 
+    public Command runRollersSlowCommand() {
+        return Commands.startEnd(
+                () -> setRollerVoltage(3),
+                () -> setRollerVoltage(0))
+                .withName("intake.runRollers");
+    }
+
     public Command reverseRollersCommand() {
         return Commands.startEnd(
                 () -> setRollerVoltage(-12),
@@ -302,7 +310,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
 
     public Command ampScoreRollersCommand() {
         return Commands.startEnd(
-                () -> setRollerVoltage(-3.5),
+                () -> setRollerVoltage(-4.5),
                 () -> setRollerVoltage(0))
                 .withName("intake.reverseRollers");
     }
@@ -320,6 +328,8 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
                 moveToPositionCommand(() -> IntakePosition.GROUND),
                 moveToCurrentGoalCommand().alongWith(runRollersCommand())
                         .until(noteInShooterTrigger),
+                moveToCurrentGoalCommand().alongWith(runRollersSlowCommand())
+                        .until(noteFullyInShooterTrigger),
                 moveToPositionCommand(() -> IntakePosition.STOW)).withName("intake.intakeNote");
     }
 
