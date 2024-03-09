@@ -22,6 +22,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
@@ -33,6 +35,8 @@ import static frc.robot.Constants.Vision.*;
 public class Vision extends SubsystemBase {
     private SwerveDrivePoseEstimator poseEstimator = null;
     private TriConsumer<Pose2d, Double, Matrix<N3, N1>> visionMeasurementConsumer = null;
+    private Supplier<ChassisSpeeds> speedsSupplier = null;
+
     private Supplier<Pose2d> simPoseSupplier = null;
     private final VisionSystemSim visionSim = new VisionSystemSim("main");
 
@@ -67,7 +71,7 @@ public class Vision extends SubsystemBase {
 
     @Override
     public void simulationPeriodic() {
-        visionSim.update(simPoseSupplier.get());
+        // visionSim.update(simPoseSupplier.get());
     }
 
     public void updatePoseEstimator() {
@@ -76,20 +80,24 @@ public class Vision extends SubsystemBase {
         }
 
         Pose2d prevEstimatedRobotPose = poseEstimator.getEstimatedPosition();
-        for (AprilTagPhotonCamera photonCamera : cameras) {
-            Optional<EstimatedRobotPose> result = photonCamera
-                    .getEstimatedGlobalPose(prevEstimatedRobotPose);
+        // for (AprilTagPhotonCamera photonCamera : cameras) {
+        AprilTagPhotonCamera photonCamera = houndeye01;
+        Optional<EstimatedRobotPose> result = photonCamera
+                .getEstimatedGlobalPose(prevEstimatedRobotPose);
 
-            if (result.isPresent()) {
-                EstimatedRobotPose estPose = result.get();
-                Pose2d oldPose = estPose.estimatedPose.toPose2d();
-                Pose2d pose = new Pose2d(oldPose.getX() + Units.inchesToMeters(1.5), oldPose.getY(),
-                        oldPose.getRotation());
+        if (result.isPresent()) {
+            EstimatedRobotPose estPose = result.get();
+            Pose2d oldPose = estPose.estimatedPose.toPose2d();
+            Pose2d pose = new Pose2d(oldPose.getX(), oldPose.getY(),
+                    oldPose.getRotation());
 
-                Matrix<N3, N1> stddevs = photonCamera.getEstimationStdDevs(pose,
-                        SINGLE_TAG_STD_DEVS, MULTI_TAG_STD_DEVS);
+            Matrix<N3, N1> stddevs = photonCamera.getEstimationStdDevs(pose,
+                    SINGLE_TAG_STD_DEVS, MULTI_TAG_STD_DEVS);
+
+            double normSpeed = new Translation2d(speedsSupplier.get().vxMetersPerSecond,
+                    speedsSupplier.get().vyMetersPerSecond).getNorm();
+            if (normSpeed < 0.3)
                 visionMeasurementConsumer.accept(pose, estPose.timestampSeconds, stddevs);
-            }
         }
     }
 
@@ -124,6 +132,10 @@ public class Vision extends SubsystemBase {
 
     public void setSimPoseSupplier(Supplier<Pose2d> simPoseSupplier) {
         this.simPoseSupplier = simPoseSupplier;
+    }
+
+    public void setSpeedsSupplier(Supplier<ChassisSpeeds> speedsSupplier) {
+        this.speedsSupplier = speedsSupplier;
     }
 
     @Log
