@@ -95,6 +95,9 @@ public class Constants {
             SWERVE_CONSTANTS.STEER_kP = 60.0;
             SWERVE_CONSTANTS.STEER_kI = 0.0;
             SWERVE_CONSTANTS.STEER_kD = 1.0;
+            SWERVE_CONSTANTS.STEER_kS = 0; // TODO
+            SWERVE_CONSTANTS.STEER_kV = 0; // TODO
+            SWERVE_CONSTANTS.STEER_kA = 0; // TODO
 
             SWERVE_CONSTANTS.DRIVE_GEARING = 5.357;
             SWERVE_CONSTANTS.STEER_GEARING = 150.0 / 7.0;
