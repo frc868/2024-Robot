@@ -942,16 +942,17 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     public Command targetSpeakerCommand() {
-        return targetSpeakerCommand(() -> FieldConstants.SPEAKER_TARGET);
+        return targetSpeakerCommand(
+                () -> DriverStation.getAlliance().isPresent()
+                        && DriverStation.getAlliance().get() == Alliance.Red
+                                ? Reflector.reflectPose3d(FieldConstants.SPEAKER_TARGET,
+                                        FieldConstants.FIELD_LENGTH)
+                                : FieldConstants.SPEAKER_TARGET);
     }
 
     public Command targetSpeakerCommand(Supplier<Pose3d> targetPose) {
         return controlledRotateCommand(() -> {
-            Pose2d target = DriverStation.getAlliance().isPresent()
-                    && DriverStation.getAlliance().get() == Alliance.Red
-                            ? Reflector.reflectPose2d(targetPose.get().toPose2d(),
-                                    FieldConstants.FIELD_LENGTH)
-                            : targetPose.get().toPose2d();
+            Pose2d target = targetPose.get().toPose2d();
             Transform2d diff = getPose().minus(target);
             Rotation2d rot = new Rotation2d(diff.getX(), diff.getY());
             rot = rot.plus(new Rotation2d(Math.PI));
