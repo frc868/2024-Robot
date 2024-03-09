@@ -92,7 +92,7 @@ public class Constants {
             SWERVE_CONSTANTS.DRIVE_kS = 0.24857;
             SWERVE_CONSTANTS.DRIVE_kV = 0.66681;
             SWERVE_CONSTANTS.DRIVE_kA = 0.10325;
-            SWERVE_CONSTANTS.STEER_kP = 60.0;
+            SWERVE_CONSTANTS.STEER_kP = 100.0;
             SWERVE_CONSTANTS.STEER_kI = 0.0;
             SWERVE_CONSTANTS.STEER_kD = 1.0;
             SWERVE_CONSTANTS.STEER_kS = 0; // TODO
@@ -112,7 +112,7 @@ public class Constants {
             SWERVE_CONSTANTS.MAX_DRIVING_ACCELERATION_METERS_PER_SECOND_SQUARED = 8; // TODO
             SWERVE_CONSTANTS.MAX_STEER_VELOCITY_RADIANS_PER_SECOND = 100 * 2 * Math.PI; // TODO
             // max velocity in 1/3 sec
-            SWERVE_CONSTANTS.MAX_STEER_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 3 * 100 * 2 * Math.PI; // TODO
+            SWERVE_CONSTANTS.MAX_STEER_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 10 * 100 * 2 * Math.PI; // TODO
 
             SWERVE_CONSTANTS.DRIVE_CURRENT_LIMIT = 75;
             SWERVE_CONSTANTS.STEER_CURRENT_LIMIT = 30;
@@ -147,9 +147,9 @@ public class Constants {
                 SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND,
                 SWERVE_CONSTANTS.MAX_DRIVING_ACCELERATION_METERS_PER_SECOND_SQUARED);
 
-        public static final double THETA_kP = 1.0; // TODO
+        public static final double THETA_kP = 2.2; // TODO
         public static final double THETA_kI = 0; // TODO
-        public static final double THETA_kD = 0.02; // TODO
+        public static final double THETA_kD = 0.1; // TODO
         public static final TrapezoidProfile.Constraints THETA_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
                 MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED);
@@ -542,7 +542,7 @@ public class Constants {
         public static final Matrix<N3, N1> SINGLE_TAG_STD_DEVS = VecBuilder.fill(Double.MAX_VALUE,
                 Double.MAX_VALUE,
                 Double.MAX_VALUE);
-        public static final Matrix<N3, N1> MULTI_TAG_STD_DEVS = VecBuilder.fill(0.01, 0.01, 1);
+        public static final Matrix<N3, N1> MULTI_TAG_STD_DEVS = VecBuilder.fill(0.1, 0.1, 1);
 
         public static final PhotonCameraConstants CAMERA_CONSTANTS = new PhotonCameraConstants();
         static {
