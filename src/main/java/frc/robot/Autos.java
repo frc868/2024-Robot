@@ -38,7 +38,8 @@ public class Autos {
         Pose2d startingPose = pathStartToC.getPreviewStartingHolonomicPose();
 
         Command command = Commands.sequence(
-                RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
+                RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt)
+                        .deadlineWith(intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy()),
                 drivetrain.followPathCommand(pathStartToC).andThen(Commands.waitSeconds(1.5))
                         .deadlineWith(
                                 intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
