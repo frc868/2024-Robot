@@ -32,7 +32,7 @@ public class LEDs extends SubsystemBase {
 
     public enum LEDState {
         OFF(solid(Color.kBlack, LEDSection.ALL)),
-        RED_BREATHE(breathe(Color.kRed, 10, 0, 150, LEDSection.ALL)),
+        RED_BREATHE(breathe(Color.kRed, 3, 0, 255, LEDSection.ALL)),
         SOLID_BLUE(solid(Color.kBlue, LEDSection.ALL)),
         SOLID_GREEN(solid(Color.kGreen, LEDSection.ALL)),
         PURPLE_WAVE(wave(new Color("#9000DD"), 30, 20, 100, 255,
