@@ -381,4 +381,8 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
     public boolean getNoteInShooter() {
         return noteInShooterTrigger.getAsBoolean();
     }
+
+    public Trigger getNoteInShooterTrigger() {
+        return noteInShooterTrigger;
+    }
 }
