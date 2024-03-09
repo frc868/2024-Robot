@@ -152,6 +152,7 @@ public class RobotContainer {
                         noteLift.resetControllersCommand(),
                         climber.resetControllersCommand()).withName("resetControllers"));
 
+        new Trigger(() -> true).onTrue(Commands.run(() -> System.out.println("test")).ignoringDisable(true));
         new Trigger(() -> {
             return intake.getInitialized()
                     && shooterTilt.getInitialized()
@@ -162,7 +163,8 @@ public class RobotContainer {
         new Trigger(() -> intake.getRollerCurrent() > 40).debounce(0.15)
                 .onTrue(leds.requestGreenCommand().withTimeout(1));
         new Trigger(intake::getNoteInShooter).onTrue(leds.requestBlueCommand().withTimeout(1));
-        new Trigger(() -> !GlobalStates.INITIALIZED.enabled()).whileTrue(leds.requestRedBreatheCommand());
+
+        leds.requestRedBreatheCommand().until(() -> GlobalStates.INITIALIZED.enabled()).schedule();
     }
 
     private void configureButtonBindings() {
@@ -184,6 +186,8 @@ public class RobotContainer {
         AutoManager.getInstance().addRoutine(Autos.autoCBA(drivetrain, intake,
                 shooter, shooterTilt));
         AutoManager.getInstance().addRoutine(Autos.auto453(drivetrain, intake,
+                shooter, shooterTilt));
+        AutoManager.getInstance().addRoutine(Autos.autoCBA12(drivetrain, intake,
                 shooter, shooterTilt));
         // AutoManager.getInstance().addRoutine(Autos.autoBAC(drivetrain, intake,
         // shooter, shooterTilt));
