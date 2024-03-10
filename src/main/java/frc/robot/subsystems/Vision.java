@@ -27,6 +27,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static frc.robot.Constants.Vision.*;
@@ -80,24 +81,24 @@ public class Vision extends SubsystemBase {
         }
 
         Pose2d prevEstimatedRobotPose = poseEstimator.getEstimatedPosition();
-        // for (AprilTagPhotonCamera photonCamera : cameras) {
-        AprilTagPhotonCamera photonCamera = houndeye01;
-        Optional<EstimatedRobotPose> result = photonCamera
-                .getEstimatedGlobalPose(prevEstimatedRobotPose);
+        for (AprilTagPhotonCamera photonCamera : cameras) {
+            Optional<EstimatedRobotPose> result = photonCamera
+                    .getEstimatedGlobalPose(prevEstimatedRobotPose);
 
-        if (result.isPresent()) {
-            EstimatedRobotPose estPose = result.get();
-            Pose2d oldPose = estPose.estimatedPose.toPose2d();
-            Pose2d pose = new Pose2d(oldPose.getX(), oldPose.getY(),
-                    oldPose.getRotation());
+            if (result.isPresent()) {
+                EstimatedRobotPose estPose = result.get();
+                Pose2d oldPose = estPose.estimatedPose.toPose2d();
+                Pose2d pose = new Pose2d(oldPose.getX(), oldPose.getY(),
+                        oldPose.getRotation());
 
-            Matrix<N3, N1> stddevs = photonCamera.getEstimationStdDevs(pose,
-                    SINGLE_TAG_STD_DEVS, MULTI_TAG_STD_DEVS);
+                Matrix<N3, N1> stddevs = photonCamera.getEstimationStdDevs(pose,
+                        SINGLE_TAG_STD_DEVS, MULTI_TAG_STD_DEVS);
 
-            double normSpeed = new Translation2d(speedsSupplier.get().vxMetersPerSecond,
-                    speedsSupplier.get().vyMetersPerSecond).getNorm();
-            if (normSpeed < 0.3)
-                visionMeasurementConsumer.accept(pose, estPose.timestampSeconds, stddevs);
+                double normSpeed = new Translation2d(speedsSupplier.get().vxMetersPerSecond,
+                        speedsSupplier.get().vyMetersPerSecond).getNorm();
+                if (normSpeed < 0.5 || !DriverStation.isAutonomous())
+                    visionMeasurementConsumer.accept(pose, estPose.timestampSeconds, stddevs);
+            }
         }
     }
 
