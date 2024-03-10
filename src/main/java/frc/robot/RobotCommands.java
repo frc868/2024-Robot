@@ -66,7 +66,7 @@ public class RobotCommands {
     public static Command shootCommand(Drivetrain drivetrain, Intake intake, Shooter shooter, ShooterTilt shooterTilt) {
         return Commands.deadline(
                 Commands.waitUntil(() -> shooter.atGoal() && shooterTilt.atGoal())
-                        .andThen(intake.runRollersCommand().withTimeout(1)),
+                        .andThen(intake.runRollersCommand().withTimeout(0.5)),
                 // drivetrain.targetSpeakerCommand(),
                 shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
                 shooter.targetSpeakerCommand(drivetrain::getPose).asProxy())
