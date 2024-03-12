@@ -58,9 +58,9 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
     @Log
     private final DigitalInput intakeBeam = new DigitalInput(INTAKE_BEAM_ID);
     @Log
-    private final DigitalInput shooterPrimaryBeam = new DigitalInput(PRIMARY_SHOOTER_BEAM_ID);
+    private final DigitalInput shooterCloseBeam = new DigitalInput(SHOOTER_CLOSE_BEAM_ID);
     @Log
-    private final DigitalInput shooterSecondaryBeam = new DigitalInput(SECONDARY_SHOOTER_BEAM_ID);
+    private final DigitalInput shooterFarBeam = new DigitalInput(SHOOTER_FAR_BEAM_ID);
 
     @Log(groups = "control")
     private final ProfiledPIDController pidController = new ProfiledPIDController(kP, kI, kD, MOVEMENT_CONSTRAINTS);
@@ -78,8 +78,8 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
             MAX_ANGLE_RADIANS);
 
     private final DIOSim intakeBeamSim = new DIOSim(intakeBeam);
-    private final DIOSim shooterPrimaryBeamSim = new DIOSim(shooterPrimaryBeam);
-    private final DIOSim shooterSecondaryBeamSim = new DIOSim(shooterSecondaryBeam);
+    private final DIOSim shooterPrimaryBeamSim = new DIOSim(shooterFarBeam);
+    private final DIOSim shooterSecondaryBeamSim = new DIOSim(shooterCloseBeam);
 
     @Log(groups = "control")
     private double feedbackVoltage = 0;
@@ -94,17 +94,16 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
 
     private final SysIdRoutine sysIdRoutine;
 
-    private final Trigger noteInShooterTrigger = new Trigger(shooterSecondaryBeam::get).negate();
-    private final Trigger noteFullyInShooterTrigger = new Trigger(shooterPrimaryBeam::get).negate();
+    public final Trigger noteInShooterTrigger = new Trigger(shooterCloseBeam::get).negate();
+    public final Trigger noteFullyInShooterTrigger = new Trigger(shooterFarBeam::get).negate();
 
     private boolean prevIntakeBeamState = true;
-
-    private final Trigger noteInIntakeTrigger = new Trigger(() -> {
+    public final Trigger noteInIntakeFromShooterTrigger = new Trigger(() -> {
         boolean triggered = !prevIntakeBeamState && intakeBeam.get();
         prevIntakeBeamState = intakeBeam.get();
         return triggered;
     });
-    private final Trigger noteInIntakeFromSourceTrigger = new Trigger(intakeBeam::get).negate();
+    public final Trigger noteInIntakeFromOutsideTrigger = new Trigger(intakeBeam::get).negate();
 
     @Log
     private boolean initialized = false;
@@ -289,7 +288,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
 
     public Command runRollersSlowCommand() {
         return Commands.startEnd(
-                () -> setRollerVoltage(3),
+                () -> setRollerVoltage(1),
                 () -> setRollerVoltage(0))
                 .withName("intake.runRollers");
     }
@@ -328,6 +327,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
                 moveToPositionCommand(() -> IntakePosition.GROUND),
                 moveToCurrentGoalCommand().alongWith(runRollersCommand())
                         .until(noteInShooterTrigger),
+                Commands.waitSeconds(0.5),
                 moveToCurrentGoalCommand().alongWith(runRollersSlowCommand())
                         .until(noteFullyInShooterTrigger),
                 moveToPositionCommand(() -> IntakePosition.STOW)).withName("intake.intakeNote");
@@ -337,7 +337,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
         return Commands.sequence(
                 moveToPositionCommand(() -> IntakePosition.SOURCE),
                 moveToCurrentGoalCommand().alongWith(sourceIntakeRollersCommand())
-                        .until(noteInIntakeFromSourceTrigger),
+                        .until(noteInIntakeFromOutsideTrigger),
                 moveToPositionCommand(() -> IntakePosition.STOW)).withName("intake.intakeNote");
     }
 
@@ -351,7 +351,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
     public Command ampPrepCommand() {
         return Commands.sequence(
                 moveToPositionCommand(() -> IntakePosition.GROUND),
-                moveToCurrentGoalCommand().alongWith(reverseRollersCommand()).until(noteInIntakeTrigger),
+                moveToCurrentGoalCommand().alongWith(reverseRollersCommand()).until(noteInIntakeFromShooterTrigger),
                 moveToPositionCommand(() -> IntakePosition.AMP)).withName("intake.ampScore");
     }
 
@@ -382,17 +382,5 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
         return Commands.runOnce(() -> {
             initialized = true;
         }).withName("intake.enableInitialized");
-    }
-
-    public double getRollerCurrent() {
-        return rollerMotor.getOutputCurrent();
-    }
-
-    public boolean getNoteInShooter() {
-        return noteInShooterTrigger.getAsBoolean();
-    }
-
-    public Trigger getNoteInShooterTrigger() {
-        return noteInShooterTrigger;
     }
 }

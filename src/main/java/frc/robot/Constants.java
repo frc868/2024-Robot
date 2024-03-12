@@ -178,8 +178,8 @@ public class Constants {
         public static final int SECONDARY_ARM_MOTOR_ID = 10;
         public static final int ROLLER_MOTOR_ID = 13;
 
-        public static final int PRIMARY_SHOOTER_BEAM_ID = 1;
-        public static final int SECONDARY_SHOOTER_BEAM_ID = 0;
+        public static final int SHOOTER_CLOSE_BEAM_ID = 0;
+        public static final int SHOOTER_FAR_BEAM_ID = 1;
         public static final int INTAKE_BEAM_ID = 2;
 
         public static final DCMotor MOTOR_GEARBOX_REPR = DCMotor.getNeoVortex(2);

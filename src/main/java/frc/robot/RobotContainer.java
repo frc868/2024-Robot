@@ -153,7 +153,6 @@ public class RobotContainer {
                         noteLift.resetControllersCommand(),
                         climber.resetControllersCommand()).withName("resetControllers"));
 
-        new Trigger(() -> true).onTrue(Commands.run(() -> System.out.println("test")).ignoringDisable(true));
         new Trigger(() -> {
             return intake.getInitialized()
                     && shooterTilt.getInitialized()
@@ -161,9 +160,9 @@ public class RobotContainer {
                     && noteLift.getInitialized();
         }).onTrue(GlobalStates.INITIALIZED.enableCommand());
 
-        new Trigger(() -> intake.getRollerCurrent() > 40).debounce(0.15)
+        intake.noteInIntakeFromOutsideTrigger.debounce(0.15)
                 .onTrue(leds.requestGreenCommand().withTimeout(1));
-        new Trigger(intake::getNoteInShooter).onTrue(leds.requestBlueCommand().withTimeout(1));
+        intake.noteInShooterTrigger.onTrue(leds.requestBlueCommand().withTimeout(1));
 
         leds.requestRedBreatheCommand().until(() -> GlobalStates.INITIALIZED.enabled()).schedule();
     }
