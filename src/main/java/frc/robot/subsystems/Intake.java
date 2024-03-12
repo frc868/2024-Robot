@@ -286,6 +286,13 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
                 .withName("intake.runRollers");
     }
 
+    public Command runRollersHalfCommand() {
+        return Commands.startEnd(
+                () -> setRollerVoltage(6),
+                () -> setRollerVoltage(0))
+                .withName("intake.runRollers");
+    }
+
     public Command runRollersSlowCommand() {
         return Commands.startEnd(
                 () -> setRollerVoltage(1),
@@ -326,8 +333,10 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
         return Commands.sequence(
                 moveToPositionCommand(() -> IntakePosition.GROUND),
                 moveToCurrentGoalCommand().alongWith(runRollersCommand())
+                        .until(noteInIntakeFromOutsideTrigger),
+                moveToCurrentGoalCommand().alongWith(runRollersHalfCommand())
                         .until(noteInShooterTrigger),
-                Commands.waitSeconds(0.5),
+                // Commands.waitSeconds(0.5),
                 moveToCurrentGoalCommand().alongWith(runRollersSlowCommand())
                         .until(noteFullyInShooterTrigger),
                 moveToPositionCommand(() -> IntakePosition.STOW)).withName("intake.intakeNote");
@@ -346,13 +355,6 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
                 moveToPositionCommand(() -> IntakePosition.GROUND),
                 moveToCurrentGoalCommand().alongWith(runRollersCommand()).until(noteInShooterTrigger))
                 .withName("intake.intakeNoteAuto");
-    }
-
-    public Command ampPrepCommand() {
-        return Commands.sequence(
-                moveToPositionCommand(() -> IntakePosition.GROUND),
-                moveToCurrentGoalCommand().alongWith(reverseRollersCommand()).until(noteInIntakeFromShooterTrigger),
-                moveToPositionCommand(() -> IntakePosition.AMP)).withName("intake.ampScore");
     }
 
     public Command simTriggerIntakeBeamCommand() {

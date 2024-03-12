@@ -57,8 +57,9 @@ public class Controls {
         joystick.centerTopHatButton().whileTrue(intake.intakeFromSourceCommand())
                 .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
 
-        joystick.redButton().whileTrue(intake.ampPrepCommand()
-                .alongWith(shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.AMP_EJECT)));
+        joystick.redButton().whileTrue(RobotCommands.ampPrepCommand(intake, shooterTilt))
+                .onFalse(intake.moveToPositionCommand(() -> IntakePosition.AMP));
+
         joystick.pinkieButton().whileTrue(intake.ampScoreRollersCommand())
                 .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
 

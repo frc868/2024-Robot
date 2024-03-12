@@ -45,6 +45,20 @@ public class RobotCommands {
                 .withName("RobotCommands.intakeNoteAuto");
     }
 
+    public static Command ampPrepCommand(Intake intake, ShooterTilt shooterTilt) {
+        return Commands.either(
+                Commands.sequence(
+                        intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
+                        intake.reverseRollersCommand().until(intake.noteInIntakeFromShooterTrigger).asProxy(),
+                        intake.moveToPositionCommand(() -> IntakePosition.AMP).asProxy()),
+                Commands.sequence(
+                        intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
+                        intake.runRollersCommand().until(intake.noteInShooterTrigger).asProxy(),
+                        intake.reverseRollersCommand().until(intake.noteInIntakeFromShooterTrigger).asProxy(),
+                        intake.moveToPositionCommand(() -> IntakePosition.AMP).asProxy()),
+                intake.noteInShooterTrigger).withName("RobotCommands.ampPrepCommand");
+    }
+
     public static Command targetSpeakerOnTheMoveCommand(Drivetrain drivetrain, Shooter shooter,
             ShooterTilt shooterTilt) {
         return Commands.parallel(

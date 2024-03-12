@@ -752,13 +752,15 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
             if (!isControlledRotationEnabled) {
                 rotationController.reset(getRotation().getRadians());
             }
-            isControlledRotationEnabled = true;
+            // isControlledRotationEnabled = true;
             if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red)
                 rotationController.setGoal(angle.getAsDouble() + Math.PI);
             else
                 rotationController.setGoal(angle.getAsDouble());
         }).andThen(run(() -> {
-            drive(new ChassisSpeeds(0, 0, rotationController.calculate(getRotation().getRadians())), driveMode);
+            drive(new ChassisSpeeds(0, 0,
+                    rotationController.calculate(poseEstimator.getEstimatedPosition().getRotation().getRadians())),
+                    driveMode);
         })).withName("drivetrain.standaloneControlledRotate");
     }
 
@@ -961,16 +963,17 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     public Command standaloneTargetSpeakerCommand() {
-        return standaloneTargetSpeakerCommand(() -> FieldConstants.SPEAKER_TARGET);
+        return standaloneTargetSpeakerCommand(
+                () -> DriverStation.getAlliance().isPresent()
+                        && DriverStation.getAlliance().get() == Alliance.Red
+                                ? Reflector.reflectPose3d(FieldConstants.SPEAKER_TARGET,
+                                        FieldConstants.FIELD_LENGTH)
+                                : FieldConstants.SPEAKER_TARGET);
     }
 
     public Command standaloneTargetSpeakerCommand(Supplier<Pose3d> targetPose) {
         return standaloneControlledRotateCommand(() -> {
-            Pose2d target = DriverStation.getAlliance().isPresent()
-                    && DriverStation.getAlliance().get() == Alliance.Red
-                            ? Reflector.reflectPose2d(targetPose.get().toPose2d(),
-                                    FieldConstants.FIELD_LENGTH)
-                            : targetPose.get().toPose2d();
+            Pose2d target = targetPose.get().toPose2d();
             Transform2d diff = getPose().minus(target);
             Rotation2d rot = new Rotation2d(diff.getX(), diff.getY());
             rot = rot.plus(new Rotation2d(Math.PI));
