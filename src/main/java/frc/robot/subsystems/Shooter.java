@@ -84,13 +84,17 @@ public class Shooter extends SubsystemBase implements BaseShooter {
                 (s) -> s.setIdleMode(IdleMode.kCoast),
                 (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
                 (s) -> s.getEncoder().setPositionConversionFactor(1.0),
-                (s) -> s.getEncoder().setVelocityConversionFactor(1.0 / 60.0));
+                (s) -> s.getEncoder().setVelocityConversionFactor(1.0 / 60.0),
+                (s) -> s.getEncoder().setAverageDepth(2),
+                (s) -> s.getEncoder().setMeasurementPeriod(16));
 
         rightMotor = SparkConfigurator.createSparkFlex(RIGHT_MOTOR_ID, MotorType.kBrushless, true,
                 (s) -> s.setIdleMode(IdleMode.kCoast),
                 (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
                 (s) -> s.getEncoder().setPositionConversionFactor(1.0),
-                (s) -> s.getEncoder().setVelocityConversionFactor(1.0 / 60.0));
+                (s) -> s.getEncoder().setVelocityConversionFactor(1.0 / 60.0),
+                (s) -> s.getEncoder().setAverageDepth(2),
+                (s) -> s.getEncoder().setMeasurementPeriod(16));
 
         sysIdRoutine = new SysIdRoutine(
                 new SysIdRoutine.Config(),
