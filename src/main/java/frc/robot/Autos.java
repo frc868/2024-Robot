@@ -78,14 +78,15 @@ public class Autos {
 
         Command command = Commands.sequence(
                 Commands.runOnce(drivetrain::stop, drivetrain),
-                RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt)
-                        .deadlineWith(intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy()),
-                drivetrain.followPathCommand(pathStartToC).andThen(Commands.waitSeconds(0))
+                Commands.waitSeconds(0.2).andThen(drivetrain.followPathCommand(pathStartToC))
+                        .andThen(Commands.waitSeconds(0))
                         .deadlineWith(
                                 intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
-                                intake.runRollersCommand(),
-                                shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
-                                shooter.targetSpeakerCommand(drivetrain::getPose).asProxy()),
+                                shooterTilt.targetSpeakerCommand(drivetrain::getPose,
+                                        drivetrain::calculateEffectiveTargetLocation).asProxy(),
+                                shooter.targetSpeakerCommand(drivetrain::getPose,
+                                        drivetrain::calculateEffectiveTargetLocation).asProxy(),
+                                Commands.waitUntil(shooter::atGoal).andThen(intake.runRollersCommand())),
                 drivetrain.followPathCommand(pathCToB).andThen(Commands.waitSeconds(0))
                         .deadlineWith(
                                 intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
@@ -111,7 +112,7 @@ public class Autos {
                                                         .until(intake.noteInShooterTrigger))),
                                 shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
                                 shooter.targetSpeakerCommand(drivetrain::getPose).asProxy()),
-                Commands.waitSeconds(1).andThen(intake.runRollersCommand().withTimeout(0.5)).deadlineWith(
+                Commands.waitSeconds(0.75).andThen(intake.runRollersCommand().withTimeout(0.25)).deadlineWith(
                         shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
                         shooter.targetSpeakerCommand(drivetrain::getPose).asProxy(),
                         drivetrain.standaloneTargetSpeakerCommand()),
@@ -128,7 +129,7 @@ public class Autos {
                                                         .until(intake.noteInShooterTrigger))),
                                 shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
                                 shooter.targetSpeakerCommand(drivetrain::getPose).asProxy()),
-                Commands.waitSeconds(1).andThen(intake.runRollersCommand().withTimeout(0.5)).deadlineWith(
+                Commands.waitSeconds(0.75).andThen(intake.runRollersCommand().withTimeout(0.25)).deadlineWith(
                         shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
                         shooter.targetSpeakerCommand(drivetrain::getPose).asProxy(),
                         drivetrain.standaloneTargetSpeakerCommand()));
