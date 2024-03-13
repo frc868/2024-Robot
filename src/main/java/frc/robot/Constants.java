@@ -230,20 +230,20 @@ public class Constants {
         // 3lb, 2in radius, 1/2mr^2
         public static final double MOMENT_OF_INERTIA_KG_METERS_SQUARED = (1.0 / 2.0) * WHEEL_AXLE_MASS
                 * Math.pow(WHEEL_RADIUS, 2);
-        public static final int CURRENT_LIMIT = 40;
+        public static final int CURRENT_LIMIT = 70;
 
         public static final double IDLE_RPS = 15;
         public static final double BASE_SHOOTING_RPS = 55;
 
         // 3/3/24
-        public static final double left_kP = 0.00001;
+        public static final double left_kP = 0.1;
         public static final double left_kI = 0;
         public static final double left_kD = 0;
         public static final double left_kS = 0.14652;
         public static final double left_kV = 0.10797;
         public static final double left_kA = 0.022635;
 
-        public static final double right_kP = 0.00001;
+        public static final double right_kP = 0.1;
         public static final double right_kI = 0;
         public static final double right_kD = 0;
         public static final double right_kS = 0.12047;
@@ -251,10 +251,11 @@ public class Constants {
         public static final double right_kA = 0.021566;
         public static final double TOLERANCE = 5;
 
-        public static final double MAX_VELOCITY_METERS_PER_SECOND = 80;
-        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 10;
-        public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
-                MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
+        // public static final double MAX_VELOCITY_METERS_PER_SECOND = 80;
+        // public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 10;
+        // public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new
+        // TrapezoidProfile.Constraints(
+        // MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
 
         public static final double GOAL_POSITION_ITERATIONS = 5;
         public static final double ACCELERATION_COMPENSATION_FACTOR = 0.0;
@@ -449,8 +450,8 @@ public class Constants {
     public static final class Climber {
         public static enum ClimberPosition {
             BOTTOM(0),
-            ON_CHAIN(0.489),
-            CLIMB_PREP(0.61);
+            ON_CHAIN(0.5144),
+            CLIMB_PREP(0.64);
 
             public final double value;
 
