@@ -336,7 +336,6 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
                         .until(noteInIntakeFromOutsideTrigger),
                 moveToCurrentGoalCommand().alongWith(runRollersHalfCommand())
                         .until(noteInShooterTrigger),
-                // Commands.waitSeconds(0.5),
                 moveToCurrentGoalCommand().alongWith(runRollersSlowCommand())
                         .until(noteFullyInShooterTrigger),
                 moveToPositionCommand(() -> IntakePosition.STOW)).withName("intake.intakeNote");
