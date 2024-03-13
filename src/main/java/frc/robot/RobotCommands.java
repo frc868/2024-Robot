@@ -53,7 +53,9 @@ public class RobotCommands {
                         intake.moveToPositionCommand(() -> IntakePosition.AMP).asProxy()),
                 Commands.sequence(
                         intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
-                        intake.runRollersCommand().until(intake.noteInShooterTrigger).asProxy(),
+                        intake.runRollersCommand().until(intake.noteInIntakeFromOutsideTrigger).asProxy(),
+                        intake.runRollersHalfCommand().until(intake.noteInShooterTrigger).asProxy(),
+                        intake.runRollersSlowCommand().until(intake.noteFullyInShooterTrigger).asProxy(),
                         intake.reverseRollersCommand().until(intake.noteInIntakeFromShooterTrigger).asProxy(),
                         intake.moveToPositionCommand(() -> IntakePosition.AMP).asProxy()),
                 intake.noteInShooterTrigger).withName("RobotCommands.ampPrepCommand");
