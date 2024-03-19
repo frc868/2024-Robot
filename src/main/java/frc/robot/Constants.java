@@ -604,8 +604,17 @@ public class Constants {
             SHOOTER_TOP(28, 77),
             SHOOTER_LEFT(78, 110, true),
             SHOOTER(0, 110),
+            SHOOTER_RIGHT_BOTTOM(0, 13),
+            SHOOTER_RIGHT_TOP(14, 27),
+            SHOOTER_LEFT_BOTTOM(94, 110, true),
+            SHOOTER_LEFT_TOP(78, 93, true),
+
             ELEVATOR_LEFT(111, 221),
+            ELEVATOR_LEFT_TOP(167, 221),
+            ELEVATOR_LEFT_BOTTOM(111, 166),
             ELEVATOR_RIGHT(222, 332),
+            ELEVATOR_RIGHT_TOP(278, 332),
+            ELEVATOR_RIGHT_BOTTOM(222, 277),
             ALL(0, 332);
 
             private final int startIdx;
