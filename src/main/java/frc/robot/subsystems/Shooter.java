@@ -37,6 +37,7 @@ import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.FieldConstants;
+import frc.robot.GlobalStates;
 
 @LoggedObject
 public class Shooter extends SubsystemBase implements BaseShooter {
@@ -254,12 +255,13 @@ public class Shooter extends SubsystemBase implements BaseShooter {
         return sysIdRoutine.dynamic(direction).withName("shooter.sysIdDynamic");
     }
 
-    @Log
-    public boolean atGoal() {
-        return leftPidController.atSetpoint() && rightPidController.atSetpoint();
-    }
-
     public Command stopCommand() {
         return run(this::stop);
+    }
+
+    @Log
+    public boolean atGoal() {
+        return leftPidController.atSetpoint() && rightPidController.atSetpoint()
+                || GlobalStates.AT_GOAL_OVERRIDE.enabled();
     }
 }

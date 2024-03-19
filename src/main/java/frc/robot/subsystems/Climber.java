@@ -266,4 +266,8 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
         }).until(() -> motor.getOutputCurrent() > 10)
                 .andThen(resetPositionCommand());
     }
+
+    public boolean atGoal() {
+        return pidController.atGoal() || GlobalStates.AT_GOAL_OVERRIDE.enabled();
+    }
 }

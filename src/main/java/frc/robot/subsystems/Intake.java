@@ -395,4 +395,8 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
                 .until(() -> (leftArmMotor.getOutputCurrent() > 20) && (rightArmMotor.getOutputCurrent() > 20))
                 .andThen(resetPositionCommand());
     }
+
+    public boolean atGoal() {
+        return pidController.atGoal() || GlobalStates.AT_GOAL_OVERRIDE.enabled();
+    }
 }

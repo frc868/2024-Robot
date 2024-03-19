@@ -289,9 +289,11 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
 
     @Log
     public boolean atGoal() {
-        return pidController.atSetpoint()
+        return (pidController.atSetpoint()
                 && Math.abs(pidController.getGoal().position - pidController.getSetpoint().position) <= TOLERANCE
-                && !beyondMaxDistance;
+                && !beyondMaxDistance)
+
+                || GlobalStates.AT_GOAL_OVERRIDE.enabled();
     }
 
     public Command resetControllersCommand() {
