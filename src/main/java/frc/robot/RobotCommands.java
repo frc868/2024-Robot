@@ -45,7 +45,7 @@ public class RobotCommands {
                 .withName("RobotCommands.intakeNoteAuto");
     }
 
-    public static Command ampPrepCommand(Intake intake, ShooterTilt shooterTilt) {
+    public static Command ampPrepIntakeCommand(Intake intake, ShooterTilt shooterTilt) {
         return Commands.either(
                 Commands.sequence(
                         intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
@@ -144,5 +144,19 @@ public class RobotCommands {
                 noteLift.moveToPositionCommand(() -> NoteLiftPosition.TOP).asProxy(),
                 shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.BOTTOM).asProxy(),
                 intake.moveToPositionCommand(() -> IntakePosition.TOP).asProxy());
+    }
+
+    public static Command homeMechanismsCommand(Intake intake, Shooter shooter, ShooterTilt shooterTilt,
+            Climber climber, NoteLift noteLift) {
+        return Commands.sequence(
+                Commands.parallel(
+                        shooterTilt.zeroMechanismCommand(),
+                        intake.zeroMechanismCommand()),
+                Commands.parallel(
+                        shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.CLIMB),
+                        intake.moveToPositionCommand(() -> IntakePosition.STOW)),
+                Commands.parallel(
+                        climber.zeroMechanismCommand(),
+                        noteLift.zeroMechanismCommand()));
     }
 }

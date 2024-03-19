@@ -33,23 +33,26 @@ public class LEDs extends SubsystemBase {
     public enum LEDState {
         OFF(solid(Color.kBlack, LEDSection.ALL)),
         RED_BREATHE(breathe(Color.kRed, 3, 0, 255, LEDSection.ALL)),
+        NOTE_LIFT_UNINITIALIZED(
+                breathe(Color.kRed, 3, 0, 255, LEDSection.ELEVATOR_LEFT_TOP),
+                breathe(Color.kRed, 3, 0, 255, LEDSection.ELEVATOR_RIGHT_TOP)),
+        CLIMBER_UNINITIALIZED(
+                breathe(Color.kRed, 3, 0, 255, LEDSection.ELEVATOR_LEFT_BOTTOM),
+                breathe(Color.kRed, 3, 0, 255, LEDSection.ELEVATOR_RIGHT_BOTTOM)),
+        INTAKE_UNINITIALIZED(
+                breathe(Color.kRed, 3, 0, 255, LEDSection.SHOOTER_LEFT_BOTTOM),
+                breathe(Color.kRed, 3, 0, 255, LEDSection.SHOOTER_RIGHT_BOTTOM)),
+        SHOOTER_TILT_UNINITIALIZED(
+                breathe(Color.kRed, 3, 0, 255, LEDSection.SHOOTER_LEFT_TOP),
+                breathe(Color.kRed, 3, 0, 255, LEDSection.SHOOTER_RIGHT_TOP),
+                breathe(Color.kRed, 3, 0, 255, LEDSection.SHOOTER_TOP)),
+        INITIALIZED_CONFIRM(breathe(Color.kGreen, 2, 0, 255, LEDSection.ALL)),
+
         SOLID_BLUE(solid(Color.kBlue, LEDSection.ALL)),
         SOLID_GREEN(solid(Color.kGreen, LEDSection.ALL)),
         PURPLE_WAVE(wave(new Color("#9000DD"), 30, 20, 100, 255,
                 LEDSection.SHOOTER)),
-        GREEN_WAVE(wave(Color.kGreen, 30, 20, 100, 255,
-                LEDSection.SHOOTER_TOP)),
-        BLUE_WAVE(wave(Color.kBlue, 30, 20, 100, 255,
-                LEDSection.SHOOTER_LEFT)),
-        YELLOW_WAVE(wave(Color.kYellow, 30, 20, 100, 255,
-                LEDSection.ELEVATOR_LEFT)),
-        RED_WAVE(wave(Color.kRed, 30, 20, 100, 255,
-                LEDSection.ELEVATOR_RIGHT)),
         RAINBOW(rainbow(255, 3, LEDSection.ALL)),
-        // CHASE(chase(Color.kPurple, Color.kPurple, 20, 0.5, 100, false,
-        // LEDSection.SHOOTER_RIGHT)),
-        // BREATHE(breathe(Color.kWhite, 3, 0, 255, LEDSection.SHOOTER_RIGHT)),
-        // WAVE(wave(Color.kPurple, 20, 20, 150, 255, LEDSection.SHOOTER_RIGHT)),
         PURPLE_FIRE(
                 fire2012Palette(0.8, 0.4,
                         List.of(Color.kBlack, new Color("#ad3fe8"), new Color("#9000DD"), new Color("#400063")),
@@ -62,11 +65,7 @@ public class LEDs extends SubsystemBase {
                         LEDSection.ELEVATOR_LEFT),
                 fire2012Palette(0.8, 0.4, List.of(Color.kBlack, Color.kRed, Color.kOrange, Color.kWhite),
                         LEDSection.ELEVATOR_RIGHT)),
-        TEST_FIRE(fire2012Palette(0.8, 0.8, List.of(Color.kBlack, Color.kRed, Color.kYellow, Color.kWhite),
-                LEDSection.SHOOTER_RIGHT)),
         NORMAL_FIRE(fire2012(0.8, 0.8, LEDSection.SHOOTER_RIGHT));
-        // FLASHING_RED(flash(Color.kRed, 0.1, LEDSection.SHOOTER_RIGHT)),
-        // FLASHING_ORANGE(flash(Color.kOrange, 1, LEDSection.SHOOTER_RIGHT));
 
         private List<Consumer<AddressableLEDBuffer>> bufferConsumers;
 
@@ -87,16 +86,8 @@ public class LEDs extends SubsystemBase {
         setDefaultCommand(updateStateMachineCommand());
     }
 
-    public Command requestGreenCommand() {
-        return Commands.run(() -> currentStates.add(LEDState.SOLID_GREEN)).ignoringDisable(true);
-    }
-
-    public Command requestBlueCommand() {
-        return Commands.run(() -> currentStates.add(LEDState.SOLID_BLUE)).ignoringDisable(true);
-    }
-
-    public Command requestRedBreatheCommand() {
-        return Commands.run(() -> currentStates.add(LEDState.RED_BREATHE)).ignoringDisable(true);
+    public Command requestStateCommand(LEDState state) {
+        return Commands.run(() -> currentStates.add(state)).ignoringDisable(true);
     }
 
     public Command updateStateMachineCommand() {

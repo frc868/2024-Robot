@@ -255,4 +255,11 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
             initialized = true;
         }).withName("climber.enableInitialized");
     }
+
+    public Command zeroMechanismCommand() {
+        return run(() -> {
+            motor.setVoltage(-1);
+        }).until(() -> motor.getOutputCurrent() > 10)
+                .andThen(resetPositionCommand());
+    }
 }

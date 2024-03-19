@@ -108,6 +108,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
     @Log
     private boolean initialized = false;
 
+    @SuppressWarnings("unused")
     private PositionTracker positionTracker;
 
     public Intake(PositionTracker positionTracker) {
@@ -221,7 +222,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
         return Commands.sequence(
                 runOnce(() -> pidController.reset(getPosition())),
                 runOnce(() -> pidController.setGoal(goalPositionSupplier.get().value)),
-                moveToCurrentGoalCommand().until(pidController::atGoal))
+                moveToCurrentGoalCommand().until(pidController::atGoal)).withTimeout(2)
                 .withName("intake.moveToPosition");
     }
 
@@ -333,7 +334,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
         return Commands.sequence(
                 moveToPositionCommand(() -> IntakePosition.GROUND),
                 moveToCurrentGoalCommand().alongWith(runRollersCommand())
-                        .until(noteInIntakeFromOutsideTrigger),
+                        .until(noteInIntakeFromOutsideTrigger.or(noteInShooterTrigger)),
                 moveToCurrentGoalCommand().alongWith(runRollersHalfCommand())
                         .until(noteInShooterTrigger),
                 moveToCurrentGoalCommand().alongWith(runRollersSlowCommand())
@@ -383,5 +384,14 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
         return Commands.runOnce(() -> {
             initialized = true;
         }).withName("intake.enableInitialized");
+    }
+
+    public Command zeroMechanismCommand() {
+        return run(() -> {
+            leftArmMotor.setVoltage(1);
+            rightArmMotor.setVoltage(1);
+        })
+                .until(() -> (leftArmMotor.getOutputCurrent() > 20) && (rightArmMotor.getOutputCurrent() > 20))
+                .andThen(resetPositionCommand());
     }
 }

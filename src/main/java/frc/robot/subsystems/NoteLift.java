@@ -252,4 +252,11 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
             initialized = true;
         }).withName("shooterTilt.enableInitialized");
     }
+
+    public Command zeroMechanismCommand() {
+        return run(() -> {
+            motor.setVoltage(1);
+        }).until(() -> motor.getOutputCurrent() > 10)
+                .andThen(resetPositionCommand());
+    }
 }

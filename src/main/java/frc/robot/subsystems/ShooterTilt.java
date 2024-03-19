@@ -1,6 +1,5 @@
 package frc.robot.subsystems;
 
-import java.lang.reflect.Field;
 import java.util.function.Supplier;
 
 import com.revrobotics.CANSparkBase.IdleMode;
@@ -88,6 +87,7 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
     private boolean beyondMaxDistance = false;
     @Log
     private boolean initialized = false;
+    @SuppressWarnings("unused")
     private PositionTracker positionTracker;
 
     public ShooterTilt(PositionTracker positionTracker) {
@@ -306,5 +306,12 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
         return Commands.runOnce(() -> {
             initialized = true;
         }).withName("shooterTilt.enableInitialized");
+    }
+
+    public Command zeroMechanismCommand() {
+        return run(() -> {
+            motor.setVoltage(-1);
+        }).until(() -> motor.getOutputCurrent() > 10)
+                .andThen(resetPositionCommand());
     }
 }
