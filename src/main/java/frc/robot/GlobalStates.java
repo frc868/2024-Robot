@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
 public enum GlobalStates {
-    // normal
     INITIALIZED(RobotBase.isReal() ? false : true),
     AT_GOAL_OVERRIDE(false),
     INTER_SUBSYSTEM_SAFETIES_DISABLED(false),

@@ -1,6 +1,8 @@
 package frc.robot;
 
 import com.techhounds.houndutil.houndlib.oi.CommandVirpilJoystick;
+
+import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -15,7 +17,7 @@ import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterTilt;
 
 public class Controls {
-    public static void configureDriverControl(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
+    public static void configureDriverControls(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
             ShooterTilt shooterTilt, Climber climber, NoteLift noteLift) {
         CommandVirpilJoystick joystick = new CommandVirpilJoystick(port);
 
@@ -70,7 +72,7 @@ public class Controls {
                 .whileTrue(climber.climbToBottomCommand().andThen(noteLift.scoreNoteCommand()));
     }
 
-    public static void configureOperatorControl(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
+    public static void configureOperatorControls(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
             ShooterTilt shooterTilt, Climber climber, NoteLift noteLift) {
         CommandXboxController controller = new CommandXboxController(port);
 
@@ -94,10 +96,27 @@ public class Controls {
                 .whileTrue(RobotCommands.homeMechanismsCommand(intake, shooter, shooterTilt, climber, noteLift));
 
         controller.leftStick().toggleOnTrue(drivetrain.playMusicCommand(MusicTrack.IMPERIAL_MARCH));
-
     }
 
-    public static void configureTestingControl(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
+    public static void configureOverridesControls(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
+            ShooterTilt shooterTilt, Climber climber, NoteLift noteLift) {
+        CommandGenericHID panel = new CommandGenericHID(port);
+
+        panel.button(1)
+                .onTrue(GlobalStates.INITIALIZED.enableCommand())
+                .onFalse(GlobalStates.INITIALIZED.disableCommand());
+        panel.button(2)
+                .onTrue(GlobalStates.AT_GOAL_OVERRIDE.enableCommand())
+                .onFalse(GlobalStates.AT_GOAL_OVERRIDE.disableCommand());
+        panel.button(3)
+                .onTrue(GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.enableCommand())
+                .onFalse(GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.disableCommand());
+        panel.button(4)
+                .onTrue(GlobalStates.MECH_LIMITS_DISABLED.enableCommand())
+                .onFalse(GlobalStates.MECH_LIMITS_DISABLED.disableCommand());
+    }
+
+    public static void configureTestingControls(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
             ShooterTilt shooterTilt, Climber climber, NoteLift noteLift) {
         CommandXboxController controller = new CommandXboxController(port);
 

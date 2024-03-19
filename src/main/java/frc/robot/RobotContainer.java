@@ -177,8 +177,9 @@ public class RobotContainer {
     }
 
     private void configureButtonBindings() {
-        Controls.configureDriverControl(0, drivetrain, intake, shooter, shooterTilt, climber, noteLift);
-        Controls.configureOperatorControl(1, drivetrain, intake, shooter, shooterTilt, climber, noteLift);
+        Controls.configureDriverControls(0, drivetrain, intake, shooter, shooterTilt, climber, noteLift);
+        Controls.configureOperatorControls(1, drivetrain, intake, shooter, shooterTilt, climber, noteLift);
+        Controls.configureOverridesControls(2, drivetrain, intake, shooter, shooterTilt, climber, noteLift);
         NTCommands.configureNTCommands(drivetrain, intake, shooter, shooterTilt, climber, noteLift, leds);
     }
 
