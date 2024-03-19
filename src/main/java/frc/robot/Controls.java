@@ -1,8 +1,6 @@
 package frc.robot;
 
 import com.techhounds.houndutil.houndlib.oi.CommandVirpilJoystick;
-import com.techhounds.houndutil.houndlib.subsystems.BaseSwerveDrive.DriveMode;
-
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -17,17 +15,15 @@ import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterTilt;
 
 public class Controls {
-    private static double speedMultiplier = 1.0;
-
     public static void configureDriverControl(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
             ShooterTilt shooterTilt, Climber climber, NoteLift noteLift) {
         CommandVirpilJoystick joystick = new CommandVirpilJoystick(port);
 
         drivetrain.setDefaultCommand(
                 drivetrain.teleopDriveCommand(
-                        () -> -joystick.getY() * speedMultiplier,
-                        () -> -joystick.getX() * speedMultiplier,
-                        () -> -joystick.getTwist() * speedMultiplier));
+                        () -> -joystick.getY(),
+                        () -> -joystick.getX(),
+                        () -> -joystick.getTwist()));
 
         new Trigger(() -> (Math.abs(joystick.getTwist()) > 0.05)).onTrue(drivetrain.disableControlledRotateCommand());
 
@@ -57,7 +53,7 @@ public class Controls {
         joystick.centerTopHatButton().whileTrue(intake.intakeFromSourceCommand())
                 .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
 
-        joystick.redButton().whileTrue(RobotCommands.ampPrepCommand(intake, shooterTilt))
+        joystick.redButton().whileTrue(RobotCommands.ampPrepIntakeCommand(intake, shooterTilt))
                 .onFalse(intake.moveToPositionCommand(() -> IntakePosition.AMP));
 
         joystick.pinkieButton().whileTrue(intake.ampScoreRollersCommand())
@@ -94,7 +90,8 @@ public class Controls {
         controller.povRight()
                 .whileTrue(RobotCommands.moveToHomeCommand(intake, shooter, shooterTilt,
                         climber, noteLift));
-        controller.povLeft().onTrue(GlobalStates.INITIALIZED.enableCommand());
+        controller.povLeft()
+                .whileTrue(RobotCommands.homeMechanismsCommand(intake, shooter, shooterTilt, climber, noteLift));
 
         controller.leftStick().toggleOnTrue(drivetrain.playMusicCommand(MusicTrack.IMPERIAL_MARCH));
 
