@@ -6,17 +6,10 @@ import edu.wpi.first.wpilibj2.command.Commands;
 
 public enum GlobalStates {
     // normal
-    INITIALIZED(RobotBase.isReal() ? false : true);
-
-    // coast
-    // DRIVETRAIN_COAST(false),
-
-    // MANUAL_MECH_CONTROL_MODE(false),
-    // ABSOLUTE_ENCODERS(false),
-    // SAFETIES_DISABLE(true),
-    // SPEED_LIMITS_DISABLE(true),
-    // MECH_LIMITS_DISABLE(true),
-    // DRIVER_EMERGENCY_MODE(false);
+    INITIALIZED(RobotBase.isReal() ? false : true),
+    AT_GOAL_OVERRIDE(false),
+    INTER_SUBSYSTEM_SAFETIES_DISABLED(false),
+    MECH_LIMITS_DISABLED(false);
 
     private boolean isEnabled;
 

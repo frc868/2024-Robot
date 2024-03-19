@@ -150,6 +150,12 @@ public class RobotCommands {
             Climber climber, NoteLift noteLift) {
         return Commands.sequence(
                 Commands.parallel(
+                        GlobalStates.INITIALIZED.disableCommand(),
+                        intake.setInitializedCommand(false),
+                        shooterTilt.setInitializedCommand(false),
+                        climber.setInitializedCommand(false),
+                        noteLift.setInitializedCommand(false)),
+                Commands.parallel(
                         shooterTilt.zeroMechanismCommand(),
                         intake.zeroMechanismCommand()),
                 Commands.parallel(

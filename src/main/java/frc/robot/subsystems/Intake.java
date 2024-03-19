@@ -195,7 +195,8 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
     @Override
     public void setVoltage(double voltage) {
         voltage = MathUtil.clamp(voltage, -12, 12);
-        voltage = Utils.applySoftStops(voltage, getPosition(), MIN_ANGLE_RADIANS, MAX_ANGLE_RADIANS - 0.03);
+        if (!GlobalStates.MECH_LIMITS_DISABLED.enabled())
+            voltage = Utils.applySoftStops(voltage, getPosition(), MIN_ANGLE_RADIANS, MAX_ANGLE_RADIANS - 0.03);
 
         if (!GlobalStates.INITIALIZED.enabled()) {
             voltage = 0.0;
@@ -380,10 +381,10 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
         return initialized;
     }
 
-    public Command enableInitializedCommand() {
+    public Command setInitializedCommand(boolean initialized) {
         return Commands.runOnce(() -> {
-            initialized = true;
-        }).withName("intake.enableInitialized");
+            this.initialized = initialized;
+        }).withName("intake.setInitialized");
     }
 
     public Command zeroMechanismCommand() {

@@ -165,12 +165,14 @@ public class RobotContainer {
                 .onTrue(leds.requestStateCommand(LEDState.SOLID_GREEN).withTimeout(1));
         intake.noteInShooterTrigger.onTrue(leds.requestStateCommand(LEDState.SOLID_BLUE).withTimeout(1));
 
+        leds.requestStateCommand(LEDState.INITIALIZATION_BLACK_BACKGROUND).until(GlobalStates.INITIALIZED::enabled)
+                .schedule();
         leds.requestStateCommand(LEDState.INTAKE_UNINITIALIZED).until(intake::getInitialized).schedule();
         leds.requestStateCommand(LEDState.SHOOTER_TILT_UNINITIALIZED).until(shooterTilt::getInitialized).schedule();
         leds.requestStateCommand(LEDState.CLIMBER_UNINITIALIZED).until(climber::getInitialized).schedule();
         leds.requestStateCommand(LEDState.NOTE_LIFT_UNINITIALIZED).until(noteLift::getInitialized).schedule();
 
-        new Trigger(() -> GlobalStates.INITIALIZED.enabled())
+        new Trigger(GlobalStates.INITIALIZED::enabled)
                 .onTrue(leds.requestStateCommand(LEDState.INITIALIZED_CONFIRM).withTimeout(2));
     }
 
@@ -183,10 +185,6 @@ public class RobotContainer {
     private void configureAuto() {
         AutoManager.getInstance().addRoutine(Autos.autoTest(drivetrain, intake,
                 shooter, shooterTilt));
-        // AutoManager.getInstance().addRoutine(Autos.autoA123(drivetrain, intake,
-        // shooter, shooterTilt));
-        // AutoManager.getInstance().addRoutine(Autos.autoBA123(drivetrain, intake,
-        // shooter, shooterTilt));
         AutoManager.getInstance().addRoutine(Autos.auto213(drivetrain, intake,
                 shooter, shooterTilt));
         AutoManager.getInstance().addRoutine(Autos.autoCBA(drivetrain, intake,
@@ -195,10 +193,6 @@ public class RobotContainer {
                 shooter, shooterTilt));
         AutoManager.getInstance().addRoutine(Autos.autoCBA12(drivetrain, intake,
                 shooter, shooterTilt));
-        // AutoManager.getInstance().addRoutine(Autos.autoBAC(drivetrain, intake,
-        // shooter, shooterTilt));
-        // AutoManager.getInstance().addRoutine(Autos.auto1234(drivetrain, intake,
-        // shooter, shooterTilt));
     }
 
     @Log

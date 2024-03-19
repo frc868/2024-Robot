@@ -140,17 +140,20 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
     @Override
     public void setVoltage(double voltage) {
         voltage = MathUtil.clamp(voltage, -12, 12);
-        voltage = Utils.applySoftStops(voltage, getPosition(), MIN_HEIGHT_METERS,
-                MAX_HEIGHT_METERS + 0.03); // allows note lift to unspool slightly
+        if (!GlobalStates.MECH_LIMITS_DISABLED.enabled())
+            voltage = Utils.applySoftStops(voltage, getPosition(), MIN_HEIGHT_METERS,
+                    MAX_HEIGHT_METERS + 0.03); // allows note lift to unspool slightly
 
-        if (getPosition() - positionTracker.getClimberPosition() < -0.09 && voltage < 0) {
-            voltage = 0;
-        }
-        if (getPosition() < 0.233 && positionTracker.getShooterTiltAngle() < 1.11 && voltage > 0) {
-            voltage = 0;
-        }
-        if (getPosition() > 0.233 && positionTracker.getShooterTiltAngle() < 1.11 && voltage < 0) {
-            voltage = 0;
+        if (!GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.enabled()) {
+            if (getPosition() - positionTracker.getClimberPosition() < -0.09 && voltage < 0) {
+                voltage = 0;
+            }
+            if (getPosition() < 0.233 && positionTracker.getShooterTiltAngle() < 1.11 && voltage > 0) {
+                voltage = 0;
+            }
+            if (getPosition() > 0.233 && positionTracker.getShooterTiltAngle() < 1.11 && voltage < 0) {
+                voltage = 0;
+            }
         }
 
         if (!GlobalStates.INITIALIZED.enabled()) {
@@ -247,10 +250,10 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
         return initialized;
     }
 
-    public Command enableInitializedCommand() {
+    public Command setInitializedCommand(boolean initialized) {
         return Commands.runOnce(() -> {
-            initialized = true;
-        }).withName("shooterTilt.enableInitialized");
+            this.initialized = initialized;
+        }).withName("noteLift.setInitialized");
     }
 
     public Command zeroMechanismCommand() {

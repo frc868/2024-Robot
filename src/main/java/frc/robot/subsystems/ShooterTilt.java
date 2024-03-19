@@ -179,7 +179,8 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
     @Override
     public void setVoltage(double voltage) {
         voltage = MathUtil.clamp(voltage, -12, 12);
-        voltage = Utils.applySoftStops(voltage, getPosition(), MIN_HEIGHT_METERS, MAX_HEIGHT_METERS);
+        if (!GlobalStates.MECH_LIMITS_DISABLED.enabled())
+            voltage = Utils.applySoftStops(voltage, getPosition(), MIN_HEIGHT_METERS, MAX_HEIGHT_METERS);
 
         if (!GlobalStates.INITIALIZED.enabled()) {
             voltage = 0.0;
@@ -302,10 +303,10 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
         return initialized;
     }
 
-    public Command enableInitializedCommand() {
+    public Command setInitializedCommand(boolean initialized) {
         return Commands.runOnce(() -> {
-            initialized = true;
-        }).withName("shooterTilt.enableInitialized");
+            this.initialized = initialized;
+        }).withName("shooterTilt.setInitialized");
     }
 
     public Command zeroMechanismCommand() {
