@@ -29,6 +29,7 @@ import frc.robot.subsystems.NoteLift;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterTilt;
 import frc.robot.subsystems.Vision;
+import frc.robot.subsystems.LEDs.LEDState;
 import frc.robot.utils.TrajectoryCalcs;
 
 import java.util.ArrayList;
@@ -161,16 +162,21 @@ public class RobotContainer {
         }).onTrue(GlobalStates.INITIALIZED.enableCommand());
 
         intake.noteInIntakeFromOutsideTrigger.debounce(0.15)
-                .onTrue(leds.requestGreenCommand().withTimeout(1));
-        intake.noteInShooterTrigger.onTrue(leds.requestBlueCommand().withTimeout(1));
+                .onTrue(leds.requestStateCommand(LEDState.SOLID_GREEN).withTimeout(1));
+        intake.noteInShooterTrigger.onTrue(leds.requestStateCommand(LEDState.SOLID_BLUE).withTimeout(1));
 
-        leds.requestRedBreatheCommand().until(() -> GlobalStates.INITIALIZED.enabled()).schedule();
+        leds.requestStateCommand(LEDState.INTAKE_UNINITIALIZED).until(intake::getInitialized).schedule();
+        leds.requestStateCommand(LEDState.SHOOTER_TILT_UNINITIALIZED).until(shooterTilt::getInitialized).schedule();
+        leds.requestStateCommand(LEDState.CLIMBER_UNINITIALIZED).until(climber::getInitialized).schedule();
+        leds.requestStateCommand(LEDState.NOTE_LIFT_UNINITIALIZED).until(noteLift::getInitialized).schedule();
+
+        new Trigger(() -> GlobalStates.INITIALIZED.enabled())
+                .onTrue(leds.requestStateCommand(LEDState.INITIALIZED_CONFIRM).withTimeout(2));
     }
 
     private void configureButtonBindings() {
         Controls.configureDriverControl(0, drivetrain, intake, shooter, shooterTilt, climber, noteLift);
         Controls.configureOperatorControl(1, drivetrain, intake, shooter, shooterTilt, climber, noteLift);
-        Controls.configureTestingControl(2, drivetrain, intake, shooter, shooterTilt, climber, noteLift);
         NTCommands.configureNTCommands(drivetrain, intake, shooter, shooterTilt, climber, noteLift, leds);
     }
 
