@@ -1038,6 +1038,10 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
             yJoystick = Math.copySign(Math.pow(yJoystick, JOYSTICK_CURVE_EXP), yJoystick);
             yJoystick = ySpeedLimiter.calculate(yJoystick);
             yJoystick *= SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND / 2.0;
+            if (DriverStation.getAlliance().isPresent() &&
+                    DriverStation.getAlliance().get() == Alliance.Red) {
+                yJoystick *= -1;
+            }
 
             double lineDirX = Math.cos(targettedStagePose.getRotation().getRadians());
             double lineDirY = Math.sin(targettedStagePose.getRotation().getRadians());
