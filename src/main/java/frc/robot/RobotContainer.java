@@ -4,6 +4,8 @@ import com.ctre.phoenix6.SignalLogger;
 import com.techhounds.houndutil.houndauto.AutoManager;
 import com.techhounds.houndutil.houndauto.Reflector;
 import com.techhounds.houndutil.houndlib.SparkConfigurator;
+import com.techhounds.houndutil.houndlog.LogGroup;
+import com.techhounds.houndutil.houndlog.LogProfileBuilder;
 import com.techhounds.houndutil.houndlog.LoggingManager;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
 import com.techhounds.houndutil.houndlog.interfaces.SendableLog;
@@ -137,7 +139,8 @@ public class RobotContainer {
 
         LoggingManager.getInstance().registerRobotContainer(this);
         LoggingManager.getInstance().registerClass(LoggingManager.class, "houndlog", new ArrayList<>());
-
+        LoggingManager.getInstance()
+                .addGroup(new LogGroup("robotController", LogProfileBuilder.buildRobotControllerLogItems()));
         LiveWindow.disableAllTelemetry(); // livewindow is basically deprecated. using houndlog instead.
 
         if (RobotBase.isSimulation()) {
