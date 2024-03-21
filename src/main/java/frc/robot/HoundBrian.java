@@ -51,22 +51,22 @@ public class HoundBrian {
                 // .and(new Trigger(intakeButton::get).negate().debounce(2,
                 // DebounceType.kFalling))
                 .and(DriverStation::isDisabled)
-                .onTrue(intake.resetPositionCommand());
+                .onTrue(intake.resetPositionCommand().ignoringDisable(true));
         new Trigger(shooterTiltButton::get).negate()
                 // .and(new Trigger(shooterTiltButton::get).negate().debounce(2,
                 // DebounceType.kFalling))
                 .and(DriverStation::isDisabled)
-                .onTrue(shooterTilt.resetPositionCommand());
+                .onTrue(shooterTilt.resetPositionCommand().ignoringDisable(true));
         new Trigger(climberButton::get).negate()
                 // .and(new Trigger(climberButton::get).negate().debounce(2,
                 // DebounceType.kFalling))
                 .and(DriverStation::isDisabled)
-                .onTrue(climber.resetPositionCommand());
+                .onTrue(climber.resetPositionCommand().ignoringDisable(true));
         new Trigger(noteLiftButton::get).negate()
                 // .and(new Trigger(noteLiftButton::get).negate().debounce(2,
                 // DebounceType.kFalling))
                 .and(DriverStation::isDisabled)
-                .onTrue(noteLift.resetPositionCommand());
+                .onTrue(noteLift.resetPositionCommand().ignoringDisable(true));
 
         // new Trigger(intakeButton::get).debounce(3, DebounceType.kBoth)
         // .and(DriverStation::isDisabled)
