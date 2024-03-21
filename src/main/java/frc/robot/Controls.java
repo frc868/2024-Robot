@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.Constants.Drivetrain.MusicTrack;
 import frc.robot.Constants.Intake.IntakePosition;
 import frc.robot.Constants.ShooterTilt.ShooterTiltPosition;
 import frc.robot.subsystems.Climber;
@@ -95,8 +94,6 @@ public class Controls {
                         climber, noteLift));
         controller.povLeft()
                 .whileTrue(RobotCommands.homeMechanismsCommand(intake, shooter, shooterTilt, climber, noteLift));
-
-        controller.leftStick().toggleOnTrue(drivetrain.playMusicCommand(MusicTrack.IMPERIAL_MARCH));
     }
 
     public static void configureOverridesControls(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
