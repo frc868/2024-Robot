@@ -72,10 +72,14 @@ public class Constants {
         public static final boolean STEER_CANCODERS_INVERTED = RobotBase.isReal() ? false : true;
 
         // 2/17/24
-        public static final double FRONT_LEFT_OFFSET = 0.457763671875;
-        public static final double FRONT_RIGHT_OFFSET = -0.183349609375;
-        public static final double BACK_LEFT_OFFSET = 0.24267578125;
-        public static final double BACK_RIGHT_OFFSET = 0.48583984375;
+        // public static final double FRONT_LEFT_OFFSET = 0.457763671875;
+        // public static final double FRONT_RIGHT_OFFSET = -0.183349609375;
+        // public static final double BACK_LEFT_OFFSET = 0.24267578125;
+        // public static final double BACK_RIGHT_OFFSET = 0.48583984375;
+        public static final double FRONT_LEFT_OFFSET = 0.4521484375;
+        public static final double FRONT_RIGHT_OFFSET = -0.179443359375;
+        public static final double BACK_LEFT_OFFSET = 0.242919921875;
+        public static final double BACK_RIGHT_OFFSET = 0.498046875;
 
         /** Distance between left and right wheels. */
         public static final double TRACK_WIDTH_METERS = 0.527;
@@ -543,7 +547,7 @@ public class Constants {
         public static final Matrix<N3, N1> SINGLE_TAG_STD_DEVS = VecBuilder.fill(Double.MAX_VALUE,
                 Double.MAX_VALUE,
                 Double.MAX_VALUE);
-        public static final Matrix<N3, N1> MULTI_TAG_STD_DEVS = VecBuilder.fill(0.1, 0.1, 1);
+        public static final Matrix<N3, N1> MULTI_TAG_STD_DEVS = VecBuilder.fill(0.1, 0.1, Double.MAX_VALUE);
 
         public static final PhotonCameraConstants CAMERA_CONSTANTS = new PhotonCameraConstants();
         static {
