@@ -156,7 +156,7 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
             }
         }
 
-        if (!GlobalStates.INITIALIZED.enabled()) {
+        if (!GlobalStates.INITIALIZED.enabled() && !GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.enabled()) {
             voltage = 0.0;
         }
         motor.setVoltage(voltage);

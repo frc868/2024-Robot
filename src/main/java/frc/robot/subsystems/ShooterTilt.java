@@ -31,6 +31,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -182,7 +183,7 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
         if (!GlobalStates.MECH_LIMITS_DISABLED.enabled())
             voltage = Utils.applySoftStops(voltage, getPosition(), MIN_HEIGHT_METERS, MAX_HEIGHT_METERS);
 
-        if (!GlobalStates.INITIALIZED.enabled()) {
+        if (!GlobalStates.INITIALIZED.enabled() && !GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.enabled()) {
             voltage = 0.0;
         }
         motor.setVoltage(voltage);
@@ -314,7 +315,7 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
     public Command zeroMechanismCommand() {
         return run(() -> {
             motor.setVoltage(-1);
-        }).until(() -> motor.getOutputCurrent() > 10)
+        }).until(new Trigger(() -> motor.getOutputCurrent() > 20).debounce(0.5))
                 .andThen(resetPositionCommand());
     }
 }

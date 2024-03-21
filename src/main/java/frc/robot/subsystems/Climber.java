@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.Climber.ClimberPosition;
 import frc.robot.GlobalStates;
 import frc.robot.PositionTracker;
@@ -157,7 +158,7 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
             }
         }
 
-        if (!GlobalStates.INITIALIZED.enabled()) {
+        if (!GlobalStates.INITIALIZED.enabled() && !GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.enabled()) {
             voltage = 0;
         }
         motor.setVoltage(voltage);
@@ -264,7 +265,7 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
     public Command zeroMechanismCommand() {
         return run(() -> {
             motor.setVoltage(-1);
-        }).until(() -> motor.getOutputCurrent() > 10)
+        }).until(new Trigger(() -> motor.getOutputCurrent() > 20).debounce(1))
                 .andThen(resetPositionCommand());
     }
 

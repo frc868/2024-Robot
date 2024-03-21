@@ -198,7 +198,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
         if (!GlobalStates.MECH_LIMITS_DISABLED.enabled())
             voltage = Utils.applySoftStops(voltage, getPosition(), MIN_ANGLE_RADIANS, MAX_ANGLE_RADIANS - 0.03);
 
-        if (!GlobalStates.INITIALIZED.enabled()) {
+        if (!GlobalStates.INITIALIZED.enabled() && !GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.enabled()) {
             voltage = 0.0;
         }
         leftArmMotor.setVoltage(voltage);
