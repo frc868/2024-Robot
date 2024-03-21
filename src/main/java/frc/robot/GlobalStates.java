@@ -8,7 +8,9 @@ public enum GlobalStates {
     INITIALIZED(RobotBase.isReal() ? false : true),
     AT_GOAL_OVERRIDE(false),
     INTER_SUBSYSTEM_SAFETIES_DISABLED(false),
-    MECH_LIMITS_DISABLED(false);
+    MECH_LIMITS_DISABLED(false),
+    BEAMS_BYPASSED(false),
+    DRIVETRAIN_TARGETTING_DISABLED(false);
 
     private boolean isEnabled;
 
