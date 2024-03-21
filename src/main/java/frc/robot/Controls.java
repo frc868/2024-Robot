@@ -11,13 +11,14 @@ import frc.robot.Constants.ShooterTilt.ShooterTiltPosition;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.NoteLift;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterTilt;
 
 public class Controls {
     public static void configureDriverControls(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
-            ShooterTilt shooterTilt, Climber climber, NoteLift noteLift) {
+            ShooterTilt shooterTilt, Climber climber, NoteLift noteLift, LEDs leds) {
         CommandVirpilJoystick joystick = new CommandVirpilJoystick(port);
 
         drivetrain.setDefaultCommand(
@@ -62,7 +63,7 @@ public class Controls {
 
         joystick.bottomHatButton().or(joystick.bottomHatLeft())
                 .onTrue(RobotCommands.intakeToNoteLift(shooter, shooterTilt,
-                        noteLift));
+                        noteLift, leds));
         joystick.flipTriggerIn()
                 .whileTrue(RobotCommands.prepareClimb(() -> -joystick.getY(), () -> -joystick.getX(),
                         () -> -joystick.getTwist(), drivetrain,

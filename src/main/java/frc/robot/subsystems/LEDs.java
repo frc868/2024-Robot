@@ -49,6 +49,7 @@ public class LEDs extends SubsystemBase {
         INITIALIZATION_BLACK_BACKGROUND(solid(Color.kBlack, LEDSection.ALL)),
         INITIALIZED_CONFIRM(breathe(Color.kGreen, 2, 0, 255, LEDSection.ALL)),
 
+        FLASHING_WHITE(flash(Color.kWhite, 0.5, LEDSection.ALL)),
         SOLID_BLUE(solid(Color.kBlue, LEDSection.ALL)),
         SOLID_GREEN(solid(Color.kGreen, LEDSection.ALL)),
         PURPLE_WAVE(wave(new Color("#9000DD"), 30, 20, 100, 255,

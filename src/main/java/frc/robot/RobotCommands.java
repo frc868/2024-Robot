@@ -13,9 +13,11 @@ import frc.robot.Constants.ShooterTilt.ShooterTiltPosition;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.NoteLift;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterTilt;
+import frc.robot.subsystems.LEDs.LEDState;
 
 public class RobotCommands {
     public static Command targetSpeakerCommand(Drivetrain drivetrain, Shooter shooter, ShooterTilt shooterTilt) {
@@ -117,12 +119,13 @@ public class RobotCommands {
                 .withName("RobotCommands.shootOnTheMove");
     }
 
-    public static Command intakeToNoteLift(Shooter shooter, ShooterTilt shooterTilt, NoteLift noteLift) {
+    public static Command intakeToNoteLift(Shooter shooter, ShooterTilt shooterTilt, NoteLift noteLift, LEDs leds) {
         // proxying to allow shooterTilt to hold position while note lift moves down
         return Commands.sequence(
                 new ScheduleCommand(shooter.stopCommand()),
                 shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.CLIMB).asProxy(),
-                noteLift.moveToPositionCommand(() -> NoteLiftPosition.INTAKE).asProxy());
+                noteLift.moveToPositionCommand(() -> NoteLiftPosition.INTAKE).asProxy(),
+                leds.requestStateCommand(LEDState.FLASHING_WHITE));
     }
 
     public static Command prepareClimb(DoubleSupplier xSpeedSupplier, DoubleSupplier ySpeedSupplier,
