@@ -205,7 +205,7 @@ public class Autos {
 
         return new AutoRoutine("213", command,
                 List.of(pathStartTo2, path2ToScore, pathScoreTo3, path3ToScore, pathScoreTo1, path1ToScore),
-                new Pose2d(startingPose.getX(), startingPose.getY(), new Rotation2d(-2.407577685478101)));
+                new Pose2d(startingPose.getX(), startingPose.getY(), new Rotation2d(-2.297815857388982)));
     }
 
     public static AutoRoutine auto453(Drivetrain drivetrain, Intake intake,

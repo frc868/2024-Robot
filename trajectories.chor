@@ -18,7 +18,7 @@
                 {
                     "x": 1.327452540397644,
                     "y": 6.640275001525879,
-                    "heading": -2.407577685478101,
+                    "heading": -2.297815857388982,
                     "isInitialGuess": false,
                     "translationConstrained": true,
                     "headingConstrained": true,
@@ -13743,7 +13743,7 @@
             "usesDefaultFieldObstacles": true,
             "circleObstacles": [],
             "eventMarkers": [],
-            "isTrajectoryStale": false
+            "isTrajectoryStale": true
         }
     },
     "splitTrajectoriesAtStopPoints": true,
