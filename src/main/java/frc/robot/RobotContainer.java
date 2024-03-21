@@ -178,7 +178,7 @@ public class RobotContainer {
         leds.requestStateCommand(LEDState.NOTE_LIFT_UNINITIALIZED).until(noteLift::getInitialized).schedule();
 
         new Trigger(GlobalStates.INITIALIZED::enabled)
-                .onTrue(leds.requestStateCommand(LEDState.INITIALIZED_CONFIRM).withTimeout(2));
+                .onTrue(leds.requestStateCommand(LEDState.INITIALIZED_CONFIRM).withTimeout(3));
     }
 
     private void configureButtonBindings() {
