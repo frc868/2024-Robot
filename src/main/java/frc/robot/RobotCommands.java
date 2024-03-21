@@ -2,8 +2,7 @@ package frc.robot;
 
 import static frc.robot.Constants.Shooter.BASE_SHOOTING_RPS;
 
-import java.util.function.Supplier;
-
+import java.util.function.DoubleSupplier;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
@@ -21,7 +20,9 @@ import frc.robot.subsystems.ShooterTilt;
 public class RobotCommands {
     public static Command targetSpeakerCommand(Drivetrain drivetrain, Shooter shooter, ShooterTilt shooterTilt) {
         return Commands.parallel(
-                drivetrain.targetSpeakerCommand(),
+                drivetrain.targetSpeakerCommand()
+                        .unless(GlobalStates.DRIVETRAIN_TARGETTING_DISABLED::enabled)
+                        .until(GlobalStates.DRIVETRAIN_TARGETTING_DISABLED::enabled),
                 shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
                 shooter.targetSpeakerCommand(drivetrain::getPose).asProxy()).withName("RobotCommands.targetSpeaker");
     }
@@ -64,7 +65,9 @@ public class RobotCommands {
     public static Command targetSpeakerOnTheMoveCommand(Drivetrain drivetrain, Shooter shooter,
             ShooterTilt shooterTilt) {
         return Commands.parallel(
-                drivetrain.targetSpeakerCommand(drivetrain::calculateEffectiveTargetLocation),
+                drivetrain.targetSpeakerCommand(drivetrain::calculateEffectiveTargetLocation)
+                        .unless(GlobalStates.DRIVETRAIN_TARGETTING_DISABLED::enabled)
+                        .until(GlobalStates.DRIVETRAIN_TARGETTING_DISABLED::enabled),
                 shooterTilt.targetSpeakerCommand(drivetrain::getPose,
                         drivetrain::calculateEffectiveTargetLocation).asProxy(),
                 shooter.targetSpeakerCommand(drivetrain::getPose, drivetrain::calculateEffectiveTargetLocation)
@@ -83,7 +86,19 @@ public class RobotCommands {
         return Commands.deadline(
                 Commands.waitUntil(() -> shooter.atGoal() && shooterTilt.atGoal())
                         .andThen(intake.runRollersCommand().withTimeout(0.5)),
-                // drivetrain.targetSpeakerCommand(),
+                drivetrain.targetSpeakerCommand()
+                        .unless(GlobalStates.DRIVETRAIN_TARGETTING_DISABLED::enabled)
+                        .until(GlobalStates.DRIVETRAIN_TARGETTING_DISABLED::enabled),
+                shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
+                shooter.targetSpeakerCommand(drivetrain::getPose).asProxy())
+                .withName("RobotCommands.shoot");
+    }
+
+    public static Command shootAutoCommand(Drivetrain drivetrain, Intake intake, Shooter shooter,
+            ShooterTilt shooterTilt) {
+        return Commands.deadline(
+                Commands.waitUntil(() -> shooter.atGoal() && shooterTilt.atGoal())
+                        .andThen(intake.runRollersCommand().withTimeout(0.5)),
                 shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
                 shooter.targetSpeakerCommand(drivetrain::getPose).asProxy())
                 .withName("RobotCommands.shoot");
@@ -110,12 +125,16 @@ public class RobotCommands {
                 noteLift.moveToPositionCommand(() -> NoteLiftPosition.INTAKE).asProxy());
     }
 
-    public static Command prepareClimb(Supplier<Double> xSpeedSupplier, Supplier<Double> ySpeedSupplier,
+    public static Command prepareClimb(DoubleSupplier xSpeedSupplier, DoubleSupplier ySpeedSupplier,
+            DoubleSupplier thetaSpeedSupplier,
             Drivetrain drivetrain, Intake intake, Shooter shooter, ShooterTilt shooterTilt, Climber climber,
             NoteLift noteLift) {
         return Commands.parallel(
                 new ScheduleCommand(shooter.stopCommand()),
-                drivetrain.targetStageCommand(xSpeedSupplier, ySpeedSupplier),
+                drivetrain.targetStageCommand(xSpeedSupplier, ySpeedSupplier)
+                        .unless(GlobalStates.DRIVETRAIN_TARGETTING_DISABLED::enabled)
+                        .until(GlobalStates.DRIVETRAIN_TARGETTING_DISABLED::enabled)
+                        .andThen(drivetrain.teleopDriveCommand(xSpeedSupplier, ySpeedSupplier, thetaSpeedSupplier)),
                 shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.CLIMB).asProxy(),
                 intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
                 noteLift.moveToPositionCommand(() -> NoteLiftPosition.CLIMB_PREP).asProxy(),

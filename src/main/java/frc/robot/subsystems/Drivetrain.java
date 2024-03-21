@@ -981,8 +981,8 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
         });
     }
 
-    public Command targetStageCommand(Supplier<Double> xJoystickSupplier,
-            Supplier<Double> yJoystickSupplier) {
+    public Command targetStageCommand(DoubleSupplier xJoystickSupplier,
+            DoubleSupplier yJoystickSupplier) {
         SlewRateLimiter xSpeedLimiter = new SlewRateLimiter(JOYSTICK_INPUT_RATE_LIMIT);
         SlewRateLimiter ySpeedLimiter = new SlewRateLimiter(JOYSTICK_INPUT_RATE_LIMIT);
 
@@ -1010,7 +1010,6 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
             targettedStagePose = currentPose.nearest(stagePoses);
         }).andThen(run(() -> {
-
             double cosTheta = targettedStagePose.getRotation().getCos();
             double sinTheta = targettedStagePose.getRotation().getSin();
 
@@ -1023,7 +1022,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
             double ySpeedRelStage = yPidController.calculate(distance, 0.0);
 
-            double xJoystick = xJoystickSupplier.get();
+            double xJoystick = xJoystickSupplier.getAsDouble();
             xJoystick = MathUtil.applyDeadband(xJoystick, JOYSTICK_INPUT_DEADBAND);
             xJoystick = Math.copySign(Math.pow(xJoystick, JOYSTICK_CURVE_EXP), xJoystick);
             xJoystick = xSpeedLimiter.calculate(xJoystick);
@@ -1033,7 +1032,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
                 xJoystick *= -1;
             }
 
-            double yJoystick = yJoystickSupplier.get();
+            double yJoystick = yJoystickSupplier.getAsDouble();
             yJoystick = MathUtil.applyDeadband(yJoystick, JOYSTICK_INPUT_DEADBAND);
             yJoystick = Math.copySign(Math.pow(yJoystick, JOYSTICK_CURVE_EXP), yJoystick);
             yJoystick = ySpeedLimiter.calculate(yJoystick);

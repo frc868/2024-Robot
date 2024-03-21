@@ -150,7 +150,7 @@ public class Autos {
         Pose2d startingPose = pathStartTo2.getPreviewStartingHolonomicPose();
 
         Command command = Commands.sequence(
-                RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
+                RobotCommands.shootAutoCommand(drivetrain, intake, shooter, shooterTilt),
 
                 drivetrain.followPathCommand(pathStartTo2)
                         .deadlineWith(
@@ -220,7 +220,7 @@ public class Autos {
         Pose2d startingPose = pathStartTo4.getPreviewStartingHolonomicPose();
 
         Command command = Commands.sequence(
-                RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt),
+                RobotCommands.shootAutoCommand(drivetrain, intake, shooter, shooterTilt),
 
                 drivetrain.followPathCommand(pathStartTo4)
                         .deadlineWith(

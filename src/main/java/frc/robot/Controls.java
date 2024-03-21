@@ -65,7 +65,8 @@ public class Controls {
                 .onTrue(RobotCommands.intakeToNoteLift(shooter, shooterTilt,
                         noteLift));
         joystick.flipTriggerIn()
-                .whileTrue(RobotCommands.prepareClimb(() -> -joystick.getY(), () -> -joystick.getX(), drivetrain,
+                .whileTrue(RobotCommands.prepareClimb(() -> -joystick.getY(), () -> -joystick.getX(),
+                        () -> -joystick.getTwist(), drivetrain,
                         intake, shooter,
                         shooterTilt, climber, noteLift));
         joystick.flipTriggerIn().and(joystick.triggerSoftPress().or(joystick.triggerHardPress()))
