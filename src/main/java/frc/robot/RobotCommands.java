@@ -172,19 +172,10 @@ public class RobotCommands {
             Climber climber, NoteLift noteLift) {
         return Commands.sequence(
                 Commands.parallel(
-                        GlobalStates.INITIALIZED.disableCommand(),
-                        intake.setInitializedCommand(false),
                         shooterTilt.setInitializedCommand(false),
-                        climber.setInitializedCommand(false),
-                        noteLift.setInitializedCommand(false)),
-                Commands.parallel(
-                        shooterTilt.zeroMechanismCommand(),
-                        intake.zeroMechanismCommand()),
-                Commands.parallel(
-                        shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.CLIMB),
-                        intake.moveToPositionCommand(() -> IntakePosition.STOW)),
-                Commands.parallel(
-                        climber.zeroMechanismCommand(),
-                        noteLift.zeroMechanismCommand()));
+                        climber.setInitializedCommand(false)),
+                shooterTilt.zeroMechanismCommand());
+        // Commands.parallel(
+        // climber.zeroMechanismCommand()));
     }
 }
