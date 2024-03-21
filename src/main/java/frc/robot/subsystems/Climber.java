@@ -250,6 +250,7 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
                 .andThen(Commands.runOnce(() -> pidController.setGoal(getPosition())));
     }
 
+    @Log
     public boolean getInitialized() {
         return initialized;
     }
