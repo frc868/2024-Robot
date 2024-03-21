@@ -102,17 +102,20 @@ public class Controls {
         CommandGenericHID panel = new CommandGenericHID(port);
 
         panel.button(1)
-                .onTrue(GlobalStates.INITIALIZED.enableCommand())
-                .onFalse(GlobalStates.INITIALIZED.disableCommand());
-        panel.button(2)
-                .onTrue(GlobalStates.AT_GOAL_OVERRIDE.enableCommand())
-                .onFalse(GlobalStates.AT_GOAL_OVERRIDE.disableCommand());
-        panel.button(3)
                 .onTrue(GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.enableCommand())
                 .onFalse(GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.disableCommand());
-        panel.button(4)
+        panel.button(2)
                 .onTrue(GlobalStates.MECH_LIMITS_DISABLED.enableCommand())
                 .onFalse(GlobalStates.MECH_LIMITS_DISABLED.disableCommand());
+        panel.button(3)
+                .onTrue(GlobalStates.INITIALIZED.enableCommand())
+                .onFalse(GlobalStates.INITIALIZED.disableCommand());
+        panel.button(4)
+                .onTrue(GlobalStates.AT_GOAL_OVERRIDE.enableCommand())
+                .onFalse(GlobalStates.AT_GOAL_OVERRIDE.disableCommand());
+        panel.button(5)
+                .onTrue(GlobalStates.DRIVETRAIN_TARGETTING_DISABLED.enableCommand())
+                .onFalse(GlobalStates.DRIVETRAIN_TARGETTING_DISABLED.disableCommand());
     }
 
     public static void configureTestingControls(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
