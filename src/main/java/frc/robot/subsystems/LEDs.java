@@ -44,7 +44,8 @@ public class LEDs extends SubsystemBase {
                 breathe(Color.kRed, 3, 0, 255, LEDSection.SHOOTER_RIGHT_BOTTOM)),
         SHOOTER_TILT_UNINITIALIZED(
                 breathe(Color.kRed, 3, 0, 255, LEDSection.SHOOTER_LEFT_TOP),
-                breathe(Color.kRed, 3, 0, 255, LEDSection.SHOOTER_RIGHT_TOP),
+                breathe(Color.kRed, 3, 0, 255, LEDSection.SHOOTER_RIGHT_TOP)),
+        DRIVETRAIN_GYRO_UNINITIALIZED(
                 breathe(Color.kRed, 3, 0, 255, LEDSection.SHOOTER_TOP)),
         INITIALIZATION_BLACK_BACKGROUND(solid(Color.kBlack, LEDSection.ALL)),
         INITIALIZED_CONFIRM(breathe(Color.kGreen, 2, 0, 255, LEDSection.ALL)),

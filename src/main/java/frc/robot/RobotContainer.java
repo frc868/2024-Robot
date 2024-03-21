@@ -160,7 +160,8 @@ public class RobotContainer {
                         climber.resetControllersCommand()).withName("resetControllers"));
 
         new Trigger(() -> {
-            return intake.getInitialized()
+            return drivetrain.getInitialized()
+                    && intake.getInitialized()
                     && shooterTilt.getInitialized()
                     && climber.getInitialized()
                     && noteLift.getInitialized();
@@ -172,6 +173,7 @@ public class RobotContainer {
 
         leds.requestStateCommand(LEDState.INITIALIZATION_BLACK_BACKGROUND).until(GlobalStates.INITIALIZED::enabled)
                 .schedule();
+        leds.requestStateCommand(LEDState.DRIVETRAIN_GYRO_UNINITIALIZED).until(drivetrain::getInitialized).schedule();
         leds.requestStateCommand(LEDState.INTAKE_UNINITIALIZED).until(intake::getInitialized).schedule();
         leds.requestStateCommand(LEDState.SHOOTER_TILT_UNINITIALIZED).until(shooterTilt::getInitialized).schedule();
         leds.requestStateCommand(LEDState.CLIMBER_UNINITIALIZED).until(climber::getInitialized).schedule();

@@ -195,6 +195,8 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     @Log
     private int failedDaqs = 0;
 
+    private boolean initialized = false;
+
     /** Initializes the drivetrain. */
     public Drivetrain() {
         poseEstimator = new SwerveDrivePoseEstimator(
@@ -574,7 +576,8 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
     @Override
     public void resetGyro() {
-        pigeon.setYaw(0);
+        pigeon.setYaw(DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue ? 180 : 0);
+        initialized = true;
     }
 
     @Override
@@ -1074,4 +1077,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
                 getFieldRelativeAccelerations());
     }
 
+    public boolean getInitialized() {
+        return initialized;
+    }
 }

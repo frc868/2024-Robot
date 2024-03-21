@@ -47,6 +47,11 @@ public class HoundBrian {
     public HoundBrian(Drivetrain drivetrain, Intake intake, ShooterTilt shooterTilt, Climber climber, NoteLift noteLift,
             LEDs leds) {
 
+        new Trigger(drivetrainButton::get).negate()
+                // .and(new Trigger(intakeButton::get).negate().debounce(2,
+                // DebounceType.kFalling))
+                .and(DriverStation::isDisabled)
+                .onTrue(drivetrain.resetGyroCommand().ignoringDisable(true));
         new Trigger(intakeButton::get).negate()
                 // .and(new Trigger(intakeButton::get).negate().debounce(2,
                 // DebounceType.kFalling))
