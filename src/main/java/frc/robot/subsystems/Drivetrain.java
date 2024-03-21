@@ -569,9 +569,11 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
     @Override
     public void resetPoseEstimator(Pose2d pose) {
-        poseEstimator.resetPosition(getRotation(), getModulePositions(), pose);
+        poseEstimator.resetPosition(getRotation(), getModulePositions(),
+                new Pose2d(pose.getTranslation(), getRotation()));
         if (RobotBase.isSimulation())
-            simOdometry.resetPosition(getRotation(), getModulePositions(), pose);
+            simOdometry.resetPosition(getRotation(), getModulePositions(),
+                    new Pose2d(pose.getTranslation(), getRotation()));
     }
 
     @Override
