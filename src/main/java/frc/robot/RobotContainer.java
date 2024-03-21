@@ -87,6 +87,10 @@ public class RobotContainer {
         prevLoopTime = timestamp;
         return loopTime * 1000.0;
     };
+
+    @Log(groups = "wpilib")
+    private final Supplier<Double> matchTimer = DriverStation::getMatchTime;
+
     @Log
     private final Supplier<Double> dist = () -> {
         Pose3d target = DriverStation.getAlliance().isPresent()
@@ -112,9 +116,7 @@ public class RobotContainer {
     };
 
     @Log
-    private final Supplier<Boolean> initialized = () -> {
-        return GlobalStates.INITIALIZED.enabled();
-    };
+    private final Supplier<Boolean> initialized = GlobalStates.INITIALIZED::enabled;
 
     /**
      * Constructs the robot container.
