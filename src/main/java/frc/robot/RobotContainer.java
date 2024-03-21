@@ -117,6 +117,8 @@ public class RobotContainer {
 
     @Log
     private final Supplier<Boolean> initialized = GlobalStates.INITIALIZED::enabled;
+    @Log
+    private final Supplier<Boolean> subsystemSafeties = GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED::enabled;
 
     /**
      * Constructs the robot container.
