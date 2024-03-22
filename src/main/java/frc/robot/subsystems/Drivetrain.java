@@ -27,6 +27,8 @@ import com.techhounds.houndutil.houndlib.subsystems.BaseSwerveDrive;
 import com.techhounds.houndutil.houndlib.swerve.KrakenCoaxialSwerveModule;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
 import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
+import com.techhounds.houndutil.houndlog.interfaces.SendableLog;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -132,6 +134,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
             SWERVE_CONSTANTS);
 
     @Log
+    @SendableLog(name = "pigeonSendable")
     private final Pigeon2 pigeon = new Pigeon2(0, CAN_BUS_NAME);
 
     private SwerveDriveOdometry simOdometry;
