@@ -2,6 +2,7 @@ package frc.robot;
 
 import com.techhounds.houndutil.houndlib.oi.CommandVirpilJoystick;
 
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -69,8 +70,11 @@ public class Controls {
                         () -> -joystick.getTwist(), drivetrain,
                         intake, shooter,
                         shooterTilt, climber, noteLift));
-        joystick.flipTriggerIn().and(joystick.triggerSoftPress().or(joystick.triggerHardPress()))
-                .whileTrue(climber.climbToBottomCommand().andThen(noteLift.scoreNoteCommand()));
+        joystick.flipTriggerIn().and(joystick.triggerSoftPress()).whileTrue(
+                Commands.sequence(
+                        climber.climbToBottomCommand(),
+                        Commands.waitUntil(joystick.triggerHardPress()),
+                        noteLift.scoreNoteCommand()));
     }
 
     public static void configureOperatorControls(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
@@ -89,12 +93,18 @@ public class Controls {
         controller.povDown().whileTrue(RobotCommands.resetClimb(intake, shooter,
                 shooterTilt, climber, noteLift));
         controller.povUp().whileTrue(RobotCommands.deClimb(intake, shooter,
-                shooterTilt, climber, noteLift));
+                shooterTilt, climber, noteLift).finallyDo(climber.resetControllersCommand()::schedule));
         controller.povRight()
                 .whileTrue(RobotCommands.moveToHomeCommand(intake, shooter, shooterTilt,
                         climber, noteLift));
-        controller.povLeft()
-                .whileTrue(RobotCommands.homeMechanismsCommand(intake, shooter, shooterTilt, climber, noteLift));
+        controller.povLeft().onTrue(
+                Commands.sequence(
+                        drivetrain.setInitializedCommand(true),
+                        intake.setInitializedCommand(true),
+                        shooterTilt.setInitializedCommand(true),
+                        climber.setInitializedCommand(true),
+                        noteLift.setInitializedCommand(true),
+                        GlobalStates.INITIALIZED.enableCommand()).ignoringDisable(true));
     }
 
     public static void configureOverridesControls(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
