@@ -1,5 +1,7 @@
 package frc.robot;
 
+import static frc.robot.Constants.Shooter.PODIUM_RPS;
+
 import com.techhounds.houndutil.houndlib.oi.CommandVirpilJoystick;
 
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -108,6 +110,9 @@ public class Controls {
                 .finallyDo(climber.resetControllersCommand()::schedule));
         controller.b().toggleOnTrue(noteLift.setOverridenSpeedCommand(() -> -controller.getRightY() * 0.75)
                 .finallyDo(noteLift.resetControllersCommand()::schedule));
+
+        controller.leftBumper().whileTrue(intake.runRollersCommand());
+        controller.rightBumper().whileTrue(shooter.spinAtVelocityCommand(() -> PODIUM_RPS));
 
         controller.start().onTrue(GlobalStates.AT_GOAL_OVERRIDE.enableCommand())
                 .onFalse(GlobalStates.AT_GOAL_OVERRIDE.disableCommand());
