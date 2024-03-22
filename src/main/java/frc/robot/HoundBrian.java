@@ -66,7 +66,7 @@ public class HoundBrian {
                 // .and(new Trigger(climberButton::get).negate().debounce(2,
                 // DebounceType.kFalling))
                 .and(DriverStation::isDisabled)
-                .onTrue(climber.resetPositionCommand().andThen(noteLift.resetPositionCommand().ignoringDisable(true)));
+                .onTrue(climber.resetPositionCommand().andThen(noteLift.resetPositionCommand()).ignoringDisable(true));
 
         // new Trigger(intakeButton::get).debounce(3, DebounceType.kBoth)
         // .and(DriverStation::isDisabled)
