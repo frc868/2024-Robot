@@ -246,7 +246,6 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
                 .andThen(Commands.runOnce(() -> pidController.setGoal(getPosition())));
     }
 
-    @Log
     public boolean getInitialized() {
         return initialized;
     }

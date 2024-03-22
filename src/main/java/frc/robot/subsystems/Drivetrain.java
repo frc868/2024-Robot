@@ -196,6 +196,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     @Log
     private int failedDaqs = 0;
 
+    @Log
     private boolean initialized = false;
 
     /** Initializes the drivetrain. */
