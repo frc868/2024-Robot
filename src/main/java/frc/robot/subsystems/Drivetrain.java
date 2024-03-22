@@ -68,6 +68,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.Drivetrain.MusicTrack;
 import frc.robot.FieldConstants;
+import frc.robot.GlobalStates;
 import frc.robot.utils.TrajectoryCalcs;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 
@@ -905,19 +906,19 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
         // Draw a pose that is based on the robot pose, but shifted by the
         // translation of the module relative to robot center,
         // then rotated around its own center by the angle of the module.
-        field.getObject("modules").setPoses(
-                getPose().transformBy(
-                        new Transform2d(SWERVE_MODULE_LOCATIONS[0],
-                                getModulePositions()[0].angle)),
-                getPose().transformBy(
-                        new Transform2d(SWERVE_MODULE_LOCATIONS[1],
-                                getModulePositions()[1].angle)),
-                getPose().transformBy(
-                        new Transform2d(SWERVE_MODULE_LOCATIONS[2],
-                                getModulePositions()[2].angle)),
-                getPose().transformBy(
-                        new Transform2d(SWERVE_MODULE_LOCATIONS[3],
-                                getModulePositions()[3].angle)));
+        // field.getObject("modules").setPoses(
+        // getPose().transformBy(
+        // new Transform2d(SWERVE_MODULE_LOCATIONS[0],
+        // getModulePositions()[0].angle)),
+        // getPose().transformBy(
+        // new Transform2d(SWERVE_MODULE_LOCATIONS[1],
+        // getModulePositions()[1].angle)),
+        // getPose().transformBy(
+        // new Transform2d(SWERVE_MODULE_LOCATIONS[2],
+        // getModulePositions()[2].angle)),
+        // getPose().transformBy(
+        // new Transform2d(SWERVE_MODULE_LOCATIONS[3],
+        // getModulePositions()[3].angle)));
     }
 
     public Command sysIdDriveQuasistatic(SysIdRoutine.Direction direction) {
@@ -1031,7 +1032,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
             xJoystick = MathUtil.applyDeadband(xJoystick, JOYSTICK_INPUT_DEADBAND);
             xJoystick = Math.copySign(Math.pow(xJoystick, JOYSTICK_CURVE_EXP), xJoystick);
             xJoystick = xSpeedLimiter.calculate(xJoystick);
-            xJoystick *= SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND / 2.0;
+            xJoystick *= SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND / 4.0;
             if (DriverStation.getAlliance().isPresent() &&
                     DriverStation.getAlliance().get() == Alliance.Red) {
                 xJoystick *= -1;
@@ -1041,7 +1042,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
             yJoystick = MathUtil.applyDeadband(yJoystick, JOYSTICK_INPUT_DEADBAND);
             yJoystick = Math.copySign(Math.pow(yJoystick, JOYSTICK_CURVE_EXP), yJoystick);
             yJoystick = ySpeedLimiter.calculate(yJoystick);
-            yJoystick *= SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND / 2.0;
+            yJoystick *= SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND / 4.0;
             if (DriverStation.getAlliance().isPresent() &&
                     DriverStation.getAlliance().get() == Alliance.Red) {
                 yJoystick *= -1;
@@ -1063,6 +1064,11 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
             double thetaSpeed = rotationController.calculate(getRotation().getRadians(),
                     targettedStagePose.getRotation().getRadians());
 
+            if (GlobalStates.DRIVETRAIN_TARGETTING_DISABLED.enabled()) {
+                drive(new ChassisSpeeds(xJoystick, yJoystick, thetaSpeed), DriveMode.FIELD_ORIENTED);
+                return;
+            }
+
             drive(new ChassisSpeeds(xSpeed, ySpeed, thetaSpeed), DriveMode.FIELD_ORIENTED);
         })).withName("drivetrain.teleopDrive");
     }
@@ -1081,5 +1087,11 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
     public boolean getInitialized() {
         return initialized;
+    }
+
+    public Command setInitializedCommand(boolean initialized) {
+        return Commands.runOnce(() -> {
+            this.initialized = initialized;
+        }).withName("drivetrain.setInitialized");
     }
 }
