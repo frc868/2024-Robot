@@ -29,9 +29,18 @@
             "/HoundLog/subsystems/noteLift/motor",
             "/HoundLog/subsystems/noteLift/control",
             "/HoundLog/subsystems/noteLift/control/pidController",
-            "/HoundLog/subsystems/shooter",
             "/HoundLog/subsystems/shooter/rightMotor",
-            "/HoundLog/subsystems/shooter/leftMotor"
+            "/HoundLog/subsystems/shooter/leftMotor",
+            "/HoundLog/autonomous",
+            "/HoundLog/autonomous/field",
+            "/HoundLog/subsystems/intake",
+            "/HoundLog/subsystems/drivetrain/modules",
+            "/HoundLog/subsystems/drivetrain/control/commandedModuleStates",
+            "/HoundLog/subsystems/drivetrain/control/moduleStates",
+            "/HoundLog/subsystems/drivetrain/modules/frontRight/driveMotor",
+            "/HoundLog/subsystems/drivetrain/modules/frontLeft/driveMotor",
+            "/HoundLog/subsystems/drivetrain/modules/backRight/driveMotor",
+            "/HoundLog/subsystems/drivetrain/modules/frontLeft"
           ]
         },
         "tabs": {
@@ -64,12 +73,6 @@
                     "key": "NT:/HoundLog/subsystems/vision/detectedAprilTags",
                     "sourceTypeIndex": 2,
                     "sourceType": "Pose3d[]"
-                  },
-                  {
-                    "type": "Green Ghost",
-                    "key": "NT:/HoundLog/subsystems/vision/estimatedRobotPoses",
-                    "sourceTypeIndex": 2,
-                    "sourceType": "Pose3d[]"
                   }
                 ],
                 [
@@ -78,6 +81,12 @@
                     "key": "NT:/HoundLog/subsystems/drivetrain/pose",
                     "sourceTypeIndex": 1,
                     "sourceType": "Pose2d"
+                  },
+                  {
+                    "type": "Trajectory",
+                    "key": "NT:/HoundLog/autonomous/field/trajectory",
+                    "sourceTypeIndex": 0,
+                    "sourceType": 5
                   }
                 ]
               ],
@@ -90,20 +99,108 @@
               },
               "configHidden": false,
               "visualizer": {
-                "cameraIndex": -2,
+                "cameraIndex": -1,
                 "orbitFov": 50,
                 "cameraPosition": [
-                  4.8627447005760205,
-                  4.522963968099544,
-                  -3.9678338746516224
+                  6.85505030236891,
+                  5.95220460620322,
+                  1.5259172836713724
                 ],
                 "cameraTarget": [
-                  0,
-                  0.5,
-                  0
+                  6.579621779967377,
+                  -3.747353929621627,
+                  1.5470978022994823
                 ]
               },
               "title": "Field"
+            },
+            {
+              "type": 1,
+              "legendHeight": 0.3,
+              "legends": {
+                "left": {
+                  "lockedRange": null,
+                  "unitConversion": {
+                    "type": null,
+                    "factor": 1
+                  },
+                  "fields": [
+                    {
+                      "key": "NT:/HoundLog/subsystems/drivetrain/control/commandedModuleStates/0/speed",
+                      "color": "#2b66a2",
+                      "show": true
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/drivetrain/control/commandedModuleStates/1/speed",
+                      "color": "#e5b31b",
+                      "show": false
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/drivetrain/control/commandedModuleStates/2/speed",
+                      "color": "#af2437",
+                      "show": false
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/drivetrain/control/commandedModuleStates/3/speed",
+                      "color": "#80588e",
+                      "show": false
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/drivetrain/control/moduleStates/0/speed",
+                      "color": "#e48b32",
+                      "show": true
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/drivetrain/control/moduleStates/1/speed",
+                      "color": "#aacaee",
+                      "show": false
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/drivetrain/control/moduleStates/2/speed",
+                      "color": "#c0b487",
+                      "show": false
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/drivetrain/control/moduleStates/3/speed",
+                      "color": "#858584",
+                      "show": false
+                    }
+                  ]
+                },
+                "discrete": {
+                  "fields": []
+                },
+                "right": {
+                  "lockedRange": null,
+                  "unitConversion": {
+                    "type": null,
+                    "factor": 1
+                  },
+                  "fields": [
+                    {
+                      "key": "NT:/HoundLog/subsystems/drivetrain/modules/frontLeft/driveMotor/outputCurrent",
+                      "color": "#3b875a",
+                      "show": false
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/drivetrain/modules/frontRight/driveMotor/outputCurrent",
+                      "color": "#d993aa",
+                      "show": false
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/drivetrain/modules/backLeft/driveMotor/outputCurrent",
+                      "color": "#eb987e",
+                      "show": false
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/drivetrain/modules/backRight/driveMotor/outputCurrent",
+                      "color": "#5d4f92",
+                      "show": false
+                    }
+                  ]
+                }
+              },
+              "title": "Drivetrain"
             },
             {
               "type": 1,
@@ -162,6 +259,11 @@
                     {
                       "key": "NT:/HoundLog/subsystems/intake/rollerMotor/outputVoltage",
                       "color": "#3b875a",
+                      "show": true
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/intake/rollerMotor/outputCurrent",
+                      "color": "#80588e",
                       "show": true
                     }
                   ]
@@ -290,12 +392,12 @@
                     {
                       "key": "NT:/HoundLog/subsystems/shooterTilt/motor/outputVoltage",
                       "color": "#c0b487",
-                      "show": true
+                      "show": false
                     },
                     {
                       "key": "NT:/HoundLog/subsystems/shooterTilt/motor/outputCurrent",
                       "color": "#858584",
-                      "show": true
+                      "show": false
                     }
                   ]
                 }
