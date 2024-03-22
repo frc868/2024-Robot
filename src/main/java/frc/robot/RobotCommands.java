@@ -122,10 +122,10 @@ public class RobotCommands {
     public static Command intakeToNoteLift(Shooter shooter, ShooterTilt shooterTilt, NoteLift noteLift, LEDs leds) {
         // proxying to allow shooterTilt to hold position while note lift moves down
         return Commands.sequence(
+                new ScheduleCommand(leds.requestStateCommand(LEDState.FLASHING_WHITE).withTimeout(5)),
                 new ScheduleCommand(shooter.stopCommand()),
                 shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.CLIMB).asProxy(),
-                noteLift.moveToPositionCommand(() -> NoteLiftPosition.INTAKE).asProxy(),
-                leds.requestStateCommand(LEDState.FLASHING_WHITE));
+                noteLift.moveToPositionCommand(() -> NoteLiftPosition.INTAKE).asProxy());
     }
 
     public static Command prepareClimb(DoubleSupplier xSpeedSupplier, DoubleSupplier ySpeedSupplier,
@@ -134,10 +134,6 @@ public class RobotCommands {
             NoteLift noteLift) {
         return Commands.parallel(
                 new ScheduleCommand(shooter.stopCommand()),
-                drivetrain.targetStageCommand(xSpeedSupplier, ySpeedSupplier)
-                        .unless(GlobalStates.DRIVETRAIN_TARGETTING_DISABLED::enabled)
-                        .until(GlobalStates.DRIVETRAIN_TARGETTING_DISABLED::enabled)
-                        .andThen(drivetrain.teleopDriveCommand(xSpeedSupplier, ySpeedSupplier, thetaSpeedSupplier)),
                 shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.CLIMB).asProxy(),
                 intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
                 noteLift.moveToPositionCommand(() -> NoteLiftPosition.CLIMB_PREP).asProxy(),
