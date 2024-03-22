@@ -52,9 +52,10 @@ public class LEDs extends SubsystemBase {
 
         FLASHING_WHITE(flash(Color.kWhite, 0.5, LEDSection.ALL)),
         SUBWOOFER_ONLY(flash(Color.kYellow, 1, LEDSection.SHOOTER_TOP)),
-        PODIUM_ONLY(flash(Color.kAqua, 1, LEDSection.SHOOTER_TOP)),
+        PODIUM_ONLY(flash(Color.kBlue, 1, LEDSection.SHOOTER_TOP)),
         SOLID_BLUE(solid(Color.kBlue, LEDSection.ALL)),
         SOLID_GREEN(solid(Color.kGreen, LEDSection.ALL)),
+        FLASHING_AQUA(flash(Color.kAqua, 0.5, LEDSection.ALL)),
         PURPLE_WAVE(wave(new Color("#9000DD"), 30, 20, 100, 255,
                 LEDSection.SHOOTER)),
         RAINBOW(rainbow(255, 3, LEDSection.ALL)),

@@ -16,6 +16,7 @@ import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.NoteLift;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterTilt;
+import frc.robot.subsystems.LEDs.LEDState;
 
 public class Controls {
     public static void configureDriverControls(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
@@ -71,7 +72,10 @@ public class Controls {
                         .alongWith(shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.INTAKE).asProxy()))
                 .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
 
-        joystick.centerTopHatButton().whileTrue(intake.intakeFromSourceCommand())
+        joystick.centerTopHatButton().whileTrue(
+                Commands.parallel(
+                        intake.intakeFromSourceCommand(),
+                        leds.requestStateCommand(LEDState.FLASHING_AQUA)))
                 .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
 
         joystick.redButton().whileTrue(RobotCommands.ampPrepIntakeCommand(intake, shooterTilt))
