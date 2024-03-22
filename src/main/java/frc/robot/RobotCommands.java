@@ -1,6 +1,7 @@
 package frc.robot;
 
-import static frc.robot.Constants.Shooter.BASE_SHOOTING_RPS;
+import static frc.robot.Constants.Shooter.PODIUM_RPS;
+import static frc.robot.Constants.Shooter.SUBWOOFER_RPS;
 
 import java.util.function.DoubleSupplier;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -77,11 +78,20 @@ public class RobotCommands {
                 .withName("RobotCommands.targetSpeakerOnTheMove");
     }
 
-    public static Command targetFromSubwooferCommand(Drivetrain drivetrain, Shooter shooter, ShooterTilt shooterTilt) {
+    public static Command targetSpeakerSubwooferCommand(Drivetrain drivetrain, Shooter shooter,
+            ShooterTilt shooterTilt) {
         return Commands.parallel(
-                shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.SUBWOOFER).asProxy(),
-                shooter.spinAtVelocityCommand(() -> BASE_SHOOTING_RPS).asProxy())
-                .withName("RobotCommands.targetFromSubwoofer");
+                shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.SUBWOOFER),
+                shooter.spinAtVelocityCommand(() -> SUBWOOFER_RPS))
+                .withName("RobotCommands.targetSpeakerSubwoofer");
+    }
+
+    public static Command targetSpeakerPodiumCommand(Drivetrain drivetrain, Shooter shooter,
+            ShooterTilt shooterTilt) {
+        return Commands.parallel(
+                shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.PODIUM),
+                shooter.spinAtVelocityCommand(() -> PODIUM_RPS))
+                .withName("RobotCommands.targetSpeakerSubwoofer");
     }
 
     public static Command shootCommand(Drivetrain drivetrain, Intake intake, Shooter shooter, ShooterTilt shooterTilt) {
@@ -94,6 +104,26 @@ public class RobotCommands {
                 shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
                 shooter.targetSpeakerCommand(drivetrain::getPose).asProxy())
                 .withName("RobotCommands.shoot");
+    }
+
+    public static Command shootSubwooferCommand(Drivetrain drivetrain, Intake intake, Shooter shooter,
+            ShooterTilt shooterTilt) {
+        return Commands.deadline(
+                Commands.waitUntil(() -> shooter.atGoal() && shooterTilt.atGoal())
+                        .andThen(intake.runRollersCommand().withTimeout(0.5)),
+                shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.SUBWOOFER).asProxy(),
+                shooter.spinAtVelocityCommand(() -> SUBWOOFER_RPS).asProxy())
+                .withName("RobotCommands.shootSubwoofer");
+    }
+
+    public static Command shootPodiumCommand(Drivetrain drivetrain, Intake intake, Shooter shooter,
+            ShooterTilt shooterTilt) {
+        return Commands.deadline(
+                Commands.waitUntil(() -> shooter.atGoal() && shooterTilt.atGoal())
+                        .andThen(intake.runRollersCommand().withTimeout(0.5)),
+                shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.PODIUM).asProxy(),
+                shooter.spinAtVelocityCommand(() -> PODIUM_RPS).asProxy())
+                .withName("RobotCommands.shootPodium");
     }
 
     public static Command shootAutoCommand(Drivetrain drivetrain, Intake intake, Shooter shooter,

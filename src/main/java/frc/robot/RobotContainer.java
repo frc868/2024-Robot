@@ -183,6 +183,10 @@ public class RobotContainer {
 
         new Trigger(GlobalStates.INITIALIZED::enabled)
                 .onTrue(leds.requestStateCommand(LEDState.INITIALIZED_CONFIRM).withTimeout(3));
+        new Trigger(GlobalStates.SUBWOOFER_ONLY::enabled)
+                .whileTrue(leds.requestStateCommand(LEDState.SUBWOOFER_ONLY));
+        new Trigger(GlobalStates.PODIUM_ONLY::enabled)
+                .whileTrue(leds.requestStateCommand(LEDState.PODIUM_ONLY));
     }
 
     private void configureButtonBindings() {

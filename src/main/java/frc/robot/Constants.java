@@ -237,7 +237,8 @@ public class Constants {
         public static final int CURRENT_LIMIT = 70;
 
         public static final double IDLE_RPS = 15;
-        public static final double BASE_SHOOTING_RPS = 55;
+        public static final double SUBWOOFER_RPS = 55;
+        public static final double PODIUM_RPS = 84;
 
         // 3/3/24
         public static final double left_kP = 0.1;
@@ -297,7 +298,8 @@ public class Constants {
             AMP_EJECT(0.601),
             INTAKE(0.55),
             CLIMB(1.176781),
-            SUBWOOFER(1.01572);
+            SUBWOOFER(1.01572),
+            PODIUM(0.651760);
 
             public final double value;
 

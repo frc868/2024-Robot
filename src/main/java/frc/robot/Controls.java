@@ -41,12 +41,30 @@ public class Controls {
         joystick.centerBottomHatRight()
                 .whileTrue(drivetrain.controlledRotateCommand(() -> Math.toRadians(90)));
 
-        joystick.triggerSoftPress().and(joystick.flipTriggerIn().negate())
-                .whileTrue(RobotCommands.targetSpeakerOnTheMoveCommand(drivetrain, shooter,
-                        shooterTilt));
-        joystick.triggerHardPress().and(joystick.flipTriggerIn().negate())
-                .whileTrue(RobotCommands.shootOnTheMoveCommand(drivetrain,
-                        intake, shooter, shooterTilt));
+        joystick.triggerSoftPress().and(joystick.flipTriggerIn().negate()).whileTrue(
+                Commands.either(
+                        RobotCommands.targetSpeakerSubwooferCommand(drivetrain, shooter, shooterTilt),
+                        Commands.either(
+                                RobotCommands.targetSpeakerPodiumCommand(drivetrain, shooter, shooterTilt),
+                                RobotCommands.targetSpeakerOnTheMoveCommand(drivetrain, shooter, shooterTilt),
+                                GlobalStates.PODIUM_ONLY::enabled),
+                        GlobalStates.SUBWOOFER_ONLY::enabled));
+        joystick.triggerHardPress().and(joystick.flipTriggerIn().negate()).whileTrue(
+                Commands.either(
+                        RobotCommands.shootSubwooferCommand(drivetrain, intake, shooter, shooterTilt),
+                        Commands.either(
+                                RobotCommands.shootPodiumCommand(drivetrain, intake, shooter, shooterTilt),
+                                RobotCommands.shootOnTheMoveCommand(drivetrain, intake, shooter, shooterTilt),
+                                GlobalStates.PODIUM_ONLY::enabled),
+                        GlobalStates.SUBWOOFER_ONLY::enabled));
+
+        joystick.topRightHatUp()
+                .onTrue(GlobalStates.PODIUM_ONLY.enableCommand().andThen(GlobalStates.SUBWOOFER_ONLY.disableCommand()));
+        joystick.topRightHatDown()
+                .onTrue(GlobalStates.SUBWOOFER_ONLY.enableCommand().andThen(GlobalStates.PODIUM_ONLY.disableCommand()));
+        joystick.centerTopHatDown()
+                .onTrue(GlobalStates.SUBWOOFER_ONLY.disableCommand()
+                        .andThen(GlobalStates.PODIUM_ONLY.disableCommand()));
 
         joystick.blackThumbButton()
                 .whileTrue(intake.intakeNoteCommand()
