@@ -109,6 +109,8 @@ public class Controls {
         controller.b().toggleOnTrue(noteLift.setOverridenSpeedCommand(() -> -controller.getRightY() * 0.75)
                 .finallyDo(noteLift.resetControllersCommand()::schedule));
 
+        controller.start().onTrue(GlobalStates.AT_GOAL_OVERRIDE.enableCommand())
+                .onFalse(GlobalStates.AT_GOAL_OVERRIDE.disableCommand());
         controller.povDown().whileTrue(RobotCommands.resetClimb(intake, shooter,
                 shooterTilt, climber, noteLift));
         controller.povUp().whileTrue(RobotCommands.deClimb(intake, shooter,
@@ -142,9 +144,6 @@ public class Controls {
         panel.button(4)
                 .onTrue(GlobalStates.AT_GOAL_OVERRIDE.enableCommand())
                 .onFalse(GlobalStates.AT_GOAL_OVERRIDE.disableCommand());
-        panel.button(5)
-                .onTrue(GlobalStates.DRIVETRAIN_TARGETTING_DISABLED.enableCommand())
-                .onFalse(GlobalStates.DRIVETRAIN_TARGETTING_DISABLED.disableCommand());
     }
 
     public static void configureTestingControls(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,

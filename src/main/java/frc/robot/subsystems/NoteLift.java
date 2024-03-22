@@ -176,7 +176,7 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
         return Commands.sequence(
                 runOnce(() -> pidController.reset(getPosition())),
                 runOnce(() -> pidController.setGoal(goalPositionSupplier.get().value)),
-                moveToCurrentGoalCommand().until(pidController::atGoal)).withName("noteLift.moveToPosition");
+                moveToCurrentGoalCommand().until(this::atGoal)).withName("noteLift.moveToPosition");
     }
 
     @Override
@@ -184,7 +184,7 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
         return Commands.sequence(
                 runOnce(() -> pidController.reset(getPosition())),
                 runOnce(() -> pidController.setGoal(goalPositionSupplier.get())),
-                moveToCurrentGoalCommand().until(pidController::atGoal)).withName("noteLift.moveToArbitraryPosition");
+                moveToCurrentGoalCommand().until(this::atGoal)).withName("noteLift.moveToArbitraryPosition");
     }
 
     @Override

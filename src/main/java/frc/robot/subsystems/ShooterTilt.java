@@ -203,7 +203,9 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
         return Commands.sequence(
                 runOnce(() -> pidController.reset(getPosition())),
                 runOnce(() -> pidController.setGoal(getLinearActuatorLength(goalPositionSupplier.get().value))),
-                moveToCurrentGoalCommand().until(pidController::atGoal)).withTimeout(2)
+                moveToCurrentGoalCommand()
+                        .until(() -> pidController.atGoal() || GlobalStates.AT_GOAL_OVERRIDE.enabled()))
+                .withTimeout(2)
                 .withName("shooterTilt.moveToPosition");
     }
 
@@ -243,7 +245,8 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
                 runOnce(() -> pidController.reset(getPosition())),
                 runOnce(() -> pidController.setGoal(getLinearActuatorLength(getAngle() +
                         delta.get()))),
-                moveToCurrentGoalCommand().until(pidController::atGoal))
+                moveToCurrentGoalCommand()
+                        .until(() -> pidController.atGoal() || GlobalStates.AT_GOAL_OVERRIDE.enabled()))
                 .withName("shooterTilt.movePositionDelta");
     }
 

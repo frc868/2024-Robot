@@ -178,7 +178,7 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
         return Commands.sequence(
                 runOnce(() -> pidController.reset(getPosition())),
                 runOnce(() -> pidController.setGoal(goalPositionSupplier.get().value)),
-                moveToCurrentGoalCommand().until(pidController::atGoal)).withName("climber.moveToPosition");
+                moveToCurrentGoalCommand().until(this::atGoal)).withName("climber.moveToPosition");
     }
 
     @Override
@@ -186,7 +186,7 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
         return Commands.sequence(
                 runOnce(() -> pidController.reset(getPosition())),
                 runOnce(() -> pidController.setGoal(goalPositionSupplier.get())),
-                moveToCurrentGoalCommand().until(pidController::atGoal)).withName("climber.moveToArbitraryPosition");
+                moveToCurrentGoalCommand().until(this::atGoal)).withName("climber.moveToArbitraryPosition");
     }
 
     @Override

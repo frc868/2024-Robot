@@ -223,7 +223,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
         return Commands.sequence(
                 runOnce(() -> pidController.reset(getPosition())),
                 runOnce(() -> pidController.setGoal(goalPositionSupplier.get().value)),
-                moveToCurrentGoalCommand().until(pidController::atGoal)).withTimeout(2)
+                moveToCurrentGoalCommand().until(this::atGoal)).withTimeout(2)
                 .withName("intake.moveToPosition");
     }
 
@@ -232,7 +232,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
         return Commands.sequence(
                 runOnce(() -> pidController.reset(getPosition())),
                 runOnce(() -> pidController.setGoal(goalPositionSupplier.get())),
-                moveToCurrentGoalCommand().until(pidController::atGoal))
+                moveToCurrentGoalCommand().until(this::atGoal))
                 .withName("intake.moveToArbitraryPosition");
     }
 
@@ -241,7 +241,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
         return Commands.sequence(
                 runOnce(() -> pidController.reset(getPosition())),
                 runOnce(() -> pidController.setGoal(getPosition() + delta.get())),
-                moveToCurrentGoalCommand().until(pidController::atGoal)).withTimeout(2)
+                moveToCurrentGoalCommand().until(this::atGoal)).withTimeout(2)
                 .withName("intake.movePositionDelta");
     }
 

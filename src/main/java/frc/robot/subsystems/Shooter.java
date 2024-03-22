@@ -261,7 +261,7 @@ public class Shooter extends SubsystemBase implements BaseShooter {
 
     @Log
     public boolean atGoal() {
-        return leftPidController.atSetpoint() && rightPidController.atSetpoint()
+        return (leftPidController.atSetpoint() && rightPidController.atSetpoint())
                 || GlobalStates.AT_GOAL_OVERRIDE.enabled();
     }
 }
