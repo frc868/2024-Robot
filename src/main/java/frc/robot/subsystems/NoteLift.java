@@ -2,13 +2,16 @@ package frc.robot.subsystems;
 
 import java.util.function.Supplier;
 
-import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.techhounds.houndutil.houndlib.SparkConfigurator;
+import com.techhounds.houndutil.houndlib.Utils;
 import com.techhounds.houndutil.houndlib.subsystems.BaseElevator;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
 import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
+
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -27,6 +30,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import frc.robot.Constants.NoteLift.NoteLiftPosition;
+import frc.robot.GlobalStates;
+import frc.robot.PositionTracker;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -36,12 +41,12 @@ import static frc.robot.Constants.NoteLift.*;
 @LoggedObject
 public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosition> {
     @Log
-    private CANSparkMax motor;
+    private CANSparkFlex motor;
 
-    @Log
+    @Log(groups = "control")
     private ProfiledPIDController pidController = new ProfiledPIDController(kP, kI, kD, MOVEMENT_CONSTRAINTS);
 
-    @Log
+    @Log(groups = "control")
     private ElevatorFeedforward feedforwardController = new ElevatorFeedforward(kS, kG, kV, kA);
 
     private ElevatorSim elevatorSim = new ElevatorSim(
@@ -51,8 +56,8 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
             DRUM_RADIUS_METERS,
             MIN_HEIGHT_METERS,
             MAX_HEIGHT_METERS,
-            true,
-            0);
+            false,
+            MAX_HEIGHT_METERS);
 
     @Log(groups = "control")
     private double feedbackVoltage = 0;
@@ -68,13 +73,20 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
 
     private final SysIdRoutine sysIdRoutine;
 
-    public NoteLift() {
-        motor = SparkConfigurator.createSparkMax(
-                MOTOR_ID, MotorType.kBrushless, false,
+    @Log
+    private boolean initialized = false;
+
+    private PositionTracker positionTracker;
+
+    public NoteLift(PositionTracker positionTracker) {
+        motor = SparkConfigurator.createSparkFlex(
+                MOTOR_ID, MotorType.kBrushless, true,
                 (s) -> s.setIdleMode(IdleMode.kBrake),
                 (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
                 (s) -> s.getEncoder().setPositionConversionFactor(ENCODER_ROTATIONS_TO_METERS),
                 (s) -> s.getEncoder().setVelocityConversionFactor(ENCODER_ROTATIONS_TO_METERS / 60.0));
+
+        this.positionTracker = positionTracker;
 
         pidController.setTolerance(TOLERANCE);
 
@@ -115,18 +127,38 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
             return simVelocity;
     }
 
-    @Log
     public Pose3d getComponentPose() {
         return BASE_COMPONENT_POSE.plus(new Transform3d(0, 0, getPosition(), new Rotation3d()));
     }
 
     @Override
     public void resetPosition() {
-        motor.getEncoder().setPosition(0);
+        motor.getEncoder().setPosition(NoteLiftPosition.TOP.value);
+        initialized = true;
     }
 
     @Override
     public void setVoltage(double voltage) {
+        voltage = MathUtil.clamp(voltage, -12, 12);
+        if (!GlobalStates.MECH_LIMITS_DISABLED.enabled())
+            voltage = Utils.applySoftStops(voltage, getPosition(), MIN_HEIGHT_METERS,
+                    MAX_HEIGHT_METERS + 0.03); // allows note lift to unspool slightly
+
+        if (!GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.enabled()) {
+            if (getPosition() - positionTracker.getClimberPosition() < -0.09 && voltage < 0) {
+                voltage = 0;
+            }
+            if (getPosition() < 0.233 && positionTracker.getShooterTiltAngle() < 1.11 && voltage > 0) {
+                voltage = 0;
+            }
+            if (getPosition() > 0.233 && positionTracker.getShooterTiltAngle() < 1.11 && voltage < 0) {
+                voltage = 0;
+            }
+        }
+
+        if (!GlobalStates.INITIALIZED.enabled() && !GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.enabled()) {
+            voltage = 0.0;
+        }
         motor.setVoltage(voltage);
     }
 
@@ -134,8 +166,7 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
     public Command moveToCurrentGoalCommand() {
         return run(() -> {
             feedbackVoltage = pidController.calculate(getPosition());
-            feedforwardVoltage = feedforwardController.calculate(pidController.getSetpoint().position,
-                    pidController.getSetpoint().velocity);
+            feedforwardVoltage = feedforwardController.calculate(pidController.getSetpoint().velocity);
             setVoltage(feedbackVoltage + feedforwardVoltage);
         }).withName("noteLift.moveToCurrentGoal");
     }
@@ -175,7 +206,7 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
 
     @Override
     public Command setOverridenSpeedCommand(Supplier<Double> speed) {
-        return run(() -> setVoltage(12.0 * speed.get()))
+        return runEnd(() -> setVoltage(12.0 * speed.get()), () -> setVoltage(0))
                 .withName("noteLift.setOverriddenSpeed");
     }
 
@@ -196,5 +227,44 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
 
     public Command sysIdDynamic(SysIdRoutine.Direction direction) {
         return sysIdRoutine.dynamic(direction).withName("noteLift.sysIdDynamic");
+    }
+
+    public Command scoreNoteCommand() {
+        return run(() -> {
+            if (getPosition() < MAX_HEIGHT_METERS + 0.03)
+                setVoltage(12);
+            else
+                setVoltage(0);
+        }).finallyDo(() -> {
+            pidController.reset(getPosition());
+            pidController.setGoal(getPosition());
+        });
+    }
+
+    public Command resetControllersCommand() {
+        return Commands.runOnce(() -> pidController.reset(getPosition()))
+                .andThen(Commands.runOnce(() -> pidController.setGoal(getPosition())));
+    }
+
+    @Log
+    public boolean getInitialized() {
+        return initialized;
+    }
+
+    public Command setInitializedCommand(boolean initialized) {
+        return Commands.runOnce(() -> {
+            this.initialized = initialized;
+        }).withName("noteLift.setInitialized");
+    }
+
+    public Command zeroMechanismCommand() {
+        return run(() -> {
+            motor.setVoltage(1);
+        }).until(() -> motor.getOutputCurrent() > 10)
+                .andThen(resetPositionCommand());
+    }
+
+    public boolean atGoal() {
+        return pidController.atGoal() || GlobalStates.AT_GOAL_OVERRIDE.enabled();
     }
 }

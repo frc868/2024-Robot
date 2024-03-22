@@ -1,7 +1,16 @@
 package frc.robot.subsystems;
 
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
+
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.Orchestra;
+import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.commands.FollowPathHolonomic;
 import com.pathplanner.lib.path.GoalEndState;
@@ -11,24 +20,34 @@ import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 import com.techhounds.houndutil.houndauto.AutoManager;
+import com.techhounds.houndutil.houndauto.Reflector;
+import com.techhounds.houndutil.houndlib.ChassisAccelerations;
 import com.techhounds.houndutil.houndlib.MotorHoldMode;
 import com.techhounds.houndutil.houndlib.subsystems.BaseSwerveDrive;
 import com.techhounds.houndutil.houndlib.swerve.KrakenCoaxialSwerveModule;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
 import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.math.filter.LinearFilter;
+import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Distance;
@@ -38,6 +57,8 @@ import edu.wpi.first.units.Velocity;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.Threads;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -45,6 +66,10 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants.Drivetrain.MusicTrack;
+import frc.robot.FieldConstants;
+import frc.robot.GlobalStates;
+import frc.robot.utils.TrajectoryCalcs;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 
 import static frc.robot.Constants.Drivetrain.*;
@@ -107,42 +132,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
             SWERVE_CONSTANTS);
 
     @Log
-    private Pigeon2 pigeon = new Pigeon2(0);
-
-    @Log
-    private SwerveDrivePoseEstimator poseEstimator;
-
-    @Log
-    private ProfiledPIDController xPositionController = new ProfiledPIDController(
-            XY_kP, XY_kI, XY_kD, XY_CONSTRAINTS);
-
-    @Log
-    private ProfiledPIDController yPositionController = new ProfiledPIDController(
-            XY_kP, XY_kI, XY_kD, XY_CONSTRAINTS);
-
-    @Log
-    private ProfiledPIDController thetaPositionController = new ProfiledPIDController(
-            THETA_kP, THETA_kI, THETA_kD, THETA_CONSTRAINTS);
-
-    @Log(groups = "control")
-    private SwerveModuleState[] commandedModuleStates = new SwerveModuleState[] { new SwerveModuleState(),
-            new SwerveModuleState(), new SwerveModuleState(), new SwerveModuleState() };
-
-    @Log(groups = "control")
-    private ChassisSpeeds commandedChassisSpeeds = new ChassisSpeeds();
-
-    @Log
-    private DriveMode driveMode = DriveMode.FIELD_ORIENTED;
-
-    @Log
-    private Twist2d twist = new Twist2d();
-
-    /**
-     * Whether to override the inputs of the driver for maintaining or turning to a
-     * specific angle.
-     */
-    @Log
-    private boolean isControlledRotationEnabled = false;
+    private final Pigeon2 pigeon = new Pigeon2(0, CAN_BUS_NAME);
 
     private SwerveDriveOdometry simOdometry;
     private SwerveModulePosition[] lastModulePositions = getModulePositions();
@@ -159,17 +149,66 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
     private final SysIdRoutine sysIdSteer;
 
+    private final Orchestra orchestra = new Orchestra();
+
+    private final SwerveDrivePoseEstimator poseEstimator;
+
+    private final ReadWriteLock stateLock = new ReentrantReadWriteLock();
+
+    private final OdometryThread odometryThread;
+
+    @Log(groups = "control")
+    private final ProfiledPIDController driveController = new ProfiledPIDController(
+            XY_kP, XY_kI, XY_kD, XY_CONSTRAINTS);
+
+    @Log(groups = "control")
+    private double driveToPoseDistance = 0.0;
+
+    @Log(groups = "control")
+    private final ProfiledPIDController rotationController = new ProfiledPIDController(
+            THETA_kP, THETA_kI, THETA_kD, THETA_CONSTRAINTS);
+
+    @Log(groups = "control")
+    private SwerveModuleState[] commandedModuleStates = new SwerveModuleState[] { new SwerveModuleState(),
+            new SwerveModuleState(), new SwerveModuleState(), new SwerveModuleState() };
+
+    @Log(groups = "control")
+    private ChassisSpeeds commandedChassisSpeeds = new ChassisSpeeds();
+
+    private DriveMode driveMode = DriveMode.FIELD_ORIENTED;
+
+    /**
+     * Whether to override the inputs of the driver for maintaining or turning to a
+     * specific angle.
+     */
+    @Log
+    private boolean isControlledRotationEnabled = false;
+
+    @Log
+    private Pose2d targettedStagePose = new Pose2d();
+
+    private ChassisSpeeds prevFieldRelVelocities = new ChassisSpeeds();
+
+    @Log
+    private double averageOdometryLoopTime = 0;
+    @Log
+    private int successfulDaqs = 0;
+    @Log
+    private int failedDaqs = 0;
+
+    private boolean initialized = false;
+
     /** Initializes the drivetrain. */
     public Drivetrain() {
-        resetGyro();
         poseEstimator = new SwerveDrivePoseEstimator(
                 KINEMATICS,
                 getRotation(),
                 getModulePositions(),
                 new Pose2d(0, 0, new Rotation2d()));
 
-        thetaPositionController.setTolerance(0.05);
-        thetaPositionController.enableContinuousInput(0, 2 * Math.PI);
+        driveController.setTolerance(0.05);
+        rotationController.setTolerance(0.05);
+        rotationController.enableContinuousInput(0, 2 * Math.PI);
 
         AutoManager.getInstance().setResetOdometryConsumer(this::resetPoseEstimator);
 
@@ -178,7 +217,8 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
         }
 
         sysIdDrive = new SysIdRoutine(
-                new SysIdRoutine.Config(),
+                new SysIdRoutine.Config(null, Volts.of(3), null,
+                        (state) -> SignalLogger.writeString("sysid_state", state.toString())),
                 new SysIdRoutine.Mechanism(
                         (Measure<Voltage> volts) -> {
                             drive(new ChassisSpeeds(
@@ -190,42 +230,31 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
                             log.motor("frontLeft")
                                     .voltage(sysidDriveAppliedVoltageMeasure
                                             .mut_replace(frontLeft.getDriveMotorVoltage(), Volts))
-                                    .linearPosition(
-                                            sysidDrivePositionMeasure.mut_replace(frontLeft.getDriveMotorPosition(),
-                                                    Meters))
+                                    .linearPosition(sysidDrivePositionMeasure
+                                            .mut_replace(frontLeft.getDriveMotorPosition(), Meters))
                                     .linearVelocity(sysidDriveVelocityMeasure
                                             .mut_replace(frontLeft.getDriveMotorVelocity(), MetersPerSecond));
                             log.motor("frontRight")
-                                    .voltage(sysidDriveAppliedVoltageMeasure.mut_replace(
-                                            frontRight.getDriveMotorVoltage(),
-                                            Volts))
-                                    .linearPosition(
-                                            sysidDrivePositionMeasure.mut_replace(frontRight.getDriveMotorPosition(),
-                                                    Meters))
-                                    .linearVelocity(
-                                            sysidDriveVelocityMeasure.mut_replace(frontRight.getDriveMotorVelocity(),
-                                                    MetersPerSecond));
+                                    .voltage(sysidDriveAppliedVoltageMeasure
+                                            .mut_replace(frontRight.getDriveMotorVoltage(), Volts))
+                                    .linearPosition(sysidDrivePositionMeasure
+                                            .mut_replace(frontRight.getDriveMotorPosition(), Meters))
+                                    .linearVelocity(sysidDriveVelocityMeasure
+                                            .mut_replace(frontRight.getDriveMotorVelocity(), MetersPerSecond));
                             log.motor("backLeft")
-                                    .voltage(
-                                            sysidDriveAppliedVoltageMeasure.mut_replace(backLeft.getDriveMotorVoltage(),
-                                                    Volts))
-                                    .linearPosition(
-                                            sysidDrivePositionMeasure.mut_replace(backLeft.getDriveMotorPosition(),
-                                                    Meters))
-                                    .linearVelocity(
-                                            sysidDriveVelocityMeasure.mut_replace(backLeft.getDriveMotorVelocity(),
-                                                    MetersPerSecond));
+                                    .voltage(sysidDriveAppliedVoltageMeasure
+                                            .mut_replace(backLeft.getDriveMotorVoltage(), Volts))
+                                    .linearPosition(sysidDrivePositionMeasure
+                                            .mut_replace(backLeft.getDriveMotorPosition(), Meters))
+                                    .linearVelocity(sysidDriveVelocityMeasure
+                                            .mut_replace(backLeft.getDriveMotorVelocity(), MetersPerSecond));
                             log.motor("backRight")
-                                    .voltage(
-                                            sysidDriveAppliedVoltageMeasure.mut_replace(
-                                                    backRight.getDriveMotorVoltage(),
-                                                    Volts))
-                                    .linearPosition(
-                                            sysidDrivePositionMeasure.mut_replace(backRight.getDriveMotorPosition(),
-                                                    Meters))
-                                    .linearVelocity(
-                                            sysidDriveVelocityMeasure.mut_replace(backRight.getDriveMotorVelocity(),
-                                                    MetersPerSecond));
+                                    .voltage(sysidDriveAppliedVoltageMeasure
+                                            .mut_replace(backRight.getDriveMotorVoltage(), Volts))
+                                    .linearPosition(sysidDrivePositionMeasure
+                                            .mut_replace(backRight.getDriveMotorPosition(), Meters))
+                                    .linearVelocity(sysidDriveVelocityMeasure
+                                            .mut_replace(backRight.getDriveMotorVelocity(), MetersPerSecond));
                         },
                         this));
 
@@ -241,55 +270,200 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
                         },
                         log -> {
                             log.motor("frontLeft")
-                                    .voltage(
-                                            sysidSteerAppliedVoltageMeasure.mut_replace(
-                                                    frontLeft.getSteerMotorVoltage(),
-                                                    Volts))
-                                    .angularPosition(
-                                            sysidSteerPositionMeasure.mut_replace(frontLeft.getSteerMotorPosition(),
-                                                    Rotations))
-                                    .angularVelocity(
-                                            sysidSteerVelocityMeasure.mut_replace(frontLeft.getSteerMotorVelocity(),
-                                                    RotationsPerSecond));
+                                    .voltage(sysidSteerAppliedVoltageMeasure
+                                            .mut_replace(frontLeft.getSteerMotorVoltage(), Volts))
+                                    .angularPosition(sysidSteerPositionMeasure
+                                            .mut_replace(frontLeft.getSteerMotorPosition(), Rotations))
+                                    .angularVelocity(sysidSteerVelocityMeasure
+                                            .mut_replace(frontLeft.getSteerMotorVelocity(), RotationsPerSecond));
                             log.motor("frontRight")
-                                    .voltage(
-                                            sysidSteerAppliedVoltageMeasure.mut_replace(
-                                                    frontRight.getSteerMotorVoltage(),
-                                                    Volts))
-                                    .angularPosition(
-                                            sysidSteerPositionMeasure.mut_replace(frontRight.getSteerMotorPosition(),
-                                                    Rotations))
-                                    .angularVelocity(
-                                            sysidSteerVelocityMeasure.mut_replace(frontRight.getSteerMotorVelocity(),
-                                                    RotationsPerSecond));
+                                    .voltage(sysidSteerAppliedVoltageMeasure
+                                            .mut_replace(frontRight.getSteerMotorVoltage(), Volts))
+                                    .angularPosition(sysidSteerPositionMeasure
+                                            .mut_replace(frontRight.getSteerMotorPosition(), Rotations))
+                                    .angularVelocity(sysidSteerVelocityMeasure
+                                            .mut_replace(frontRight.getSteerMotorVelocity(), RotationsPerSecond));
                             log.motor("backLeft")
-                                    .voltage(
-                                            sysidSteerAppliedVoltageMeasure.mut_replace(backLeft.getSteerMotorVoltage(),
-                                                    Volts))
-                                    .angularPosition(
-                                            sysidSteerPositionMeasure.mut_replace(backLeft.getSteerMotorPosition(),
-                                                    Rotations))
-                                    .angularVelocity(
-                                            sysidSteerVelocityMeasure.mut_replace(backLeft.getSteerMotorVelocity(),
-                                                    RotationsPerSecond));
+                                    .voltage(sysidSteerAppliedVoltageMeasure
+                                            .mut_replace(backLeft.getSteerMotorVoltage(), Volts))
+                                    .angularPosition(sysidSteerPositionMeasure
+                                            .mut_replace(backLeft.getSteerMotorPosition(), Rotations))
+                                    .angularVelocity(sysidSteerVelocityMeasure
+                                            .mut_replace(backLeft.getSteerMotorVelocity(), RotationsPerSecond));
                             log.motor("backRight")
-                                    .voltage(
-                                            sysidSteerAppliedVoltageMeasure.mut_replace(
-                                                    backRight.getSteerMotorVoltage(),
-                                                    Volts))
-                                    .angularPosition(
-                                            sysidSteerPositionMeasure.mut_replace(backRight.getSteerMotorPosition(),
-                                                    Rotations))
-                                    .angularVelocity(
-                                            sysidSteerVelocityMeasure.mut_replace(backRight.getSteerMotorVelocity(),
-                                                    RotationsPerSecond));
+                                    .voltage(sysidSteerAppliedVoltageMeasure
+                                            .mut_replace(backRight.getSteerMotorVoltage(), Volts))
+                                    .angularPosition(sysidSteerPositionMeasure
+                                            .mut_replace(backRight.getSteerMotorPosition(), Rotations))
+                                    .angularVelocity(sysidSteerVelocityMeasure
+                                            .mut_replace(backRight.getSteerMotorVelocity(), RotationsPerSecond));
                         },
                         this));
+
+        orchestra.addInstrument(frontLeft.getDriveMotor(), 1);
+        orchestra.addInstrument(frontRight.getDriveMotor(), 1);
+        orchestra.addInstrument(backLeft.getDriveMotor(), 1);
+        orchestra.addInstrument(backRight.getDriveMotor(), 1);
+        orchestra.addInstrument(frontLeft.getSteerMotor(), 1);
+        orchestra.addInstrument(frontRight.getSteerMotor(), 1);
+        orchestra.addInstrument(backLeft.getSteerMotor(), 1);
+        orchestra.addInstrument(backRight.getSteerMotor(), 1);
+
+        odometryThread = new OdometryThread();
+        odometryThread.start();
+
+    }
+
+    public class OdometryThread {
+        // Testing shows 1 (minimum realtime) is sufficient for tighter odometry loops.
+        // If the odometry period is far away from the desired frequency, increasing
+        // this may help
+        private static final int START_THREAD_PRIORITY = 1;
+
+        private final Thread m_thread;
+        private volatile boolean m_running = false;
+
+        private final BaseStatusSignal[] allSignals;
+
+        private final MedianFilter peakRemover = new MedianFilter(3);
+        private final LinearFilter lowPass = LinearFilter.movingAverage(50);
+        private double lastTime = 0;
+        private double currentTime = 0;
+
+        private KrakenCoaxialSwerveModule[] modules = new KrakenCoaxialSwerveModule[] {
+                frontLeft, frontRight, backLeft, backRight };
+        private SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
+
+        private int lastThreadPriority = START_THREAD_PRIORITY;
+        private volatile int threadPriorityToSet = START_THREAD_PRIORITY;
+        private final int UPDATE_FREQUENCY = 250;
+
+        public OdometryThread() {
+            m_thread = new Thread(this::run);
+            /*
+             * Mark this thread as a "daemon" (background) thread
+             * so it doesn't hold up program shutdown
+             */
+            m_thread.setDaemon(true);
+
+            /* 4 signals for each module + 2 for Pigeon2 */
+
+            allSignals = new BaseStatusSignal[(4 * 4) + 2];
+            for (int i = 0; i < 4; ++i) {
+                BaseStatusSignal[] signals = modules[i].getSignals();
+                allSignals[(i * 4) + 0] = signals[0];
+                allSignals[(i * 4) + 1] = signals[1];
+                allSignals[(i * 4) + 2] = signals[2];
+                allSignals[(i * 4) + 3] = signals[3];
+            }
+            allSignals[allSignals.length - 2] = pigeon.getYaw();
+            allSignals[allSignals.length - 1] = pigeon.getAngularVelocityZWorld();
+        }
+
+        /**
+         * Starts the odometry thread.
+         */
+        public void start() {
+            m_running = true;
+            m_thread.start();
+        }
+
+        /**
+         * Stops the odometry thread.
+         */
+        public void stop() {
+            stop(0);
+        }
+
+        /**
+         * Stops the odometry thread with a timeout.
+         *
+         * @param millis The time to wait in milliseconds
+         */
+        public void stop(long millis) {
+            m_running = false;
+            try {
+                m_thread.join(millis);
+            } catch (final InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        public void run() {
+            /* Make sure all signals update at the correct update frequency */
+            BaseStatusSignal.setUpdateFrequencyForAll(UPDATE_FREQUENCY, allSignals);
+            Threads.setCurrentThreadPriority(true, START_THREAD_PRIORITY);
+
+            /* Run as fast as possible, our signals will control the timing */
+            while (m_running) {
+                /* Synchronously wait for all signals in drivetrain */
+                /* Wait up to twice the period of the update frequency */
+                StatusCode status;
+                status = BaseStatusSignal.waitForAll(2.0 / UPDATE_FREQUENCY, allSignals);
+
+                try {
+                    stateLock.writeLock().lock();
+
+                    lastTime = currentTime;
+                    currentTime = Timer.getFPGATimestamp();
+                    /*
+                     * We don't care about the peaks, as they correspond to GC events, and we want
+                     * the period generally low passed
+                     */
+                    averageOdometryLoopTime = lowPass.calculate(peakRemover.calculate(currentTime - lastTime));
+
+                    /* Get status of first element */
+                    if (status.isOK()) {
+                        successfulDaqs++;
+                    } else {
+                        failedDaqs++;
+                    }
+
+                    /* Now update odometry */
+                    /* Keep track of the change in azimuth rotations */
+                    for (int i = 0; i < 4; ++i) {
+                        modulePositions[i] = modules[i].getPosition();
+                    }
+                    double yawDegrees = BaseStatusSignal.getLatencyCompensatedValue(
+                            pigeon.getYaw(), pigeon.getAngularVelocityZWorld());
+
+                    /* Keep track of previous and current pose to account for the carpet vector */
+                    poseEstimator.update(Rotation2d.fromDegrees(yawDegrees), modulePositions);
+                    if (RobotBase.isSimulation()) {
+                        simOdometry.update(getRotation(), getModulePositions());
+                        drawRobotOnField(AutoManager.getInstance().getField());
+                    }
+                } finally {
+                    stateLock.writeLock().unlock();
+                }
+
+                /**
+                 * This is inherently synchronous, since lastThreadPriority
+                 * is only written here and threadPriorityToSet is only read here
+                 */
+                if (threadPriorityToSet != lastThreadPriority) {
+                    Threads.setCurrentThreadPriority(true, threadPriorityToSet);
+                    lastThreadPriority = threadPriorityToSet;
+                }
+            }
+        }
+
+        /**
+         * Sets the DAQ thread priority to a real time priority under the specified
+         * priority level
+         *
+         * @param priority Priority level to set the DAQ thread to.
+         *                 This is a value between 0 and 99, with 99 indicating higher
+         *                 priority and 0 indicating lower priority.
+         */
+        public void setThreadPriority(int priority) {
+            threadPriorityToSet = priority;
+        }
     }
 
     @Override
     public void periodic() {
-        updatePoseEstimator();
+        prevFieldRelVelocities = getFieldRelativeSpeeds();
     }
 
     /**
@@ -306,10 +480,8 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
                     currentPositions[i].angle);
         }
 
-        twist = KINEMATICS.toTwist2d(deltas);
-
         pigeon.getSimState().setRawYaw(pigeon.getYaw().getValue() +
-                Units.radiansToDegrees(twist.dtheta));
+                Units.radiansToDegrees(KINEMATICS.toTwist2d(deltas).dtheta));
 
         lastModulePositions = currentPositions;
     }
@@ -327,7 +499,10 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
     @Log
     public Pose2d getSimPose() {
-        return simOdometry.getPoseMeters();
+        if (simOdometry != null)
+            return simOdometry.getPoseMeters();
+        else
+            return new Pose2d();
     }
 
     @Override
@@ -363,27 +538,49 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
         return KINEMATICS.toChassisSpeeds(getModuleStates());
     }
 
+    @Log(groups = "control")
+    public ChassisSpeeds getFieldRelativeSpeeds() {
+        return ChassisSpeeds.fromRobotRelativeSpeeds(KINEMATICS.toChassisSpeeds(getModuleStates()), getRotation());
+    }
+
+    @Log(groups = "control")
+    public ChassisAccelerations getFieldRelativeAccelerations() {
+        return new ChassisAccelerations(getFieldRelativeSpeeds(), prevFieldRelVelocities, 0.020);
+    }
+
     @Override
     public SwerveDrivePoseEstimator getPoseEstimator() {
         return poseEstimator;
     }
 
+    public void addVisionMeasurement(Pose2d visionRobotPoseMeters,
+            double timestampSeconds,
+            Matrix<N3, N1> visionMeasurementStdDevs) {
+        try {
+            stateLock.writeLock().lock();
+            poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
+        } finally {
+            stateLock.writeLock().unlock();
+        }
+    }
+
     @Override
     public void updatePoseEstimator() {
-        poseEstimator.update(getRotation(), getModulePositions());
-        simOdometry.update(getRotation(), getModulePositions());
-        drawRobotOnField(AutoManager.getInstance().getField());
     }
 
     @Override
     public void resetPoseEstimator(Pose2d pose) {
-        poseEstimator.resetPosition(getRotation(), getModulePositions(), pose);
-        simOdometry.resetPosition(getRotation(), getModulePositions(), pose);
+        poseEstimator.resetPosition(getRotation(), getModulePositions(),
+                new Pose2d(pose.getTranslation(), getRotation()));
+        if (RobotBase.isSimulation())
+            simOdometry.resetPosition(getRotation(), getModulePositions(),
+                    new Pose2d(pose.getTranslation(), getRotation()));
     }
 
     @Override
     public void resetGyro() {
-        pigeon.setYaw(0);
+        pigeon.setYaw(DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue ? 180 : 0);
+        initialized = true;
     }
 
     @Override
@@ -522,39 +719,55 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
             xSpeed = Math.copySign(Math.pow(xSpeed, JOYSTICK_CURVE_EXP), xSpeed);
             ySpeed = Math.copySign(Math.pow(ySpeed, JOYSTICK_CURVE_EXP), ySpeed);
-            thetaSpeed = Math.copySign(Math.pow(thetaSpeed, JOYSTICK_CURVE_EXP), thetaSpeed);
+            thetaSpeed = Math.copySign(Math.pow(thetaSpeed, JOYSTICK_ROT_CURVE_EXP), thetaSpeed);
 
             xSpeed = xSpeedLimiter.calculate(xSpeed);
             ySpeed = ySpeedLimiter.calculate(ySpeed);
             thetaSpeed = thetaSpeedLimiter.calculate(thetaSpeed);
 
             if (isControlledRotationEnabled) {
-                thetaSpeed = thetaPositionController.calculate(getRotation().getRadians());
+                thetaSpeed = rotationController.calculate(getRotation().getRadians());
             }
 
             // the speeds are initially values from -1.0 to 1.0, so we multiply by the max
             // physical velocity to output in m/s.
             xSpeed *= SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND;
             ySpeed *= SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND;
-            thetaSpeed *= SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND;
+            thetaSpeed *= MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND * 0.5;
 
             drive(new ChassisSpeeds(xSpeed, ySpeed, thetaSpeed), driveMode);
         }).withName("drivetrain.teleopDrive");
     }
 
     @Override
-    public Command controlledRotateCommand(DoubleSupplier angle, DriveMode driveMode) {
+    public Command controlledRotateCommand(DoubleSupplier angle) {
         return Commands.run(() -> {
             if (!isControlledRotationEnabled) {
-                thetaPositionController.reset(getRotation().getRadians());
+                rotationController.reset(getRotation().getRadians());
             }
             isControlledRotationEnabled = true;
-            if (driveMode == DriveMode.FIELD_ORIENTED && DriverStation.getAlliance().isPresent()
-                    && DriverStation.getAlliance().get() == Alliance.Red)
-                thetaPositionController.setGoal(angle.getAsDouble() + Math.PI);
+            if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red)
+                rotationController.setGoal(angle.getAsDouble() + Math.PI);
             else
-                thetaPositionController.setGoal(angle.getAsDouble());
+                rotationController.setGoal(angle.getAsDouble());
         }).withName("drivetrain.controlledRotate");
+    }
+
+    public Command standaloneControlledRotateCommand(DoubleSupplier angle) {
+        return runOnce(() -> {
+            if (!isControlledRotationEnabled) {
+                rotationController.reset(getRotation().getRadians());
+            }
+            // isControlledRotationEnabled = true;
+            if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red)
+                rotationController.setGoal(angle.getAsDouble() + Math.PI);
+            else
+                rotationController.setGoal(angle.getAsDouble());
+        }).andThen(run(() -> {
+            drive(new ChassisSpeeds(0, 0,
+                    rotationController.calculate(poseEstimator.getEstimatedPosition().getRotation().getRadians())),
+                    driveMode);
+        })).withName("drivetrain.standaloneControlledRotate");
     }
 
     @Override
@@ -591,17 +804,32 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     @Override
-    public Command driveToPoseCommand(Pose2d pose) {
+    public Command driveToPoseCommand(Supplier<Pose2d> poseSupplier) {
         return runOnce(() -> {
-            xPositionController.reset(getPose().getX());
-            yPositionController.reset(getPose().getY());
-            thetaPositionController.reset(getPose().getRotation().getRadians());
+            driveController.reset(getPose().getTranslation().getDistance(poseSupplier.get().getTranslation()));
+            rotationController.reset(getPose().getRotation().getRadians());
         }).andThen(run(() -> {
-            driveClosedLoop(
+            driveToPoseDistance = getPose().getTranslation().getDistance(poseSupplier.get().getTranslation());
+            double driveVelocityScalar = driveController.getSetpoint().velocity + driveController.calculate(
+                    driveToPoseDistance, 0.0);
+            if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red) {
+                driveVelocityScalar *= -1;
+            }
+            if (driveController.atGoal())
+                driveVelocityScalar = 0.0;
+
+            Translation2d driveVelocity = new Pose2d(
+                    new Translation2d(),
+                    getPose().getTranslation().minus(poseSupplier.get().getTranslation()).getAngle())
+                    .transformBy(new Transform2d(driveVelocityScalar, 0, new Rotation2d()))
+                    .getTranslation();
+
+            drive(
                     new ChassisSpeeds(
-                            xPositionController.calculate(getPose().getX(), pose.getX()),
-                            yPositionController.calculate(getPose().getX(), pose.getY()),
-                            thetaPositionController.calculate(getPose().getX(), pose.getRotation().getRadians())),
+                            driveVelocity.getX(),
+                            driveVelocity.getY(),
+                            rotationController.calculate(getPose().getRotation().getRadians(),
+                                    poseSupplier.get().getRotation().getRadians())),
                     DriveMode.FIELD_ORIENTED);
         })).withName("drivetrain.driveToPose");
     }
@@ -617,10 +845,10 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
                         new PIDConstants(PATH_FOLLOWING_TRANSLATION_kP, 0, 0),
                         new PIDConstants(PATH_FOLLOWING_ROTATION_kP, 0, 0),
                         SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND,
-                        0.41,
+                        DRIVE_BASE_RADIUS_METERS,
                         new ReplanningConfig()),
-                () -> false,
-                this).withName("drivetrain.followPath");
+                () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
+                this).finallyDo(this::stop).withName("drivetrain.followPath");
     }
 
     @Override
@@ -672,27 +900,25 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
      */
     public void drawRobotOnField(Field2d field) {
         field.setRobotPose(getPose());
-        field.getObject("simPose").setPose(simOdometry.getPoseMeters());
+        if (RobotBase.isSimulation())
+            field.getObject("simPose").setPose(simOdometry.getPoseMeters());
 
         // Draw a pose that is based on the robot pose, but shifted by the
         // translation of the module relative to robot center,
         // then rotated around its own center by the angle of the module.
-        field.getObject("frontLeft").setPose(
-                getPose().transformBy(
-                        new Transform2d(SWERVE_MODULE_LOCATIONS[0],
-                                getModuleStates()[0].angle)));
-        field.getObject("frontRight").setPose(
-                getPose().transformBy(
-                        new Transform2d(SWERVE_MODULE_LOCATIONS[1],
-                                getModuleStates()[1].angle)));
-        field.getObject("backLeft").setPose(
-                getPose().transformBy(
-                        new Transform2d(SWERVE_MODULE_LOCATIONS[2],
-                                getModuleStates()[2].angle)));
-        field.getObject("backRight").setPose(
-                getPose().transformBy(
-                        new Transform2d(SWERVE_MODULE_LOCATIONS[3],
-                                getModuleStates()[3].angle)));
+        // field.getObject("modules").setPoses(
+        // getPose().transformBy(
+        // new Transform2d(SWERVE_MODULE_LOCATIONS[0],
+        // getModulePositions()[0].angle)),
+        // getPose().transformBy(
+        // new Transform2d(SWERVE_MODULE_LOCATIONS[1],
+        // getModulePositions()[1].angle)),
+        // getPose().transformBy(
+        // new Transform2d(SWERVE_MODULE_LOCATIONS[2],
+        // getModulePositions()[2].angle)),
+        // getPose().transformBy(
+        // new Transform2d(SWERVE_MODULE_LOCATIONS[3],
+        // getModulePositions()[3].angle)));
     }
 
     public Command sysIdDriveQuasistatic(SysIdRoutine.Direction direction) {
@@ -709,5 +935,163 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
     public Command sysIdSteerDynamic(SysIdRoutine.Direction direction) {
         return sysIdSteer.dynamic(direction).withName("drivetrain.sysIdDriveQuasistatic");
+    }
+
+    @Log
+    public double getShotDistance() {
+        Pose3d target = DriverStation.getAlliance().isPresent()
+                && DriverStation.getAlliance().get() == Alliance.Red
+                        ? Reflector.reflectPose3d(FieldConstants.SPEAKER_TARGET,
+                                FieldConstants.FIELD_LENGTH)
+                        : FieldConstants.SPEAKER_TARGET;
+
+        Transform3d diff = new Pose3d(getPose()).minus(target);
+        return new Translation2d(diff.getX(), diff.getY()).getNorm();
+    }
+
+    public Command targetSpeakerCommand() {
+        return targetSpeakerCommand(
+                () -> DriverStation.getAlliance().isPresent()
+                        && DriverStation.getAlliance().get() == Alliance.Red
+                                ? Reflector.reflectPose3d(FieldConstants.SPEAKER_TARGET,
+                                        FieldConstants.FIELD_LENGTH)
+                                : FieldConstants.SPEAKER_TARGET);
+    }
+
+    public Command targetSpeakerCommand(Supplier<Pose3d> targetPose) {
+        return controlledRotateCommand(() -> {
+            Pose2d target = targetPose.get().toPose2d();
+            Transform2d diff = getPose().minus(target);
+            Rotation2d rot = new Rotation2d(diff.getX(), diff.getY());
+            rot = rot.plus(new Rotation2d(Math.PI));
+            return rot.getRadians();
+        });
+    }
+
+    public Command standaloneTargetSpeakerCommand() {
+        return standaloneTargetSpeakerCommand(
+                () -> DriverStation.getAlliance().isPresent()
+                        && DriverStation.getAlliance().get() == Alliance.Red
+                                ? Reflector.reflectPose3d(FieldConstants.SPEAKER_TARGET,
+                                        FieldConstants.FIELD_LENGTH)
+                                : FieldConstants.SPEAKER_TARGET);
+    }
+
+    public Command standaloneTargetSpeakerCommand(Supplier<Pose3d> targetPose) {
+        return standaloneControlledRotateCommand(() -> {
+            Pose2d target = targetPose.get().toPose2d();
+            Transform2d diff = getPose().minus(target);
+            Rotation2d rot = new Rotation2d(diff.getX(), diff.getY());
+            rot = rot.plus(new Rotation2d(Math.PI));
+            return rot.getRadians();
+        });
+    }
+
+    public Command targetStageCommand(DoubleSupplier xJoystickSupplier,
+            DoubleSupplier yJoystickSupplier) {
+        SlewRateLimiter xSpeedLimiter = new SlewRateLimiter(JOYSTICK_INPUT_RATE_LIMIT);
+        SlewRateLimiter ySpeedLimiter = new SlewRateLimiter(JOYSTICK_INPUT_RATE_LIMIT);
+
+        ProfiledPIDController yPidController = new ProfiledPIDController(XY_kP, XY_kI, XY_kD,
+                new TrapezoidProfile.Constraints(1, 1));
+
+        return runOnce(() -> {
+            List<Pose2d> stagePoses;
+            Pose2d currentPose = getPose();
+            if (DriverStation.getAlliance().isPresent() &&
+                    DriverStation.getAlliance().get() == Alliance.Red) {
+                stagePoses = List.of(
+                        Reflector.reflectPose2d(FieldConstants.LEFT_CHAIN_CENTER,
+                                FieldConstants.FIELD_LENGTH),
+                        Reflector.reflectPose2d(FieldConstants.RIGHT_CHAIN_CENTER,
+                                FieldConstants.FIELD_LENGTH),
+                        Reflector.reflectPose2d(FieldConstants.FAR_CHAIN_CENTER,
+                                FieldConstants.FIELD_LENGTH));
+            } else {
+                stagePoses = List.of(
+                        FieldConstants.LEFT_CHAIN_CENTER,
+                        FieldConstants.RIGHT_CHAIN_CENTER,
+                        FieldConstants.FAR_CHAIN_CENTER);
+            }
+
+            targettedStagePose = currentPose.nearest(stagePoses);
+        }).andThen(run(() -> {
+            double cosTheta = targettedStagePose.getRotation().getCos();
+            double sinTheta = targettedStagePose.getRotation().getSin();
+
+            double A = -sinTheta;
+            double B = cosTheta;
+            double C = -(A * targettedStagePose.getX() + B * targettedStagePose.getY());
+
+            // formula for distance between point and line given Ax + By + C = 0
+            double distance = (A * getPose().getX() + B * getPose().getY() + C) / Math.sqrt(A * A + B * B);
+
+            double ySpeedRelStage = yPidController.calculate(distance, 0.0);
+
+            double xJoystick = xJoystickSupplier.getAsDouble();
+            xJoystick = MathUtil.applyDeadband(xJoystick, JOYSTICK_INPUT_DEADBAND);
+            xJoystick = Math.copySign(Math.pow(xJoystick, JOYSTICK_CURVE_EXP), xJoystick);
+            xJoystick = xSpeedLimiter.calculate(xJoystick);
+            xJoystick *= SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND / 4.0;
+            if (DriverStation.getAlliance().isPresent() &&
+                    DriverStation.getAlliance().get() == Alliance.Red) {
+                xJoystick *= -1;
+            }
+
+            double yJoystick = yJoystickSupplier.getAsDouble();
+            yJoystick = MathUtil.applyDeadband(yJoystick, JOYSTICK_INPUT_DEADBAND);
+            yJoystick = Math.copySign(Math.pow(yJoystick, JOYSTICK_CURVE_EXP), yJoystick);
+            yJoystick = ySpeedLimiter.calculate(yJoystick);
+            yJoystick *= SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND / 4.0;
+            if (DriverStation.getAlliance().isPresent() &&
+                    DriverStation.getAlliance().get() == Alliance.Red) {
+                yJoystick *= -1;
+            }
+
+            double lineDirX = Math.cos(targettedStagePose.getRotation().getRadians());
+            double lineDirY = Math.sin(targettedStagePose.getRotation().getRadians());
+
+            double xSpeedRelStage = xJoystick * lineDirX + yJoystick * lineDirY;
+
+            double xSpeed = xSpeedRelStage * cosTheta - ySpeedRelStage * sinTheta;
+            double ySpeed = xSpeedRelStage * sinTheta + ySpeedRelStage * cosTheta;
+
+            if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red) {
+                xSpeed *= -1;
+                ySpeed *= -1;
+            }
+
+            double thetaSpeed = rotationController.calculate(getRotation().getRadians(),
+                    targettedStagePose.getRotation().getRadians());
+
+            if (GlobalStates.DRIVETRAIN_TARGETTING_DISABLED.enabled()) {
+                drive(new ChassisSpeeds(xJoystick, yJoystick, thetaSpeed), DriveMode.FIELD_ORIENTED);
+                return;
+            }
+
+            drive(new ChassisSpeeds(xSpeed, ySpeed, thetaSpeed), DriveMode.FIELD_ORIENTED);
+        })).withName("drivetrain.teleopDrive");
+    }
+
+    public Command playMusicCommand(MusicTrack track) {
+        return startEnd(() -> {
+            orchestra.loadMusic(track.filename);
+            orchestra.play();
+        }, orchestra::pause);
+    }
+
+    public Pose3d calculateEffectiveTargetLocation() {
+        return TrajectoryCalcs.calculateEffectiveTargetLocation(getPose(), getFieldRelativeSpeeds(),
+                getFieldRelativeAccelerations());
+    }
+
+    public boolean getInitialized() {
+        return initialized;
+    }
+
+    public Command setInitializedCommand(boolean initialized) {
+        return Commands.runOnce(() -> {
+            this.initialized = initialized;
+        }).withName("drivetrain.setInitialized");
     }
 }

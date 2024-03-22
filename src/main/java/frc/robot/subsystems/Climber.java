@@ -2,13 +2,16 @@ package frc.robot.subsystems;
 
 import java.util.function.Supplier;
 
-import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.techhounds.houndutil.houndlib.SparkConfigurator;
+import com.techhounds.houndutil.houndlib.Utils;
 import com.techhounds.houndutil.houndlib.subsystems.BaseElevator;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
 import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
+
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -26,7 +29,10 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.Climber.ClimberPosition;
+import frc.robot.GlobalStates;
+import frc.robot.PositionTracker;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -36,12 +42,11 @@ import static frc.robot.Constants.Climber.*;
 @LoggedObject
 public class Climber extends SubsystemBase implements BaseElevator<ClimberPosition> {
     @Log
-    private CANSparkMax motor;
+    private CANSparkFlex motor;
 
-    @Log
+    @Log(groups = "control")
     private ProfiledPIDController pidController = new ProfiledPIDController(kP, kI, kD, MOVEMENT_CONSTRAINTS);
 
-    @Log
     private ElevatorFeedforward feedforwardController = new ElevatorFeedforward(kS, kG, kV, kA);
 
     private ElevatorSim elevatorSim = new ElevatorSim(
@@ -51,7 +56,7 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
             DRUM_RADIUS_METERS,
             MIN_HEIGHT_METERS,
             MAX_HEIGHT_METERS,
-            true,
+            false,
             0);
 
     @Log(groups = "control")
@@ -68,9 +73,13 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
 
     private final SysIdRoutine sysIdRoutine;
 
-    public Climber() {
-        motor = SparkConfigurator.createSparkMax(
-                MOTOR_ID, MotorType.kBrushless, false,
+    private boolean initialized = false;
+
+    private PositionTracker positionTracker;
+
+    public Climber(PositionTracker positionTracker) {
+        motor = SparkConfigurator.createSparkFlex(
+                MOTOR_ID, MotorType.kBrushless, true,
                 (s) -> s.setIdleMode(IdleMode.kBrake),
                 (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
                 (s) -> s.getEncoder().setPositionConversionFactor(ENCODER_ROTATIONS_TO_METERS),
@@ -89,6 +98,8 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
                                     .linearVelocity(sysidVelocityMeasure.mut_replace(getVelocity(), MetersPerSecond));
                         },
                         this));
+
+        this.positionTracker = positionTracker;
 
         setDefaultCommand(moveToCurrentGoalCommand());
     }
@@ -115,7 +126,6 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
             return simVelocity;
     }
 
-    @Log
     public Pose3d getComponentPose() {
         return BASE_COMPONENT_POSE.plus(new Transform3d(0, 0, getPosition(), new Rotation3d()));
     }
@@ -123,10 +133,34 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
     @Override
     public void resetPosition() {
         motor.getEncoder().setPosition(0);
+        initialized = true;
     }
 
     @Override
     public void setVoltage(double voltage) {
+        voltage = MathUtil.clamp(voltage, -12, 12);
+        if (!GlobalStates.MECH_LIMITS_DISABLED.enabled()) {
+            voltage = Utils.applySoftStops(voltage, getPosition(), MIN_HEIGHT_METERS - 0.05, MAX_HEIGHT_METERS);
+            if (getPosition() < 0.02) {
+                voltage = MathUtil.clamp(voltage, -3, 12);
+            }
+        }
+        if (!GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.enabled()) {
+            if (getPosition() < 0.293 && positionTracker.getShooterTiltAngle() < 1.11 && voltage > 0) {
+                voltage = 0;
+            }
+            if (getPosition() > 0.293 && positionTracker.getShooterTiltAngle() < 1.11 && voltage < 0) {
+                voltage = 0;
+            }
+
+            if (positionTracker.getNoteLiftPosition() - getPosition() < -0.09 && voltage > 0) {
+                voltage = 0;
+            }
+        }
+
+        if (!GlobalStates.INITIALIZED.enabled() && !GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.enabled()) {
+            voltage = 0;
+        }
         motor.setVoltage(voltage);
     }
 
@@ -134,8 +168,7 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
     public Command moveToCurrentGoalCommand() {
         return run(() -> {
             feedbackVoltage = pidController.calculate(getPosition());
-            feedforwardVoltage = feedforwardController.calculate(pidController.getSetpoint().position,
-                    pidController.getSetpoint().velocity);
+            feedforwardVoltage = feedforwardController.calculate(pidController.getSetpoint().velocity);
             setVoltage(feedbackVoltage + feedforwardVoltage);
         }).withName("climber.moveToCurrentGoal");
     }
@@ -175,7 +208,7 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
 
     @Override
     public Command setOverridenSpeedCommand(Supplier<Double> speed) {
-        return run(() -> setVoltage(12.0 * speed.get()))
+        return runEnd(() -> setVoltage(12.0 * speed.get()), () -> setVoltage(0))
                 .withName("climber.setOverriddenSpeed");
     }
 
@@ -196,5 +229,47 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
 
     public Command sysIdDynamic(SysIdRoutine.Direction direction) {
         return sysIdRoutine.dynamic(direction).withName("climber.sysIdDynamic");
+    }
+
+    public Command climbToBottomCommand() {
+        return run(() -> {
+            if (getPosition() > ClimberPosition.BOTTOM.value + 0.008) {
+                setVoltage(-9);
+            } else {
+                setVoltage(-3);
+            }
+        })
+                .until(() -> getPosition() < ClimberPosition.BOTTOM.value + 0.008)
+                .finallyDo(() -> {
+                    pidController.reset(getPosition());
+                    pidController.setGoal(getPosition());
+                });
+    }
+
+    public Command resetControllersCommand() {
+        return Commands.runOnce(() -> pidController.reset(getPosition()))
+                .andThen(Commands.runOnce(() -> pidController.setGoal(getPosition())));
+    }
+
+    @Log
+    public boolean getInitialized() {
+        return initialized;
+    }
+
+    public Command setInitializedCommand(boolean initialized) {
+        return Commands.runOnce(() -> {
+            this.initialized = initialized;
+        }).withName("climber.setInitialized");
+    }
+
+    public Command zeroMechanismCommand() {
+        return run(() -> {
+            motor.setVoltage(-1);
+        }).until(new Trigger(() -> motor.getOutputCurrent() > 20).debounce(1))
+                .andThen(resetPositionCommand());
+    }
+
+    public boolean atGoal() {
+        return pidController.atGoal() || GlobalStates.AT_GOAL_OVERRIDE.enabled();
     }
 }

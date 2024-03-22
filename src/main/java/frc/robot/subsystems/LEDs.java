@@ -1,7 +1,10 @@
 package frc.robot.subsystems;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
+
 import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
 
 import edu.wpi.first.wpilibj.AddressableLED;
@@ -22,20 +25,56 @@ import static com.techhounds.houndutil.houndlib.leds.LEDPatterns.*;
 @LoggedObject
 public class LEDs extends SubsystemBase {
     /** The LEDs. */
-    private AddressableLED leds = new AddressableLED(PORT);
+    private AddressableLED leds = new AddressableLED(9);
     private AddressableLEDBuffer buffer = new AddressableLEDBuffer(LENGTH);
 
     private ArrayList<LEDState> currentStates = new ArrayList<LEDState>();
 
     public enum LEDState {
-        OFF(solid(Color.kBlack, LEDSection.SHOOTER_RIGHT)),
-        FLASHING_RED(flash(Color.kRed, 0.1, LEDSection.SHOOTER_RIGHT)),
-        FLASHING_ORANGE(flash(Color.kOrange, 1, LEDSection.SHOOTER_RIGHT));
+        OFF(solid(Color.kBlack, LEDSection.ALL)),
+        RED_BREATHE(breathe(Color.kRed, 3, 0, 255, LEDSection.ALL)),
+        NOTE_LIFT_UNINITIALIZED(
+                breathe(Color.kRed, 3, 0, 255, LEDSection.ELEVATOR_LEFT_TOP),
+                breathe(Color.kRed, 3, 0, 255, LEDSection.ELEVATOR_RIGHT_TOP)),
+        CLIMBER_UNINITIALIZED(
+                breathe(Color.kRed, 3, 0, 255, LEDSection.ELEVATOR_LEFT_BOTTOM),
+                breathe(Color.kRed, 3, 0, 255, LEDSection.ELEVATOR_RIGHT_BOTTOM)),
+        INTAKE_UNINITIALIZED(
+                breathe(Color.kRed, 3, 0, 255, LEDSection.SHOOTER_LEFT_BOTTOM),
+                breathe(Color.kRed, 3, 0, 255, LEDSection.SHOOTER_RIGHT_BOTTOM)),
+        SHOOTER_TILT_UNINITIALIZED(
+                breathe(Color.kRed, 3, 0, 255, LEDSection.SHOOTER_LEFT_TOP),
+                breathe(Color.kRed, 3, 0, 255, LEDSection.SHOOTER_RIGHT_TOP)),
+        DRIVETRAIN_GYRO_UNINITIALIZED(
+                breathe(Color.kRed, 3, 0, 255, LEDSection.SHOOTER_TOP)),
+        INITIALIZATION_BLACK_BACKGROUND(solid(Color.kBlack, LEDSection.ALL)),
+        INITIALIZED_CONFIRM(breathe(Color.kGreen, 2, 0, 255, LEDSection.ALL)),
 
-        private Consumer<AddressableLEDBuffer> bufferConsumer;
+        FLASHING_WHITE(flash(Color.kWhite, 0.5, LEDSection.ALL)),
+        SOLID_BLUE(solid(Color.kBlue, LEDSection.ALL)),
+        SOLID_GREEN(solid(Color.kGreen, LEDSection.ALL)),
+        PURPLE_WAVE(wave(new Color("#9000DD"), 30, 20, 100, 255,
+                LEDSection.SHOOTER)),
+        RAINBOW(rainbow(255, 3, LEDSection.ALL)),
+        PURPLE_FIRE(
+                fire2012Palette(0.8, 0.4,
+                        List.of(Color.kBlack, new Color("#ad3fe8"), new Color("#9000DD"), new Color("#400063")),
+                        LEDSection.ELEVATOR_LEFT),
+                fire2012Palette(0.8, 0.4,
+                        List.of(Color.kBlack, new Color("#ad3fe8"), new Color("#9000DD"), new Color("#400063")),
+                        LEDSection.ELEVATOR_RIGHT)),
+        FIRE(
+                fire2012Palette(0.8, 0.4, List.of(Color.kBlack, Color.kRed, Color.kOrange, Color.kWhite),
+                        LEDSection.ELEVATOR_LEFT),
+                fire2012Palette(0.8, 0.4, List.of(Color.kBlack, Color.kRed, Color.kOrange, Color.kWhite),
+                        LEDSection.ELEVATOR_RIGHT)),
+        NORMAL_FIRE(fire2012(0.8, 0.8, LEDSection.SHOOTER_RIGHT));
 
-        private LEDState(Consumer<AddressableLEDBuffer> bufferConsumer) {
-            this.bufferConsumer = bufferConsumer;
+        private List<Consumer<AddressableLEDBuffer>> bufferConsumers;
+
+        @SafeVarargs
+        private LEDState(Consumer<AddressableLEDBuffer>... bufferConsumer) {
+            this.bufferConsumers = Arrays.asList(bufferConsumer);
         }
     }
 
@@ -50,34 +89,27 @@ public class LEDs extends SubsystemBase {
         setDefaultCommand(updateStateMachineCommand());
     }
 
-    public Command requestFlashingRedCommand() {
-        return Commands.run(() -> currentStates.add(LEDState.FLASHING_RED)).ignoringDisable(true);
+    public Command requestStateCommand(LEDState state) {
+        return Commands.run(() -> currentStates.add(state)).ignoringDisable(true);
     }
 
     public Command updateStateMachineCommand() {
         return run(() -> {
             clear();
+            currentStates.add(LEDState.PURPLE_WAVE);
+            currentStates.add(LEDState.PURPLE_FIRE);
             currentStates.sort((s1, s2) -> s2.ordinal() - s1.ordinal());
-            currentStates.forEach((s) -> s.bufferConsumer.accept(buffer));
+            currentStates.forEach(s -> s.bufferConsumers.forEach(c -> c.accept(buffer)));
             leds.setData(buffer);
             currentStates.clear();
         })
                 .ignoringDisable(true)
-                .withName("Update State Machine");
+                .withName("leds.updateStateMachine");
     }
 
     public void clear() {
         for (int i = 0; i < buffer.getLength(); i++) {
             buffer.setLED(i, Color.kBlack);
         }
-    }
-
-    /**
-     * Sets the LEDs to the current state of the buffer.
-     */
-    @Override
-    public void periodic() {
-        // super.periodic();
-        // leds.setData(buffer);
     }
 }

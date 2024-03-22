@@ -1,0 +1,46 @@
+{
+  "NetworkTables": {
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/HoundLog//wpilib/commandScheduler": "Scheduler",
+      "/HoundLog/autonomous/chooser": "String Chooser",
+      "/HoundLog/autonomous/field": "Field2d",
+      "/HoundLog/commands/climber/resetPosition": "Command",
+      "/HoundLog/commands/initialize": "Command",
+      "/HoundLog/commands/intake/resetPosition": "Command",
+      "/HoundLog/commands/intake/triggerShooterBeam": "Command",
+      "/HoundLog/commands/noteLift/resetPosition": "Command",
+      "/HoundLog/commands/shooterTilt/resetPosition": "Command",
+      "/SmartDashboard/VisionSystemSim-main/Sim Field": "Field2d"
+    },
+    "windows": {
+      "/HoundLog/commands/climber/resetPosition": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/commands/intake/resetPosition": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/commands/noteLift/resetPosition": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/commands/shooterTilt/resetPosition": {
+        "window": {
+          "visible": true
+        }
+      }
+    }
+  },
+  "NetworkTables Info": {
+    "visible": true
+  },
+  "NetworkTables Settings": {
+    "mode": "Client (NT4)",
+    "serverTeam": "868"
+  }
+}

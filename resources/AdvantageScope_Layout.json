@@ -1,0 +1,440 @@
+{
+  "hubs": [
+    {
+      "x": 0,
+      "y": 0,
+      "width": 1680,
+      "height": 1050,
+      "state": {
+        "sidebar": {
+          "width": 412,
+          "expanded": [
+            "/HoundLog",
+            "/HoundLog/houndlog",
+            "/HoundLog/subsystems",
+            "/HoundLog/subsystems/drivetrain",
+            "/HoundLog/subsystems/vision",
+            "/HoundLog/subsystems/intake/control",
+            "/HoundLog/subsystems/intake/control/pidController",
+            "/HoundLog/subsystems/intake/leftArmMotor",
+            "/HoundLog/subsystems/intake/rollerMotor",
+            "/HoundLog/subsystems/shooter/control",
+            "/HoundLog/subsystems/shooter/control/leftPidController",
+            "/HoundLog/subsystems/shooterTilt/control",
+            "/HoundLog/subsystems/shooterTilt/control/pidController",
+            "/HoundLog/subsystems/shooterTilt/motor",
+            "/HoundLog/subsystems/climber/control",
+            "/HoundLog/subsystems/climber/control/pidController",
+            "/HoundLog/subsystems/climber/motor",
+            "/HoundLog/subsystems/noteLift/motor",
+            "/HoundLog/subsystems/noteLift/control",
+            "/HoundLog/subsystems/noteLift/control/pidController",
+            "/HoundLog/subsystems/shooter",
+            "/HoundLog/subsystems/shooter/rightMotor",
+            "/HoundLog/subsystems/shooter/leftMotor"
+          ]
+        },
+        "tabs": {
+          "selected": 1,
+          "tabs": [
+            {
+              "type": 0,
+              "path": "../docs/INDEX.md"
+            },
+            {
+              "type": 6,
+              "uuid": "fnmvdsfpngjuhct3f8eizbkt58lefh7t",
+              "fields": [],
+              "listFields": [
+                [
+                  {
+                    "type": "Component (Robot)",
+                    "key": "NT:/HoundLog/componentPoses",
+                    "sourceTypeIndex": 2,
+                    "sourceType": "Pose3d[]"
+                  },
+                  {
+                    "type": "Component (Ghost)",
+                    "key": "NT:/HoundLog/componentPoses",
+                    "sourceTypeIndex": 2,
+                    "sourceType": "Pose3d[]"
+                  },
+                  {
+                    "type": "Vision Target",
+                    "key": "NT:/HoundLog/subsystems/vision/detectedAprilTags",
+                    "sourceTypeIndex": 2,
+                    "sourceType": "Pose3d[]"
+                  },
+                  {
+                    "type": "Green Ghost",
+                    "key": "NT:/HoundLog/subsystems/vision/estimatedRobotPoses",
+                    "sourceTypeIndex": 2,
+                    "sourceType": "Pose3d[]"
+                  }
+                ],
+                [
+                  {
+                    "type": "Robot",
+                    "key": "NT:/HoundLog/subsystems/drivetrain/pose",
+                    "sourceTypeIndex": 1,
+                    "sourceType": "Pose2d"
+                  }
+                ]
+              ],
+              "options": {
+                "field": "2024 Field",
+                "alliance": "blue",
+                "robot": "Remix",
+                "unitDistance": "meters",
+                "unitRotation": "radians"
+              },
+              "configHidden": false,
+              "visualizer": {
+                "cameraIndex": -2,
+                "orbitFov": 50,
+                "cameraPosition": [
+                  4.8627447005760205,
+                  4.522963968099544,
+                  -3.9678338746516224
+                ],
+                "cameraTarget": [
+                  0,
+                  0.5,
+                  0
+                ]
+              },
+              "title": "Field"
+            },
+            {
+              "type": 1,
+              "legendHeight": 0.3,
+              "legends": {
+                "left": {
+                  "lockedRange": null,
+                  "unitConversion": {
+                    "type": null,
+                    "factor": 1
+                  },
+                  "fields": [
+                    {
+                      "key": "NT:/HoundLog/subsystems/intake/position",
+                      "color": "#2b66a2",
+                      "show": true
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/intake/control/pidController/setpointPosition",
+                      "color": "#e5b31b",
+                      "show": true
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/intake/velocity",
+                      "color": "#c0b487",
+                      "show": true
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/intake/control/pidController/setpointVelocity",
+                      "color": "#858584",
+                      "show": true
+                    }
+                  ]
+                },
+                "discrete": {
+                  "fields": [
+                    {
+                      "key": "NT:/HoundLog/subsystems/intake/control/pidController/atGoal",
+                      "color": "#af2437",
+                      "show": true
+                    }
+                  ]
+                },
+                "right": {
+                  "lockedRange": null,
+                  "unitConversion": {
+                    "type": null,
+                    "factor": 1
+                  },
+                  "fields": [
+                    {
+                      "key": "NT:/HoundLog/subsystems/intake/leftArmMotor/outputVoltage",
+                      "color": "#aacaee",
+                      "show": true
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/intake/rollerMotor/outputVoltage",
+                      "color": "#3b875a",
+                      "show": true
+                    }
+                  ]
+                }
+              },
+              "title": "Intake"
+            },
+            {
+              "type": 1,
+              "legendHeight": 0.3,
+              "legends": {
+                "left": {
+                  "lockedRange": null,
+                  "unitConversion": {
+                    "type": null,
+                    "factor": 1
+                  },
+                  "fields": [
+                    {
+                      "key": "NT:/HoundLog/subsystems/shooter/leftVelocity",
+                      "color": "#e5b31b",
+                      "show": true
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/shooter/rightVelocity",
+                      "color": "#af2437",
+                      "show": true
+                    }
+                  ]
+                },
+                "discrete": {
+                  "fields": [
+                    {
+                      "key": "NT:/HoundLog/subsystems/shooter/atGoal",
+                      "color": "#2b66a2",
+                      "show": true
+                    }
+                  ]
+                },
+                "right": {
+                  "lockedRange": null,
+                  "unitConversion": {
+                    "type": null,
+                    "factor": 1
+                  },
+                  "fields": [
+                    {
+                      "key": "NT:/HoundLog/subsystems/shooter/leftMotor/outputVoltage",
+                      "color": "#80588e",
+                      "show": true
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/shooter/rightMotor/outputVoltage",
+                      "color": "#e48b32",
+                      "show": true
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/shooter/leftMotor/outputCurrent",
+                      "color": "#aacaee",
+                      "show": true
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/shooter/rightMotor/outputCurrent",
+                      "color": "#c0b487",
+                      "show": true
+                    }
+                  ]
+                }
+              },
+              "title": "Shooter"
+            },
+            {
+              "type": 1,
+              "legendHeight": 0.3,
+              "legends": {
+                "left": {
+                  "lockedRange": null,
+                  "unitConversion": {
+                    "type": null,
+                    "factor": 1
+                  },
+                  "fields": [
+                    {
+                      "key": "NT:/HoundLog/subsystems/shooterTilt/position",
+                      "color": "#e5b31b",
+                      "show": true
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/shooterTilt/angle",
+                      "color": "#af2437",
+                      "show": true
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/shooterTilt/velocity",
+                      "color": "#80588e",
+                      "show": true
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/shooterTilt/control/pidController/setpointPosition",
+                      "color": "#e48b32",
+                      "show": true
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/shooterTilt/control/pidController/setpointVelocity",
+                      "color": "#aacaee",
+                      "show": true
+                    }
+                  ]
+                },
+                "discrete": {
+                  "fields": [
+                    {
+                      "key": "NT:/HoundLog/subsystems/shooterTilt/control/pidController/atGoal",
+                      "color": "#2b66a2",
+                      "show": true
+                    }
+                  ]
+                },
+                "right": {
+                  "lockedRange": null,
+                  "unitConversion": {
+                    "type": null,
+                    "factor": 1
+                  },
+                  "fields": [
+                    {
+                      "key": "NT:/HoundLog/subsystems/shooterTilt/motor/outputVoltage",
+                      "color": "#c0b487",
+                      "show": true
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/shooterTilt/motor/outputCurrent",
+                      "color": "#858584",
+                      "show": true
+                    }
+                  ]
+                }
+              },
+              "title": "ShooterTilt"
+            },
+            {
+              "type": 1,
+              "legendHeight": 0.3,
+              "legends": {
+                "left": {
+                  "lockedRange": null,
+                  "unitConversion": {
+                    "type": null,
+                    "factor": 1
+                  },
+                  "fields": [
+                    {
+                      "key": "NT:/HoundLog/subsystems/climber/position",
+                      "color": "#2b66a2",
+                      "show": true
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/climber/velocity",
+                      "color": "#e5b31b",
+                      "show": true
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/climber/control/pidController/setpointPosition",
+                      "color": "#af2437",
+                      "show": true
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/climber/control/pidController/setpointVelocity",
+                      "color": "#80588e",
+                      "show": true
+                    }
+                  ]
+                },
+                "discrete": {
+                  "fields": [
+                    {
+                      "key": "NT:/HoundLog/subsystems/climber/control/pidController/atGoal",
+                      "color": "#c0b487",
+                      "show": true
+                    }
+                  ]
+                },
+                "right": {
+                  "lockedRange": null,
+                  "unitConversion": {
+                    "type": null,
+                    "factor": 1
+                  },
+                  "fields": [
+                    {
+                      "key": "NT:/HoundLog/subsystems/climber/motor/outputVoltage",
+                      "color": "#e48b32",
+                      "show": true
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/climber/motor/outputCurrent",
+                      "color": "#aacaee",
+                      "show": true
+                    }
+                  ]
+                }
+              },
+              "title": "Climber"
+            },
+            {
+              "type": 1,
+              "legendHeight": 0.3,
+              "legends": {
+                "left": {
+                  "lockedRange": null,
+                  "unitConversion": {
+                    "type": null,
+                    "factor": 1
+                  },
+                  "fields": [
+                    {
+                      "key": "NT:/HoundLog/subsystems/noteLift/position",
+                      "color": "#2b66a2",
+                      "show": true
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/noteLift/velocity",
+                      "color": "#e5b31b",
+                      "show": true
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/noteLift/control/pidController/setpointPosition",
+                      "color": "#e48b32",
+                      "show": true
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/noteLift/control/pidController/setpointVelocity",
+                      "color": "#aacaee",
+                      "show": true
+                    }
+                  ]
+                },
+                "discrete": {
+                  "fields": [
+                    {
+                      "key": "NT:/HoundLog/subsystems/noteLift/control/pidController/atGoal",
+                      "color": "#c0b487",
+                      "show": true
+                    }
+                  ]
+                },
+                "right": {
+                  "lockedRange": null,
+                  "unitConversion": {
+                    "type": null,
+                    "factor": 1
+                  },
+                  "fields": [
+                    {
+                      "key": "NT:/HoundLog/subsystems/noteLift/motor/outputVoltage",
+                      "color": "#af2437",
+                      "show": true
+                    },
+                    {
+                      "key": "NT:/HoundLog/subsystems/noteLift/motor/outputCurrent",
+                      "color": "#80588e",
+                      "show": true
+                    }
+                  ]
+                }
+              },
+              "title": "NoteLift"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "satellites": [],
+  "version": "3.2.0"
+}

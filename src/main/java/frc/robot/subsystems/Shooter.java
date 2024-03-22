@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.techhounds.houndutil.houndauto.Reflector;
 import com.techhounds.houndutil.houndlib.SparkConfigurator;
 import com.techhounds.houndutil.houndlib.subsystems.BaseShooter;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
@@ -15,40 +16,60 @@ import static frc.robot.Constants.Shooter.*;
 
 import java.util.function.Supplier;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.MutableMeasure;
 import edu.wpi.first.units.Velocity;
 import edu.wpi.first.units.Voltage;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.FieldConstants;
+import frc.robot.GlobalStates;
 
 @LoggedObject
 public class Shooter extends SubsystemBase implements BaseShooter {
     @Log
-    private final CANSparkFlex primaryMotor;
+    private final CANSparkFlex leftMotor;
 
     @Log
-    private final CANSparkFlex secondaryMotor;
+    private final CANSparkFlex rightMotor;
 
-    @Log
-    private final PIDController pidController = new PIDController(kP, kI, kD);
-    @Log
-    private final SimpleMotorFeedforward feedforwardController = new SimpleMotorFeedforward(kS, kV, kA);
+    @Log(groups = "control")
+    private final PIDController leftPidController = new PIDController(left_kP, left_kI, left_kD);
+    @Log(groups = "control")
+    private final PIDController rightPidController = new PIDController(right_kP, right_kI, right_kD);
+
+    @Log(groups = "control")
+    private final SimpleMotorFeedforward leftFeedforwardController = new SimpleMotorFeedforward(left_kS, left_kV,
+            left_kA);
+    @Log(groups = "control")
+    private final SimpleMotorFeedforward rightFeedforwardController = new SimpleMotorFeedforward(right_kS, right_kV,
+            right_kA);
 
     private final FlywheelSim flywheelSim = new FlywheelSim(MOTOR_GEARBOX_REPR, GEARING,
             MOMENT_OF_INERTIA_KG_METERS_SQUARED);
 
-    @Log
-    private double feedforwardVoltage = 0.0;
-    @Log
-    private double feedbackVoltage = 0.0;
+    @Log(groups = "control")
+    private double leftFeedforwardVoltage = 0.0;
+    @Log(groups = "control")
+    private double rightFeedforwardVoltage = 0.0;
+    @Log(groups = "control")
+    private double leftFeedbackVoltage = 0.0;
+    @Log(groups = "control")
+    private double rightFeedbackVoltage = 0.0;
 
     private double simVelocity = 0.0;
 
@@ -60,40 +81,56 @@ public class Shooter extends SubsystemBase implements BaseShooter {
     private final SysIdRoutine sysIdRoutine;
 
     public Shooter() {
-        primaryMotor = SparkConfigurator.createSparkFlex(PRIMARY_MOTOR_ID, MotorType.kBrushless, false,
-                (s) -> s.setIdleMode(IdleMode.kBrake),
+        leftMotor = SparkConfigurator.createSparkFlex(LEFT_MOTOR_ID, MotorType.kBrushless, true,
+                (s) -> s.setIdleMode(IdleMode.kCoast),
                 (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
                 (s) -> s.getEncoder().setPositionConversionFactor(1.0),
-                (s) -> s.getEncoder().setVelocityConversionFactor(1.0 / 60.0));
+                (s) -> s.getEncoder().setVelocityConversionFactor(1.0 / 60.0),
+                (s) -> s.getEncoder().setAverageDepth(2),
+                (s) -> s.getEncoder().setMeasurementPeriod(16));
 
-        secondaryMotor = SparkConfigurator.createSparkFlex(SECONDARY_MOTOR_ID, MotorType.kBrushless, false,
-                (s) -> s.setIdleMode(IdleMode.kBrake),
+        rightMotor = SparkConfigurator.createSparkFlex(RIGHT_MOTOR_ID, MotorType.kBrushless, true,
+                (s) -> s.setIdleMode(IdleMode.kCoast),
                 (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
-                (s) -> s.follow(primaryMotor, true));
+                (s) -> s.getEncoder().setPositionConversionFactor(1.0),
+                (s) -> s.getEncoder().setVelocityConversionFactor(1.0 / 60.0),
+                (s) -> s.getEncoder().setAverageDepth(2),
+                (s) -> s.getEncoder().setMeasurementPeriod(16));
 
         sysIdRoutine = new SysIdRoutine(
                 new SysIdRoutine.Config(),
                 new SysIdRoutine.Mechanism(
                         (Measure<Voltage> volts) -> setVoltage(volts.magnitude()),
                         log -> {
-                            log.motor("primary")
-                                    .voltage(sysidAppliedVoltageMeasure.mut_replace(primaryMotor.getAppliedOutput(),
+                            log.motor("left")
+                                    .voltage(sysidAppliedVoltageMeasure.mut_replace(leftMotor.getAppliedOutput(),
                                             Volts))
-                                    .angularPosition(sysidPositionMeasure.mut_replace(0, Rotations))
+                                    .angularPosition(sysidPositionMeasure
+                                            .mut_replace(leftMotor.getEncoder().getPosition(), Rotations))
                                     .angularVelocity(
-                                            sysidVelocityMeasure.mut_replace(getVelocity(), RotationsPerSecond));
+                                            sysidVelocityMeasure.mut_replace(leftMotor.getEncoder().getVelocity(),
+                                                    RotationsPerSecond));
+                            log.motor("right")
+                                    .voltage(sysidAppliedVoltageMeasure.mut_replace(rightMotor.getAppliedOutput(),
+                                            Volts))
+                                    .angularPosition(sysidPositionMeasure
+                                            .mut_replace(rightMotor.getEncoder().getPosition(), Rotations))
+                                    .angularVelocity(
+                                            sysidVelocityMeasure.mut_replace(rightMotor.getEncoder().getVelocity(),
+                                                    RotationsPerSecond));
                         },
                         this));
 
         setDefaultCommand(holdVelocityCommand(() -> IDLE_RPS));
-        pidController.setTolerance(0.25);
+        leftPidController.setTolerance(TOLERANCE);
+        rightPidController.setTolerance(TOLERANCE);
 
     }
 
     @Override
     public void simulationPeriodic() {
         // set the input (the voltage of the motor)
-        flywheelSim.setInput(primaryMotor.getAppliedOutput());
+        flywheelSim.setInput(leftMotor.getAppliedOutput());
         // update the sim
         flywheelSim.update(0.020);
         simVelocity = flywheelSim.getAngularVelocityRPM() / 60.0;
@@ -102,56 +139,110 @@ public class Shooter extends SubsystemBase implements BaseShooter {
     @Override
     public double getVelocity() {
         if (RobotBase.isReal())
-            return primaryMotor.getEncoder().getVelocity();
+            return leftMotor.getEncoder().getVelocity();
+        else
+            return simVelocity;
+    }
+
+    @Log
+    public double getLeftVelocity() {
+        if (RobotBase.isReal())
+            return leftMotor.getEncoder().getVelocity();
+        else
+            return simVelocity;
+    }
+
+    @Log
+    public double getRightVelocity() {
+        if (RobotBase.isReal())
+            return rightMotor.getEncoder().getVelocity();
         else
             return simVelocity;
     }
 
     @Override
     public void setVoltage(double voltage) {
-        primaryMotor.setVoltage(voltage > 12 ? 12 : (voltage < -12 ? -12 : voltage));
+        leftMotor.setVoltage(MathUtil.clamp(voltage, -12, 12));
+        rightMotor.setVoltage(MathUtil.clamp(voltage, -12, 12));
+    }
+
+    public void setLeftVoltage(double voltage) {
+        leftMotor.setVoltage(MathUtil.clamp(voltage, -12, 12));
+    }
+
+    public void setRightVoltage(double voltage) {
+        rightMotor.setVoltage(MathUtil.clamp(voltage, -12, 12));
     }
 
     public void stop() {
-        primaryMotor.setVoltage(0);
+        leftMotor.setVoltage(0);
+        rightMotor.setVoltage(0);
     }
 
     @Override
     public Command spinAtVelocityCommand(Supplier<Double> goalVelocitySupplier) {
         return run(() -> {
-            feedbackVoltage = pidController.calculate(getVelocity(), goalVelocitySupplier.get());
-            feedforwardVoltage = feedforwardController.calculate(goalVelocitySupplier.get());
-            setVoltage(feedbackVoltage + feedforwardVoltage);
+            leftFeedbackVoltage = leftPidController.calculate(getLeftVelocity(), goalVelocitySupplier.get());
+            rightFeedbackVoltage = rightPidController.calculate(getRightVelocity(), goalVelocitySupplier.get());
+            leftFeedforwardVoltage = leftFeedforwardController.calculate(goalVelocitySupplier.get());
+            rightFeedforwardVoltage = rightFeedforwardController.calculate(goalVelocitySupplier.get());
+            setLeftVoltage(leftFeedbackVoltage + leftFeedforwardVoltage);
+            setRightVoltage(rightFeedbackVoltage + rightFeedforwardVoltage);
         }).withName("shooter.spinAtVelocity");
     }
 
-    // will get up to speed, but slowly ramp down
+    public Command targetSpeakerCommand(Supplier<Pose2d> robotPoseSupplier) {
+        return targetSpeakerCommand(robotPoseSupplier,
+                () -> DriverStation.getAlliance().isPresent()
+                        && DriverStation.getAlliance().get() == Alliance.Red
+                                ? Reflector.reflectPose3d(FieldConstants.SPEAKER_TARGET,
+                                        FieldConstants.FIELD_LENGTH)
+                                : FieldConstants.SPEAKER_TARGET);
+    }
+
+    public Command targetSpeakerCommand(Supplier<Pose2d> robotPoseSupplier, Supplier<Pose3d> targetSupplier) {
+        return spinAtVelocityCommand(() -> {
+            Pose3d target = targetSupplier.get();
+            Transform3d diff = new Pose3d(robotPoseSupplier.get()).minus(target);
+            return SPEED_INTERPOLATOR.get(new Translation2d(diff.getX(), diff.getY()).getNorm());
+        }).withName("shooter.targetSpeaker");
+    }
+
+    // will get up to speed, but slowly ramp down at only FF
     public Command holdVelocityCommand(Supplier<Double> goalVelocitySupplier) {
         return run(() -> {
-            feedbackVoltage = pidController.calculate(getVelocity(), goalVelocitySupplier.get());
-            feedforwardVoltage = feedforwardController.calculate(goalVelocitySupplier.get());
-            if (feedbackVoltage < 0)
-                feedbackVoltage = 0.0;
-            setVoltage(feedbackVoltage + feedforwardVoltage);
+            if (getVelocity() > goalVelocitySupplier.get() * 1.2) {
+                setVoltage(0);
+            } else {
+                leftFeedforwardVoltage = leftFeedforwardController.calculate(goalVelocitySupplier.get());
+                rightFeedforwardVoltage = rightFeedforwardController.calculate(goalVelocitySupplier.get());
+                leftFeedbackVoltage = leftPidController.calculate(getLeftVelocity(),
+                        goalVelocitySupplier.get());
+                rightFeedbackVoltage = rightPidController.calculate(getRightVelocity(),
+                        goalVelocitySupplier.get());
+                setLeftVoltage(leftFeedforwardVoltage + leftFeedbackVoltage);
+                setRightVoltage(rightFeedforwardVoltage + rightFeedbackVoltage);
+            }
+
         }).withName("shooter.holdVelocity");
     }
 
     @Override
     public Command setOverridenSpeedCommand(Supplier<Double> speed) {
-        return run(() -> setVoltage(12.0 * speed.get()))
+        return runEnd(() -> setVoltage(12.0 * speed.get()), () -> setVoltage(0))
                 .withName("shooter.setOverriddenSpeed");
     }
 
     @Override
     public Command coastMotorsCommand() {
-        return runOnce(() -> primaryMotor.stopMotor())
+        return runOnce(() -> leftMotor.stopMotor())
                 .andThen(() -> {
-                    primaryMotor.setIdleMode(IdleMode.kCoast);
-                    secondaryMotor.setIdleMode(IdleMode.kCoast);
+                    leftMotor.setIdleMode(IdleMode.kCoast);
+                    rightMotor.setIdleMode(IdleMode.kCoast);
                 })
                 .finallyDo((d) -> {
-                    primaryMotor.setIdleMode(IdleMode.kBrake);
-                    secondaryMotor.setIdleMode(IdleMode.kBrake);
+                    leftMotor.setIdleMode(IdleMode.kBrake);
+                    rightMotor.setIdleMode(IdleMode.kBrake);
                 }).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
                 .withName("shooter.coastMotors");
     }
@@ -164,7 +255,13 @@ public class Shooter extends SubsystemBase implements BaseShooter {
         return sysIdRoutine.dynamic(direction).withName("shooter.sysIdDynamic");
     }
 
+    public Command stopCommand() {
+        return run(this::stop);
+    }
+
+    @Log
     public boolean atGoal() {
-        return pidController.atSetpoint();
+        return leftPidController.atSetpoint() && rightPidController.atSetpoint()
+                || GlobalStates.AT_GOAL_OVERRIDE.enabled();
     }
 }
