@@ -116,6 +116,8 @@ public class Controls {
 
         controller.start().onTrue(GlobalStates.AT_GOAL_OVERRIDE.enableCommand())
                 .onFalse(GlobalStates.AT_GOAL_OVERRIDE.disableCommand());
+        controller.back().whileTrue(intake.reverseRollersCommand());
+
         controller.povDown().whileTrue(RobotCommands.resetClimb(intake, shooter,
                 shooterTilt, climber, noteLift));
         controller.povUp().whileTrue(RobotCommands.deClimb(intake, shooter,
