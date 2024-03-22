@@ -68,7 +68,7 @@ public class Autos {
     public static AutoRoutine autoCBA12(Drivetrain drivetrain, Intake intake, Shooter shooter,
             ShooterTilt shooterTilt) {
         PathPlannerPath pathStartToC = PathPlannerPath.fromChoreoTrajectory("CBA12.1");
-        PathPlannerPath pathCToB = PathPlannerPath.fromChoreoTrajectory("CBA.2");
+        PathPlannerPath pathCToB = PathPlannerPath.fromChoreoTrajectory("CBA12.2");
         PathPlannerPath pathBToA = PathPlannerPath.fromChoreoTrajectory("CBA12.3");
         PathPlannerPath pathATo1 = PathPlannerPath.fromChoreoTrajectory("CBA12.4");
         PathPlannerPath path1ToScore = PathPlannerPath.fromChoreoTrajectory("CBA12.5");
@@ -78,8 +78,10 @@ public class Autos {
 
         Command command = Commands.sequence(
                 Commands.runOnce(drivetrain::stop, drivetrain),
-                Commands.waitSeconds(0.2).andThen(drivetrain.followPathCommand(pathStartToC))
-                        .andThen(Commands.waitSeconds(0))
+                RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt)
+                        .deadlineWith(intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy()),
+                drivetrain.followPathCommand(pathStartToC)
+                        .andThen(Commands.waitSeconds(0.75))
                         .deadlineWith(
                                 intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
                                 shooterTilt.targetSpeakerCommand(drivetrain::getPose,
