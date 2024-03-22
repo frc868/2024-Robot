@@ -583,7 +583,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
     @Override
     public void resetGyro() {
-        pigeon.setYaw(DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue ? 180 : 0);
+        pigeon.setYaw(0);
         initialized = true;
     }
 
