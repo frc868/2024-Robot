@@ -52,12 +52,9 @@ public class Controls {
                         GlobalStates.SUBWOOFER_ONLY::enabled));
         joystick.triggerHardPress().and(joystick.flipTriggerIn().negate()).whileTrue(
                 Commands.either(
-                        RobotCommands.shootSubwooferCommand(drivetrain, intake, shooter, shooterTilt),
-                        Commands.either(
-                                RobotCommands.shootPodiumCommand(drivetrain, intake, shooter, shooterTilt),
-                                RobotCommands.shootOnTheMoveCommand(drivetrain, intake, shooter, shooterTilt),
-                                GlobalStates.PODIUM_ONLY::enabled),
-                        GlobalStates.SUBWOOFER_ONLY::enabled));
+                        intake.runRollersCommand(),
+                        RobotCommands.shootOnTheMoveCommand(drivetrain, intake, shooter, shooterTilt),
+                        new Trigger(GlobalStates.SUBWOOFER_ONLY::enabled).or(GlobalStates.PODIUM_ONLY::enabled)));
 
         joystick.topRightHatUp()
                 .onTrue(GlobalStates.PODIUM_ONLY.enableCommand().andThen(GlobalStates.SUBWOOFER_ONLY.disableCommand()));
