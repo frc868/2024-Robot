@@ -5,7 +5,6 @@ import static frc.robot.Constants.Shooter.PODIUM_RPS;
 import com.techhounds.houndutil.houndlib.oi.CommandVirpilJoystick;
 
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -137,20 +136,13 @@ public class Controls {
 
     public static void configureOverridesControls(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
             ShooterTilt shooterTilt, Climber climber, NoteLift noteLift) {
-        CommandGenericHID panel = new CommandGenericHID(port);
+        CommandXboxController controller = new CommandXboxController(port);
 
-        panel.button(1)
-                .onTrue(GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.enableCommand())
-                .onFalse(GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.disableCommand());
-        panel.button(2)
-                .onTrue(GlobalStates.MECH_LIMITS_DISABLED.enableCommand())
-                .onFalse(GlobalStates.MECH_LIMITS_DISABLED.disableCommand());
-        panel.button(3)
-                .onTrue(GlobalStates.INITIALIZED.enableCommand())
-                .onFalse(GlobalStates.INITIALIZED.disableCommand());
-        panel.button(4)
-                .onTrue(GlobalStates.AT_GOAL_OVERRIDE.enableCommand())
-                .onFalse(GlobalStates.AT_GOAL_OVERRIDE.disableCommand());
+        controller.x().onTrue(GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.enableCommand());
+        controller.y().onTrue(GlobalStates.MECH_LIMITS_DISABLED.enableCommand());
+        controller.b().onTrue(
+                GlobalStates.MECH_LIMITS_DISABLED.disableCommand()
+                        .andThen(GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.disableCommand()));
     }
 
     public static void configureTestingControls(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
