@@ -1068,10 +1068,11 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
             double thetaSpeed = rotationController.calculate(getRotation().getRadians(),
                     targettedStagePose.getRotation().getRadians());
 
-            if (GlobalStates.DRIVETRAIN_TARGETTING_DISABLED.enabled()) {
-                drive(new ChassisSpeeds(xJoystick, yJoystick, thetaSpeed), DriveMode.FIELD_ORIENTED);
-                return;
-            }
+            // if (GlobalStates.DRIVETRAIN_TARGETTING_DISABLED.enabled()) {
+            // drive(new ChassisSpeeds(xJoystick, yJoystick, thetaSpeed),
+            // DriveMode.FIELD_ORIENTED);
+            // return;
+            // }
 
             drive(new ChassisSpeeds(xSpeed, ySpeed, thetaSpeed), DriveMode.FIELD_ORIENTED);
         })).withName("drivetrain.teleopDrive");

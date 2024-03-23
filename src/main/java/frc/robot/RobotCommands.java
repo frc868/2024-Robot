@@ -23,9 +23,7 @@ import frc.robot.subsystems.LEDs.LEDState;
 public class RobotCommands {
     public static Command targetSpeakerCommand(Drivetrain drivetrain, Shooter shooter, ShooterTilt shooterTilt) {
         return Commands.parallel(
-                drivetrain.targetSpeakerCommand()
-                        .unless(GlobalStates.DRIVETRAIN_TARGETTING_DISABLED::enabled)
-                        .until(GlobalStates.DRIVETRAIN_TARGETTING_DISABLED::enabled),
+                drivetrain.targetSpeakerCommand(),
                 shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
                 shooter.targetSpeakerCommand(drivetrain::getPose).asProxy()).withName("RobotCommands.targetSpeaker");
     }
@@ -68,9 +66,7 @@ public class RobotCommands {
     public static Command targetSpeakerOnTheMoveCommand(Drivetrain drivetrain, Shooter shooter,
             ShooterTilt shooterTilt) {
         return Commands.parallel(
-                drivetrain.targetSpeakerCommand(drivetrain::calculateEffectiveTargetLocation)
-                        .unless(GlobalStates.DRIVETRAIN_TARGETTING_DISABLED::enabled)
-                        .until(GlobalStates.DRIVETRAIN_TARGETTING_DISABLED::enabled),
+                drivetrain.targetSpeakerCommand(drivetrain::calculateEffectiveTargetLocation),
                 shooterTilt.targetSpeakerCommand(drivetrain::getPose,
                         drivetrain::calculateEffectiveTargetLocation).asProxy(),
                 shooter.targetSpeakerCommand(drivetrain::getPose, drivetrain::calculateEffectiveTargetLocation)
@@ -98,9 +94,7 @@ public class RobotCommands {
         return Commands.deadline(
                 Commands.waitUntil(() -> shooter.atGoal() && shooterTilt.atGoal())
                         .andThen(intake.runRollersCommand().withTimeout(0.5)),
-                drivetrain.targetSpeakerCommand()
-                        .unless(GlobalStates.DRIVETRAIN_TARGETTING_DISABLED::enabled)
-                        .until(GlobalStates.DRIVETRAIN_TARGETTING_DISABLED::enabled),
+                drivetrain.targetSpeakerCommand(),
                 shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
                 shooter.targetSpeakerCommand(drivetrain::getPose).asProxy())
                 .withName("RobotCommands.shoot");

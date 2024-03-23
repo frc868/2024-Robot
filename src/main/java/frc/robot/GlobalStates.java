@@ -10,7 +10,6 @@ public enum GlobalStates {
     INTER_SUBSYSTEM_SAFETIES_DISABLED(false),
     MECH_LIMITS_DISABLED(false),
     BEAMS_BYPASSED(false),
-    DRIVETRAIN_TARGETTING_DISABLED(false),
     SUBWOOFER_ONLY(false),
     PODIUM_ONLY(false);
 
