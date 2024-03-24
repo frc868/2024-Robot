@@ -77,16 +77,16 @@ public class RobotCommands {
     public static Command targetSpeakerSubwooferCommand(Drivetrain drivetrain, Shooter shooter,
             ShooterTilt shooterTilt) {
         return Commands.parallel(
-                shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.SUBWOOFER),
-                shooter.spinAtVelocityCommand(() -> SUBWOOFER_RPS))
+                shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.SUBWOOFER).asProxy(),
+                shooter.spinAtVelocityCommand(() -> SUBWOOFER_RPS).asProxy())
                 .withName("RobotCommands.targetSpeakerSubwoofer");
     }
 
     public static Command targetSpeakerPodiumCommand(Drivetrain drivetrain, Shooter shooter,
             ShooterTilt shooterTilt) {
         return Commands.parallel(
-                shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.PODIUM),
-                shooter.spinAtVelocityCommand(() -> PODIUM_RPS))
+                shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.PODIUM).asProxy(),
+                shooter.spinAtVelocityCommand(() -> PODIUM_RPS).asProxy())
                 .withName("RobotCommands.targetSpeakerSubwoofer");
     }
 

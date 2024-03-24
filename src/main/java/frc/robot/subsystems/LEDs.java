@@ -39,6 +39,9 @@ public class LEDs extends SubsystemBase {
         CLIMBER_UNINITIALIZED(
                 breathe(Color.kRed, 3, 0, 255, LEDSection.ELEVATOR_LEFT_BOTTOM),
                 breathe(Color.kRed, 3, 0, 255, LEDSection.ELEVATOR_RIGHT_BOTTOM)),
+        CLIMBER_BAD(
+                flash(Color.kRed, 0.5, LEDSection.ELEVATOR_LEFT_BOTTOM),
+                flash(Color.kRed, 0.5, LEDSection.ELEVATOR_RIGHT_BOTTOM)),
         INTAKE_UNINITIALIZED(
                 breathe(Color.kRed, 3, 0, 255, LEDSection.SHOOTER_LEFT_BOTTOM),
                 breathe(Color.kRed, 3, 0, 255, LEDSection.SHOOTER_RIGHT_BOTTOM)),

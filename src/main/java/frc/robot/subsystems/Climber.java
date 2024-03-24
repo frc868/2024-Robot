@@ -132,7 +132,7 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
 
     @Override
     public void resetPosition() {
-        motor.getEncoder().setPosition(0);
+        motor.getEncoder().setPosition(ClimberPosition.BOTTOM.value);
         initialized = true;
     }
 
@@ -141,19 +141,19 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
         voltage = MathUtil.clamp(voltage, -12, 12);
         if (!GlobalStates.MECH_LIMITS_DISABLED.enabled()) {
             voltage = Utils.applySoftStops(voltage, getPosition(), MIN_HEIGHT_METERS - 0.05, MAX_HEIGHT_METERS);
-            if (getPosition() < 0.02) {
+            if (getPosition() < ClimberPosition.BOTTOM.value + 0.02) {
                 voltage = MathUtil.clamp(voltage, -3, 12);
             }
         }
         if (!GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.enabled()) {
-            if (getPosition() < 0.293 && positionTracker.getShooterTiltAngle() < 1.11 && voltage > 0) {
+            if (getPosition() < 1.293 && positionTracker.getShooterTiltAngle() < 1.11 && voltage > 0) {
                 voltage = 0;
             }
-            if (getPosition() > 0.293 && positionTracker.getShooterTiltAngle() < 1.11 && voltage < 0) {
+            if (getPosition() > 1.293 && positionTracker.getShooterTiltAngle() < 1.11 && voltage < 0) {
                 voltage = 0;
             }
 
-            if (positionTracker.getNoteLiftPosition() - getPosition() < -0.09 && voltage > 0) {
+            if (positionTracker.getNoteLiftPosition() - getPosition() + 1 < -0.09 && voltage > 0) {
                 voltage = 0;
             }
         }

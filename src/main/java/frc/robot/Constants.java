@@ -455,9 +455,9 @@ public class Constants {
 
     public static final class Climber {
         public static enum ClimberPosition {
-            BOTTOM(0),
-            ON_CHAIN(0.5144),
-            CLIMB_PREP(0.64);
+            BOTTOM(0 + 1),
+            ON_CHAIN(0.5144 + 1),
+            CLIMB_PREP(0.64 + 1);
 
             public final double value;
 
@@ -475,8 +475,8 @@ public class Constants {
         public static final double WHEEL_CIRCUMFERENCE = 2.0 * Math.PI * DRUM_RADIUS_METERS;
         public static final double ENCODER_ROTATIONS_TO_METERS = WHEEL_CIRCUMFERENCE / GEARING;
 
-        public static final double MIN_HEIGHT_METERS = 0;
-        public static final double MAX_HEIGHT_METERS = 0.61;
+        public static final double MIN_HEIGHT_METERS = 0 + 1;
+        public static final double MAX_HEIGHT_METERS = 0.61 + 1;
 
         public static final int CURRENT_LIMIT = 50;
 

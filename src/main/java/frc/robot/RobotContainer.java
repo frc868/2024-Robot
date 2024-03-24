@@ -191,6 +191,9 @@ public class RobotContainer {
                 .whileTrue(leds.requestStateCommand(LEDState.SUBWOOFER_ONLY));
         new Trigger(GlobalStates.PODIUM_ONLY::enabled)
                 .whileTrue(leds.requestStateCommand(LEDState.PODIUM_ONLY));
+
+        new Trigger(() -> climber.getPosition() < 0.5)
+                .whileTrue(leds.requestStateCommand(LEDState.CLIMBER_UNINITIALIZED));
     }
 
     private void configureButtonBindings() {
