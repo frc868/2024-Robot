@@ -270,7 +270,7 @@ public class Constants {
         static {
             // 3/5/24
             SPEED_INTERPOLATOR.put(1.142, 55.0);
-            SPEED_INTERPOLATOR.put(1.511, 84.0);
+            SPEED_INTERPOLATOR.put(1.511, 60.0);
             SPEED_INTERPOLATOR.put(1.995, 84.0);
             SPEED_INTERPOLATOR.put(2.2845, 84.0);
             SPEED_INTERPOLATOR.put(2.593, 84.0);
