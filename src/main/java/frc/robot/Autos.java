@@ -105,7 +105,7 @@ public class Autos {
                 drivetrain.followPathCommand(pathATo1)
                         .deadlineWith(
                                 intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
-                                intake.runRollersCommand().until(intake.noteInShooterTrigger)),
+                                intake.runRollersAutoCommand().until(intake.noteInShooterTrigger)),
                 drivetrain.followPathCommand(path1ToScore)
                         .deadlineWith(
                                 Commands.sequence(
@@ -122,7 +122,7 @@ public class Autos {
                 drivetrain.followPathCommand(pathScoreTo2)
                         .deadlineWith(
                                 intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
-                                intake.runRollersCommand().until(intake.noteInShooterTrigger)),
+                                intake.runRollersAutoCommand().until(intake.noteInShooterTrigger)),
                 drivetrain.followPathCommand(path2ToScore)
                         .deadlineWith(
                                 Commands.sequence(
