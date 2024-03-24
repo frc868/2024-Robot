@@ -45,7 +45,8 @@ public class Controls {
 
         joystick.triggerSoftPress().and(joystick.flipTriggerIn().negate()).whileTrue(
                 Commands.either(
-                        RobotCommands.targetSpeakerSubwooferCommand(drivetrain, shooter, shooterTilt),
+                        RobotCommands.targetSpeakerSubwooferCommand(drivetrain, shooter,
+                                shooterTilt),
                         Commands.either(
                                 RobotCommands.targetSpeakerPodiumCommand(drivetrain, shooter, shooterTilt),
                                 RobotCommands.targetSpeakerOnTheMoveCommand(drivetrain, shooter, shooterTilt),
