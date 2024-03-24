@@ -435,8 +435,8 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
                     poseEstimator.update(Rotation2d.fromDegrees(yawDegrees), modulePositions);
                     if (RobotBase.isSimulation()) {
                         simOdometry.update(getRotation(), getModulePositions());
-                        drawRobotOnField(AutoManager.getInstance().getField());
                     }
+                    drawRobotOnField(AutoManager.getInstance().getField());
                 } finally {
                     stateLock.writeLock().unlock();
                 }
