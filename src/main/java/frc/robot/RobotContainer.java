@@ -212,6 +212,8 @@ public class RobotContainer {
                 shooter, shooterTilt));
         AutoManager.getInstance().addRoutine(Autos.auto453(drivetrain, intake,
                 shooter, shooterTilt));
+        AutoManager.getInstance().addRoutine(Autos.autoCBA1(drivetrain, intake,
+                shooter, shooterTilt));
         AutoManager.getInstance().addRoutine(Autos.autoCBA12(drivetrain, intake,
                 shooter, shooterTilt));
     }

@@ -65,7 +65,7 @@ public class Autos {
                 new Pose2d(startingPose.getX(), startingPose.getY(), new Rotation2d(Math.PI)));
     }
 
-    public static AutoRoutine autoCBA12(Drivetrain drivetrain, Intake intake, Shooter shooter,
+    public static AutoRoutine autoCBA1(Drivetrain drivetrain, Intake intake, Shooter shooter,
             ShooterTilt shooterTilt) {
         PathPlannerPath pathStartToC = PathPlannerPath.fromChoreoTrajectory("CBA12.1");
         PathPlannerPath pathCToB = PathPlannerPath.fromChoreoTrajectory("CBA12.2");
@@ -132,6 +132,82 @@ public class Autos {
                                 shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
                                 shooter.targetSpeakerCommand(drivetrain::getPose).asProxy()),
                 Commands.waitSeconds(0.75).andThen(intake.runRollersCommand().withTimeout(0.25)).deadlineWith(
+                        shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
+                        shooter.targetSpeakerCommand(drivetrain::getPose).asProxy(),
+                        drivetrain.standaloneTargetSpeakerCommand()));
+
+        return new AutoRoutine("CBA1", command,
+                List.of(pathStartToC, pathCToB, pathBToA, pathATo1, path1ToScore, pathScoreTo2, path2ToScore),
+                new Pose2d(startingPose.getX(), startingPose.getY(), new Rotation2d(Math.PI)));
+    }
+
+    public static AutoRoutine autoCBA12(Drivetrain drivetrain, Intake intake, Shooter shooter,
+            ShooterTilt shooterTilt) {
+        PathPlannerPath pathStartToC = PathPlannerPath.fromChoreoTrajectory("CBA12.1");
+        PathPlannerPath pathCToB = PathPlannerPath.fromChoreoTrajectory("CBA12.2");
+        PathPlannerPath pathBToA = PathPlannerPath.fromChoreoTrajectory("CBA12.3");
+        PathPlannerPath pathATo1 = PathPlannerPath.fromChoreoTrajectory("CBA12.4");
+        PathPlannerPath path1ToScore = PathPlannerPath.fromChoreoTrajectory("CBA12.5");
+        PathPlannerPath pathScoreTo2 = PathPlannerPath.fromChoreoTrajectory("CBA12.6");
+        PathPlannerPath path2ToScore = PathPlannerPath.fromChoreoTrajectory("CBA12.7");
+        Pose2d startingPose = pathStartToC.getPreviewStartingHolonomicPose();
+
+        Command command = Commands.sequence(
+                Commands.runOnce(drivetrain::stop, drivetrain),
+                RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt)
+                        .deadlineWith(intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy()),
+                drivetrain.followPathCommand(pathStartToC)
+                        .andThen(Commands.waitSeconds(0.1))
+                        .deadlineWith(
+                                intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
+                                shooterTilt.targetSpeakerCommand(drivetrain::getPose,
+                                        drivetrain::calculateEffectiveTargetLocation).asProxy(),
+                                shooter.targetSpeakerCommand(drivetrain::getPose,
+                                        drivetrain::calculateEffectiveTargetLocation).asProxy(),
+                                Commands.waitUntil(shooter::atGoal).andThen(intake.runRollersCommand())),
+                drivetrain.followPathCommand(pathCToB).andThen(Commands.waitSeconds(0))
+                        .deadlineWith(
+                                intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
+                                intake.runRollersCommand(),
+                                shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
+                                shooter.targetSpeakerCommand(drivetrain::getPose).asProxy()),
+                drivetrain.followPathCommand(pathBToA).andThen(Commands.waitSeconds(0.5))
+                        .deadlineWith(
+                                intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
+                                intake.runRollersCommand(),
+                                shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
+                                shooter.targetSpeakerCommand(drivetrain::getPose).asProxy()),
+
+                drivetrain.followPathCommand(pathATo1)
+                        .deadlineWith(
+                                intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
+                                intake.runRollersAutoCommand().until(intake.noteInShooterTrigger)),
+                drivetrain.followPathCommand(path1ToScore)
+                        .deadlineWith(
+                                Commands.sequence(
+                                        intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy()
+                                                .alongWith(intake.runRollersCommand()
+                                                        .until(intake.noteInShooterTrigger))),
+                                shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
+                                shooter.targetSpeakerCommand(drivetrain::getPose).asProxy()),
+                Commands.waitSeconds(0.3).andThen(intake.runRollersCommand().withTimeout(0.25)).deadlineWith(
+                        shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
+                        shooter.targetSpeakerCommand(drivetrain::getPose).asProxy(),
+                        drivetrain.standaloneTargetSpeakerCommand()),
+
+                drivetrain.followPathCommand(pathScoreTo2)
+                        .deadlineWith(
+                                intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
+                                intake.runRollersAutoCommand().until(intake.noteInShooterTrigger)),
+                drivetrain.followPathCommand(path2ToScore)
+                        .deadlineWith(
+                                Commands.sequence(
+                                        intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy()
+                                                .alongWith(intake.runRollersCommand()
+                                                        .until(intake.noteInShooterTrigger))),
+                                shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
+                                shooter.targetSpeakerCommand(drivetrain::getPose).asProxy()),
+                Commands.waitSeconds(0.3).andThen(intake.runRollersCommand().withTimeout(0.25)).deadlineWith(
                         shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
                         shooter.targetSpeakerCommand(drivetrain::getPose).asProxy(),
                         drivetrain.standaloneTargetSpeakerCommand()));
