@@ -42,13 +42,13 @@ public class Vision extends SubsystemBase {
 
     @Log(groups = "cameras")
     private final AprilTagPhotonCamera houndeye01 = new AprilTagPhotonCamera("HoundEye01",
-            ROBOT_TO_CAMS[0], CAMERA_CONSTANTS, 0.64, 0.22);
+            ROBOT_TO_CAMS[0], CAMERA_CONSTANTS, 0.2, 0.1);
     @Log(groups = "cameras")
     private final AprilTagPhotonCamera houndeye02 = new AprilTagPhotonCamera("HoundEye02",
-            ROBOT_TO_CAMS[1], CAMERA_CONSTANTS, 0.64, 0.22);
+            ROBOT_TO_CAMS[1], CAMERA_CONSTANTS, 0.2, 0.1);
     @Log(groups = "cameras")
     private final AprilTagPhotonCamera houndeye03 = new AprilTagPhotonCamera("HoundEye03",
-            ROBOT_TO_CAMS[2], CAMERA_CONSTANTS, 0.64, 0.22);
+            ROBOT_TO_CAMS[2], CAMERA_CONSTANTS, 0.2, 0.1);
 
     private final AprilTagPhotonCamera[] cameras = new AprilTagPhotonCamera[] {
             houndeye01, houndeye02, houndeye03 };
