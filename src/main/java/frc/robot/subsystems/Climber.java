@@ -234,7 +234,7 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
     public Command climbToBottomCommand() {
         return run(() -> {
             if (getPosition() > ClimberPosition.BOTTOM.value + 0.008) {
-                setVoltage(-9);
+                setVoltage(-12);
             } else {
                 setVoltage(-3);
             }
