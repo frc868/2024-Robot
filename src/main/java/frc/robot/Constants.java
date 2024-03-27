@@ -311,7 +311,7 @@ public class Constants {
         public static final int MOTOR_ID = 14;
 
         public static final DCMotor MOTOR_GEARBOX_REPR = DCMotor.getNeoVortex(1);
-        public static final double GEARING = 9.0;
+        public static final double GEARING = 5.0;
         public static final double MASS_KG = Units.lbsToKilograms(12);
         // 1 rot = 12mm
         public static final double ENCODER_ROTATIONS_TO_METERS = Units.inchesToMeters(0.5) / GEARING;
@@ -330,7 +330,7 @@ public class Constants {
         public static final double kD = 2;
         public static final double kS = 0.0760704;
         public static final double kG = 0.07851;
-        public static final double kV = 76.9668;
+        public static final double kV = 76.9668 * (9.0 / 5.0);
         public static final double kA = 6.00096;
         public static final double TOLERANCE = 0.02;
 
