@@ -350,19 +350,22 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
                 moveToPositionCommand(() -> IntakePosition.STOW)).withName("intake.intakeNote");
     }
 
+    public Command intakeNoteAutoCommand() {
+        return Commands.parallel(
+                moveToPositionCommand(() -> IntakePosition.GROUND),
+                Commands.sequence(
+                        runRollersCommand().until(noteInIntakeFromOutsideTrigger.or(noteInShooterTrigger)),
+                        runRollersHalfCommand().until(noteInShooterTrigger),
+                        runRollersSlowCommand().until(noteFullyInShooterTrigger)))
+                .withName("intake.intakeNoteAuto");
+    }
+
     public Command intakeFromSourceCommand() {
         return Commands.sequence(
                 moveToPositionCommand(() -> IntakePosition.SOURCE),
                 moveToCurrentGoalCommand().alongWith(sourceIntakeRollersCommand())
                         .until(noteInIntakeFromOutsideTrigger),
                 moveToPositionCommand(() -> IntakePosition.STOW)).withName("intake.intakeNote");
-    }
-
-    public Command intakeNoteAutoCommand() {
-        return Commands.sequence(
-                moveToPositionCommand(() -> IntakePosition.GROUND),
-                moveToCurrentGoalCommand().alongWith(runRollersCommand()).until(noteInShooterTrigger))
-                .withName("intake.intakeNoteAuto");
     }
 
     public Command simTriggerIntakeBeamCommand() {

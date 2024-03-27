@@ -103,9 +103,7 @@ public class Autos {
                                 shooter.targetSpeakerCommand(drivetrain::getPose).asProxy()),
 
                 drivetrain.followPathCommand(pathATo1)
-                        .deadlineWith(
-                                intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
-                                intake.runRollersAutoCommand().until(intake.noteInShooterTrigger)),
+                        .deadlineWith(RobotCommands.intakeNoteAutoCommand(intake, shooterTilt)),
                 drivetrain.followPathCommand(path1ToScore)
                         .deadlineWith(
                                 Commands.sequence(
@@ -120,9 +118,7 @@ public class Autos {
                         drivetrain.standaloneTargetSpeakerCommand()),
 
                 drivetrain.followPathCommand(pathScoreTo2)
-                        .deadlineWith(
-                                intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
-                                intake.runRollersAutoCommand().until(intake.noteInShooterTrigger)),
+                        .deadlineWith(RobotCommands.intakeNoteAutoCommand(intake, shooterTilt)),
                 drivetrain.followPathCommand(path2ToScore)
                         .deadlineWith(
                                 Commands.sequence(
@@ -179,9 +175,7 @@ public class Autos {
                                 shooter.targetSpeakerCommand(drivetrain::getPose).asProxy()),
 
                 drivetrain.followPathCommand(pathATo1)
-                        .deadlineWith(
-                                intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
-                                intake.runRollersAutoCommand().until(intake.noteInShooterTrigger)),
+                        .deadlineWith(RobotCommands.intakeNoteAutoCommand(intake, shooterTilt)),
                 drivetrain.followPathCommand(path1ToScore)
                         .deadlineWith(
                                 Commands.sequence(
@@ -196,9 +190,7 @@ public class Autos {
                         drivetrain.standaloneTargetSpeakerCommand()),
 
                 drivetrain.followPathCommand(pathScoreTo2)
-                        .deadlineWith(
-                                intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
-                                intake.runRollersAutoCommand().until(intake.noteInShooterTrigger)),
+                        .deadlineWith(RobotCommands.intakeNoteAutoCommand(intake, shooterTilt)),
                 drivetrain.followPathCommand(path2ToScore)
                         .deadlineWith(
                                 Commands.sequence(
