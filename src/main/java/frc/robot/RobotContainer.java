@@ -190,6 +190,10 @@ public class RobotContainer {
                 .whileTrue(leds.requestStateCommand(LEDState.PODIUM_ONLY));
         new Trigger(GlobalStates.QUICK_CLIMB::enabled)
                 .whileTrue(leds.requestStateCommand(LEDState.QUICK_CLIMB));
+        new Trigger(GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED::enabled)
+                .whileTrue(leds.requestStateCommand(LEDState.INTER_SUBSYSTEM_SAFETIES_DISABLED));
+        new Trigger(GlobalStates.MECH_LIMITS_DISABLED::enabled)
+                .whileTrue(leds.requestStateCommand(LEDState.MECH_LIMITS_DISABLED));
 
         new Trigger(() -> climber.getPosition() < 0.5)
                 .whileTrue(leds.requestStateCommand(LEDState.CLIMBER_UNINITIALIZED));
