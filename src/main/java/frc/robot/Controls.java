@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.Intake.IntakePosition;
+import frc.robot.Constants.NoteLift.NoteLiftPosition;
 import frc.robot.Constants.ShooterTilt.ShooterTiltPosition;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Drivetrain;
@@ -43,6 +44,23 @@ public class Controls {
         joystick.centerBottomHatRight()
                 .whileTrue(drivetrain.controlledRotateCommand(() -> Math.toRadians(90)));
 
+        joystick.blackThumbButton()
+                .whileTrue(intake.intakeNoteCommand()
+                        .alongWith(shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.INTAKE).asProxy()))
+                .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
+
+        joystick.centerTopHatButton().whileTrue(
+                Commands.parallel(
+                        intake.intakeFromSourceCommand(),
+                        leds.requestStateCommand(LEDState.FLASHING_AQUA)))
+                .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
+
+        joystick.redButton().whileTrue(RobotCommands.ampPrepIntakeCommand(intake, shooterTilt))
+                .onFalse(intake.moveToPositionCommand(() -> IntakePosition.AMP));
+
+        joystick.pinkieButton().whileTrue(intake.ampScoreRollersCommand())
+                .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
+
         joystick.triggerSoftPress().and(joystick.flipTriggerIn().negate()).whileTrue(
                 Commands.either(
                         RobotCommands.targetSpeakerSubwooferCommand(drivetrain, shooter,
@@ -66,36 +84,27 @@ public class Controls {
                 .onTrue(GlobalStates.SUBWOOFER_ONLY.disableCommand()
                         .andThen(GlobalStates.PODIUM_ONLY.disableCommand()));
 
-        joystick.blackThumbButton()
-                .whileTrue(intake.intakeNoteCommand()
-                        .alongWith(shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.INTAKE).asProxy()))
-                .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
+        joystick.bottomHatButton().or(joystick.bottomHatLeft()).onTrue(
+                GlobalStates.QUICK_CLIMB.disableCommand().andThen(
+                        RobotCommands.intakeToNoteLift(shooter, shooterTilt, noteLift, leds)));
 
-        joystick.centerTopHatButton().whileTrue(
-                Commands.parallel(
-                        intake.intakeFromSourceCommand(),
-                        leds.requestStateCommand(LEDState.FLASHING_AQUA)))
-                .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
+        joystick.dialSoftPress().onTrue(noteLift.moveToPositionCommand(() -> NoteLiftPosition.TRAVEL));
 
-        joystick.redButton().whileTrue(RobotCommands.ampPrepIntakeCommand(intake, shooterTilt))
-                .onFalse(intake.moveToPositionCommand(() -> IntakePosition.AMP));
-
-        joystick.pinkieButton().whileTrue(intake.ampScoreRollersCommand())
-                .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
-
-        joystick.bottomHatButton().or(joystick.bottomHatLeft())
-                .onTrue(RobotCommands.intakeToNoteLift(shooter, shooterTilt,
-                        noteLift, leds));
         joystick.flipTriggerIn()
-                .whileTrue(RobotCommands.prepareClimb(() -> -joystick.getY(), () -> -joystick.getX(),
-                        () -> -joystick.getTwist(), drivetrain,
-                        intake, shooter,
-                        shooterTilt, climber, noteLift));
+                .whileTrue(
+                        Commands.either(
+                                RobotCommands.prepareClimb(intake, shooter, shooterTilt, climber, noteLift),
+                                RobotCommands.prepareQuickClimb(intake, shooter, shooterTilt, climber, noteLift),
+                                () -> !GlobalStates.QUICK_CLIMB.enabled()));
         joystick.flipTriggerIn().and(joystick.triggerSoftPress()).whileTrue(
                 Commands.sequence(
                         climber.climbToBottomCommand(),
                         Commands.waitUntil(joystick.triggerHardPress()),
                         noteLift.scoreNoteCommand()));
+
+        joystick.bottomHatRight()
+                .onTrue(GlobalStates.QUICK_CLIMB.toggleCommand());
+
     }
 
     public static void configureOperatorControls(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
@@ -144,6 +153,8 @@ public class Controls {
         controller.b().onTrue(
                 GlobalStates.MECH_LIMITS_DISABLED.disableCommand()
                         .andThen(GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.disableCommand()));
+
+        controller.a().onTrue(shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.SUBWOOFER));
     }
 
     public static void configureTestingControls(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
@@ -179,7 +190,5 @@ public class Controls {
         controller.y().and(controller.rightBumper()).whileTrue(shooter.sysIdQuasistatic(Direction.kReverse));
         controller.a().and(controller.rightBumper()).whileTrue(shooter.sysIdDynamic(Direction.kForward));
         controller.b().and(controller.rightBumper()).whileTrue(shooter.sysIdDynamic(Direction.kReverse));
-
     }
-
 }
