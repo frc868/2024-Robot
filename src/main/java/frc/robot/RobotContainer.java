@@ -16,7 +16,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
@@ -36,8 +35,6 @@ import frc.robot.utils.TrajectoryCalcs;
 
 import java.util.ArrayList;
 import java.util.function.Supplier;
-
-import org.littletonrobotics.urcl.URCL;
 
 /**
  * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -72,8 +69,8 @@ public class RobotContainer {
     @Log(groups = "subsystems")
     private final HoundBrian houndBrian = new HoundBrian(drivetrain, intake, shooterTilt, climber, noteLift, leds);
 
-    @Log(groups = { "subsystems", "misc" })
-    private final PowerDistribution pdh = new PowerDistribution();
+    // @Log(groups = { "subsystems", "misc" })
+    // private final PowerDistribution pdh = new PowerDistribution();
 
     @SendableLog(groups = "wpilib")
     private final CommandScheduler commandScheduler = CommandScheduler.getInstance();
@@ -142,7 +139,7 @@ public class RobotContainer {
         DataLogManager.logNetworkTables(true);
         DriverStation.startDataLog(DataLogManager.getLog());
         DataLogManager.start();
-        URCL.start();
+        // URCL.start();
         SignalLogger.start();
 
         LoggingManager.getInstance().registerRobotContainer(this);
@@ -191,6 +188,8 @@ public class RobotContainer {
                 .whileTrue(leds.requestStateCommand(LEDState.SUBWOOFER_ONLY));
         new Trigger(GlobalStates.PODIUM_ONLY::enabled)
                 .whileTrue(leds.requestStateCommand(LEDState.PODIUM_ONLY));
+        new Trigger(GlobalStates.QUICK_CLIMB::enabled)
+                .whileTrue(leds.requestStateCommand(LEDState.QUICK_CLIMB));
 
         new Trigger(() -> climber.getPosition() < 0.5)
                 .whileTrue(leds.requestStateCommand(LEDState.CLIMBER_UNINITIALIZED));
