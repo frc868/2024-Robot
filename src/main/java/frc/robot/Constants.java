@@ -236,7 +236,7 @@ public class Constants {
                 * Math.pow(WHEEL_RADIUS, 2);
         public static final int CURRENT_LIMIT = 70;
 
-        public static final double IDLE_RPS = 15;
+        public static final double IDLE_RPS = 35;
         public static final double SUBWOOFER_RPS = 55;
         public static final double PODIUM_RPS = 84;
 
