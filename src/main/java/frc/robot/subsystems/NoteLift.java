@@ -145,7 +145,7 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
                     MAX_HEIGHT_METERS + 0.03); // allows note lift to unspool slightly
 
         if (!GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.enabled()) {
-            if (getPosition() - positionTracker.getClimberPosition() + 1 < -0.09 && voltage < 0) {
+            if (getPosition() - positionTracker.getClimberPosition() + 1 < -0.065 && voltage < 0) {
                 voltage = 0;
             }
             if (getPosition() < 0.233 && positionTracker.getShooterTiltAngle() < 1.11 && voltage > 0) {
