@@ -201,14 +201,14 @@ public class Constants {
         public static final int ARM_CURRENT_LIMIT = 30;
         public static final int ROLLER_CURRENT_LIMIT = 65;
 
-        // 2/14/24
+        // 3/28/24
         public static final double kP = 3.5;
         public static final double kI = 0.0;
         public static final double kD = 0.1;
-        public static final double kS = 0.0;
-        public static final double kG = 0.320004;
-        public static final double kV = 0.861492;
-        public static final double kA = 0.0848256;
+        public static final double kS = 0.132468;
+        public static final double kG = 0.273264;
+        public static final double kV = 0.77622;
+        public static final double kA = 0;
         public static final double TOLERANCE = 0.05;
 
         // max theoretical velocity: 15.777 rad/s
@@ -316,7 +316,7 @@ public class Constants {
         // 1 rot = 12mm
         public static final double ENCODER_ROTATIONS_TO_METERS = Units.inchesToMeters(0.5) / GEARING;
 
-        public static final double MIN_HEIGHT_METERS = 0;
+        public static final double MIN_HEIGHT_METERS = 0.005;
         public static final double MAX_HEIGHT_METERS = 0.14;
 
         public static final double MIN_ANGLE_RADIANS = 0.389842;
@@ -324,14 +324,14 @@ public class Constants {
 
         public static final int CURRENT_LIMIT = 25;
 
-        // 2/14/2024
+        // 3/28/24
         public static final double kP = 400;
         public static final double kI = 0;
         public static final double kD = 2;
-        public static final double kS = 0.0760704;
-        public static final double kG = 0.07851;
-        public static final double kV = 76.9668 * (9.0 / 5.0);
-        public static final double kA = 6.00096;
+        public static final double kS = 0.104904;
+        public static final double kG = 0.124356;
+        public static final double kV = 44.0148;
+        public static final double kA = 3.48876;
         public static final double TOLERANCE = 0.02;
 
         public static final double MAX_VELOCITY_METERS_PER_SECOND = 0.3;
@@ -457,7 +457,8 @@ public class Constants {
         public static enum ClimberPosition {
             BOTTOM(0 + 1),
             ON_CHAIN(0.5144 + 1),
-            CLIMB_PREP(0.64 + 1);
+            CLIMB_PREP(0.605 + 1),
+            MAX_HEIGHT(0.67485 + 1);
 
             public final double value;
 
@@ -476,21 +477,21 @@ public class Constants {
         public static final double ENCODER_ROTATIONS_TO_METERS = WHEEL_CIRCUMFERENCE / GEARING;
 
         public static final double MIN_HEIGHT_METERS = 0 + 1;
-        public static final double MAX_HEIGHT_METERS = 0.61 + 1;
+        public static final double MAX_HEIGHT_METERS = 0.67485 + 1;
 
         public static final int CURRENT_LIMIT = 50;
 
-        // 2/18/24
+        // 3/28/24
         public static final double kP = 20;
         public static final double kI = 0;
         public static final double kD = 0;
-        public static final double kS = 0.0787596;
-        public static final double kG = -0.0558552;
-        public static final double kV = 32.5716;
-        public static final double kA = 1.099416;
+        public static final double kS = 0.089874;
+        public static final double kG = -0.0441588;
+        public static final double kV = 31.89;
+        public static final double kA = 1.68948;
         public static final double TOLERANCE = 0.01;
 
-        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0.55; // TODO
+        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0.344; // TODO
         public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0.5; // TODO
         public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
@@ -502,6 +503,7 @@ public class Constants {
         public static enum NoteLiftPosition {
             BOTTOM(0),
             INTAKE(0.16),
+            TRAVEL(0.4903106689453125),
             CLIMB_PREP(0.55),
             STOW(0.62),
             TOP(0.66);
