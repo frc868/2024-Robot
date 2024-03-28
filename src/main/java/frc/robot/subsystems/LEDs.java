@@ -9,10 +9,13 @@ import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.LEDs.LEDSection;
+
 import static frc.robot.Constants.LEDs.*;
 import static com.techhounds.houndutil.houndlib.leds.LEDPatterns.*;
 
@@ -27,6 +30,7 @@ public class LEDs extends SubsystemBase {
     /** The LEDs. */
     private AddressableLED leds = new AddressableLED(9);
     private AddressableLEDBuffer buffer = new AddressableLEDBuffer(LENGTH);
+    private final Notifier loadingNotifier;
 
     private ArrayList<LEDState> currentStates = new ArrayList<LEDState>();
 
@@ -92,6 +96,15 @@ public class LEDs extends SubsystemBase {
         leds.setData(buffer);
         leds.start();
 
+        loadingNotifier = new Notifier(
+                () -> {
+                    synchronized (this) {
+                        breathe(Color.kWhite, 3, 0, 255, LEDSection.ALL).accept(buffer);
+                        leds.setData(buffer);
+                    }
+                });
+        loadingNotifier.startPeriodic(0.02);
+
         setDefaultCommand(updateStateMachineCommand());
     }
 
@@ -101,6 +114,7 @@ public class LEDs extends SubsystemBase {
 
     public Command updateStateMachineCommand() {
         return run(() -> {
+            loadingNotifier.stop();
             clear();
             currentStates.add(LEDState.PURPLE_WAVE);
             currentStates.add(LEDState.PURPLE_FIRE);
