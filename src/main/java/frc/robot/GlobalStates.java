@@ -11,6 +11,7 @@ public enum GlobalStates {
     MECH_LIMITS_DISABLED(false),
     BEAMS_BYPASSED(false),
     SUBWOOFER_ONLY(false),
+    QUICK_CLIMB(false),
     PODIUM_ONLY(false);
 
     private boolean isEnabled;
@@ -25,6 +26,10 @@ public enum GlobalStates {
 
     public Command enableCommand() {
         return Commands.runOnce(() -> this.isEnabled = true).ignoringDisable(true);
+    }
+
+    public Command toggleCommand() {
+        return Commands.runOnce(() -> this.isEnabled = !this.isEnabled).ignoringDisable(true);
     }
 
     public Command disableCommand() {

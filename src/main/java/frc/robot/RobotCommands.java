@@ -3,7 +3,6 @@ package frc.robot;
 import static frc.robot.Constants.Shooter.PODIUM_RPS;
 import static frc.robot.Constants.Shooter.SUBWOOFER_RPS;
 
-import java.util.function.DoubleSupplier;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
@@ -152,9 +151,7 @@ public class RobotCommands {
                 noteLift.moveToPositionCommand(() -> NoteLiftPosition.INTAKE).asProxy());
     }
 
-    public static Command prepareClimb(DoubleSupplier xSpeedSupplier, DoubleSupplier ySpeedSupplier,
-            DoubleSupplier thetaSpeedSupplier,
-            Drivetrain drivetrain, Intake intake, Shooter shooter, ShooterTilt shooterTilt, Climber climber,
+    public static Command prepareClimb(Intake intake, Shooter shooter, ShooterTilt shooterTilt, Climber climber,
             NoteLift noteLift) {
         return Commands.parallel(
                 new ScheduleCommand(shooter.stopCommand()),
@@ -162,6 +159,16 @@ public class RobotCommands {
                 intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
                 noteLift.moveToPositionCommand(() -> NoteLiftPosition.CLIMB_PREP).asProxy(),
                 climber.moveToPositionCommand(() -> ClimberPosition.CLIMB_PREP).asProxy());
+    }
+
+    public static Command prepareQuickClimb(Intake intake, Shooter shooter, ShooterTilt shooterTilt, Climber climber,
+            NoteLift noteLift) {
+        return Commands.parallel(
+                new ScheduleCommand(shooter.stopCommand()),
+                shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.CLIMB).asProxy(),
+                intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
+                noteLift.moveToPositionCommand(() -> NoteLiftPosition.TOP).asProxy(),
+                climber.moveToPositionCommand(() -> ClimberPosition.MAX_HEIGHT).asProxy());
     }
 
     public static Command resetClimb(Intake intake, Shooter shooter, ShooterTilt shooterTilt, Climber climber,
