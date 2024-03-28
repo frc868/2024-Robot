@@ -128,7 +128,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
                 (s) -> s.setSmartCurrentLimit(ROLLER_CURRENT_LIMIT));
 
         sysIdRoutine = new SysIdRoutine(
-                new SysIdRoutine.Config(Volts.of(1).per(Seconds.of(1)), Volts.of(5), null, null),
+                new SysIdRoutine.Config(Volts.of(1).per(Seconds.of(1)), Volts.of(3), null, null),
                 new SysIdRoutine.Mechanism(
                         (Measure<Voltage> volts) -> setVoltage(volts.magnitude()),
                         log -> {
