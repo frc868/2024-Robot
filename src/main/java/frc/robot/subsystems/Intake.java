@@ -354,8 +354,9 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
         return Commands.parallel(
                 moveToPositionCommand(() -> IntakePosition.GROUND),
                 Commands.sequence(
-                        runRollersCommand().until(noteInIntakeFromOutsideTrigger.or(noteInShooterTrigger)),
-                        runRollersHalfCommand().until(noteInShooterTrigger),
+                        runRollersCommand().until(
+                                noteInIntakeFromOutsideTrigger.or(noteInShooterTrigger).or(noteFullyInShooterTrigger)),
+                        runRollersHalfCommand().until(noteInShooterTrigger.or(noteFullyInShooterTrigger)),
                         runRollersSlowCommand().until(noteFullyInShooterTrigger)))
                 .withName("intake.intakeNoteAuto");
     }

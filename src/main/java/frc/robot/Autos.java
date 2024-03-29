@@ -179,9 +179,7 @@ public class Autos {
                 drivetrain.followPathCommand(path1ToScore)
                         .deadlineWith(
                                 Commands.sequence(
-                                        intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy()
-                                                .alongWith(intake.runRollersCommand()
-                                                        .until(intake.noteInShooterTrigger))),
+                                        RobotCommands.intakeNoteAutoCommand(intake, shooterTilt)),
                                 shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
                                 shooter.targetSpeakerCommand(drivetrain::getPose).asProxy()),
                 Commands.waitSeconds(0.3).andThen(intake.runRollersCommand().withTimeout(0.25)).deadlineWith(
@@ -194,9 +192,7 @@ public class Autos {
                 drivetrain.followPathCommand(path2ToScore)
                         .deadlineWith(
                                 Commands.sequence(
-                                        intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy()
-                                                .alongWith(intake.runRollersCommand()
-                                                        .until(intake.noteInShooterTrigger))),
+                                        RobotCommands.intakeNoteAutoCommand(intake, shooterTilt)),
                                 shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
                                 shooter.targetSpeakerCommand(drivetrain::getPose).asProxy()),
                 Commands.waitSeconds(0.3).andThen(intake.runRollersCommand().withTimeout(0.25)).deadlineWith(
@@ -224,14 +220,11 @@ public class Autos {
 
                 drivetrain.followPathCommand(pathStartTo2)
                         .deadlineWith(
-                                intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
-                                intake.runRollersCommand().until(intake.noteInShooterTrigger)),
+                                RobotCommands.intakeNoteAutoCommand(intake, shooterTilt)),
                 drivetrain.followPathCommand(path2ToScore)
                         .deadlineWith(
                                 Commands.sequence(
-                                        intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy()
-                                                .alongWith(intake.runRollersCommand()
-                                                        .until(intake.noteInShooterTrigger))),
+                                        RobotCommands.intakeNoteAutoCommand(intake, shooterTilt)),
                                 shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
                                 shooter.targetSpeakerCommand(drivetrain::getPose).asProxy()),
                 Commands.waitSeconds(0.5).andThen(intake.runRollersCommand().withTimeout(0.5)).deadlineWith(
@@ -241,14 +234,11 @@ public class Autos {
 
                 drivetrain.followPathCommand(pathScoreTo3)
                         .deadlineWith(
-                                intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
-                                intake.runRollersCommand().until(intake.noteInShooterTrigger)),
+                                RobotCommands.intakeNoteAutoCommand(intake, shooterTilt)),
                 drivetrain.followPathCommand(path3ToScore)
                         .deadlineWith(
                                 Commands.sequence(
-                                        intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy()
-                                                .alongWith(intake.runRollersCommand()
-                                                        .until(intake.noteInShooterTrigger))),
+                                        RobotCommands.intakeNoteAutoCommand(intake, shooterTilt)),
                                 shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
                                 shooter.targetSpeakerCommand(drivetrain::getPose).asProxy()),
                 Commands.waitSeconds(0.5).andThen(intake.runRollersCommand().withTimeout(0.5)).deadlineWith(
@@ -258,14 +248,11 @@ public class Autos {
 
                 drivetrain.followPathCommand(pathScoreTo1)
                         .deadlineWith(
-                                intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
-                                intake.runRollersCommand().until(intake.noteInShooterTrigger)),
+                                RobotCommands.intakeNoteAutoCommand(intake, shooterTilt)),
                 drivetrain.followPathCommand(path1ToScore)
                         .deadlineWith(
                                 Commands.sequence(
-                                        intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy()
-                                                .alongWith(intake.runRollersCommand()
-                                                        .until(intake.noteInShooterTrigger))),
+                                        RobotCommands.intakeNoteAutoCommand(intake, shooterTilt)),
                                 shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
                                 shooter.targetSpeakerCommand(drivetrain::getPose).asProxy()),
                 Commands.waitSeconds(0.5).andThen(intake.runRollersCommand().withTimeout(0.5)).deadlineWith(
@@ -294,14 +281,11 @@ public class Autos {
 
                 drivetrain.followPathCommand(pathStartTo4)
                         .deadlineWith(
-                                intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
-                                intake.runRollersCommand().until(intake.noteInShooterTrigger)),
+                                RobotCommands.intakeNoteAutoCommand(intake, shooterTilt)),
                 drivetrain.followPathCommand(path4ToScore)
                         .deadlineWith(
                                 Commands.sequence(
-                                        intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy()
-                                                .alongWith(intake.runRollersCommand()
-                                                        .until(intake.noteInShooterTrigger))),
+                                        RobotCommands.intakeNoteAutoCommand(intake, shooterTilt)),
                                 shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
                                 shooter.targetSpeakerCommand(drivetrain::getPose).asProxy()),
                 Commands.waitSeconds(0.5).andThen(intake.runRollersCommand().withTimeout(0.5)).deadlineWith(
@@ -311,14 +295,11 @@ public class Autos {
 
                 drivetrain.followPathCommand(pathScoreTo5)
                         .deadlineWith(
-                                intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
-                                intake.runRollersCommand().until(intake.noteInShooterTrigger)),
+                                RobotCommands.intakeNoteAutoCommand(intake, shooterTilt)),
                 drivetrain.followPathCommand(path5ToScore)
                         .deadlineWith(
                                 Commands.sequence(
-                                        intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy()
-                                                .alongWith(intake.runRollersCommand()
-                                                        .until(intake.noteInShooterTrigger))),
+                                        RobotCommands.intakeNoteAutoCommand(intake, shooterTilt)),
                                 shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
                                 shooter.targetSpeakerCommand(drivetrain::getPose).asProxy()),
                 Commands.waitSeconds(0.5).andThen(intake.runRollersCommand().withTimeout(0.5)).deadlineWith(
