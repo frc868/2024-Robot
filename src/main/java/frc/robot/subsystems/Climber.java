@@ -156,6 +156,9 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
             if (positionTracker.getNoteLiftPosition() - getPosition() + 1 < -0.065 && voltage > 0) {
                 voltage = 0;
             }
+            if (getPosition() < 0.5) {
+                voltage = 0.0;
+            }
         }
 
         if (!GlobalStates.INITIALIZED.enabled() && !GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.enabled()) {
