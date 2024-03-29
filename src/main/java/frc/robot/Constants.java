@@ -491,7 +491,7 @@ public class Constants {
         public static final double kA = 1.68948;
         public static final double TOLERANCE = 0.01;
 
-        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0.344; // TODO
+        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0.28; // TODO
         public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0.5; // TODO
         public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
