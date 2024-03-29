@@ -95,8 +95,11 @@ public class Vision extends SubsystemBase {
 
                 double normSpeed = new Translation2d(speedsSupplier.get().vxMetersPerSecond,
                         speedsSupplier.get().vyMetersPerSecond).getNorm();
-                if (normSpeed < 0.5 || !DriverStation.isAutonomous())
-                    visionMeasurementConsumer.accept(pose, estPose.timestampSeconds, stddevs);
+                if (normSpeed < 0.5 || !DriverStation.isAutonomous()) {
+                    if (photonCamera.getName() == "HoundEye01" || !DriverStation.isAutonomous()) {
+                        visionMeasurementConsumer.accept(pose, estPose.timestampSeconds, stddevs);
+                    }
+                }
             }
         }
     }
