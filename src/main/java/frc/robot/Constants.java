@@ -269,9 +269,9 @@ public class Constants {
         public static final InterpolatingDoubleTreeMap SPEED_INTERPOLATOR = new InterpolatingDoubleTreeMap();
         static {
             // 3/5/24
-            SPEED_INTERPOLATOR.put(1.142, 55.0);
-            SPEED_INTERPOLATOR.put(1.511, 60.0);
-            SPEED_INTERPOLATOR.put(1.995, 84.0);
+            SPEED_INTERPOLATOR.put(1.142, 45.0);
+            SPEED_INTERPOLATOR.put(1.511, 55.0);
+            SPEED_INTERPOLATOR.put(1.995, 78.0);
             SPEED_INTERPOLATOR.put(2.2845, 84.0);
             SPEED_INTERPOLATOR.put(2.593, 84.0);
             SPEED_INTERPOLATOR.put(2.87, 84.0);
