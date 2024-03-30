@@ -153,7 +153,7 @@ public class Autos {
                 RobotCommands.shootCommand(drivetrain, intake, shooter, shooterTilt)
                         .deadlineWith(intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy()),
                 drivetrain.followPathCommand(pathStartToC)
-                        .andThen(Commands.waitSeconds(0.1))
+                        .andThen(Commands.waitSeconds(0.35))
                         .deadlineWith(
                                 intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
                                 shooterTilt.targetSpeakerCommand(drivetrain::getPose,
