@@ -296,7 +296,7 @@ public class Constants {
         public static enum ShooterTiltPosition {
             BOTTOM(0.389842),
             AMP_EJECT(0.601),
-            INTAKE(0.55+0.17),
+            INTAKE(0.55+0.035),
             CLIMB(1.176781),
             SUBWOOFER(1.01572),
             PODIUM(0.651760);
