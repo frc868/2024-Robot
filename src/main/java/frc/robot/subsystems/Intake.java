@@ -78,8 +78,8 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
             MAX_ANGLE_RADIANS);
 
     private final DIOSim intakeBeamSim = new DIOSim(intakeBeam);
-    private final DIOSim shooterPrimaryBeamSim = new DIOSim(shooterFarBeam);
-    private final DIOSim shooterSecondaryBeamSim = new DIOSim(shooterCloseBeam);
+    private final DIOSim shooterFarBeamSim = new DIOSim(shooterFarBeam);
+    private final DIOSim shooterCloseBeamSim = new DIOSim(shooterCloseBeam);
 
     @Log(groups = "control")
     private double feedbackVoltage = 0;
@@ -155,8 +155,8 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
         }).start();
 
         intakeBeamSim.setValue(true);
-        shooterPrimaryBeamSim.setValue(true);
-        shooterSecondaryBeamSim.setValue(true);
+        shooterFarBeamSim.setValue(true);
+        shooterCloseBeamSim.setValue(true);
         setDefaultCommand(moveToCurrentGoalCommand());
     }
 
@@ -354,10 +354,17 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
         return Commands.parallel(
                 moveToPositionCommand(() -> IntakePosition.GROUND),
                 Commands.sequence(
-                        runRollersAutoCommand().until(
-                                noteInIntakeFromOutsideTrigger.or(noteInShooterTrigger).or(noteFullyInShooterTrigger)),
-                        runRollersHalfCommand().until(noteInShooterTrigger.or(noteFullyInShooterTrigger)),
-                        runRollersSlowCommand().until(noteFullyInShooterTrigger)))
+                        runRollersAutoCommand()
+                                .unless(noteInIntakeFromOutsideTrigger.or(noteInShooterTrigger)
+                                        .or(noteFullyInShooterTrigger))
+                                .until(noteInIntakeFromOutsideTrigger.or(noteInShooterTrigger)
+                                        .or(noteFullyInShooterTrigger)),
+                        runRollersHalfCommand()
+                                .unless(noteInShooterTrigger.or(noteFullyInShooterTrigger))
+                                .until(noteInShooterTrigger.or(noteFullyInShooterTrigger)),
+                        runRollersSlowCommand()
+                                .unless(noteFullyInShooterTrigger)
+                                .until(noteFullyInShooterTrigger)))
                 .withName("intake.intakeNoteAuto");
     }
 
@@ -376,11 +383,18 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
                 .withName("intake.simTriggerIntakeBeam");
     }
 
-    public Command simTriggerShooterBeamCommand() {
-        return Commands.runOnce(() -> shooterSecondaryBeamSim.setValue(false))
+    public Command simTriggerShooterCloseBeamCommand() {
+        return Commands.runOnce(() -> shooterCloseBeamSim.setValue(false))
                 .andThen(Commands.waitSeconds(1))
-                .andThen(Commands.runOnce(() -> shooterSecondaryBeamSim.setValue(true)))
-                .withName("intake.simTriggerShooterBeam");
+                .andThen(Commands.runOnce(() -> shooterCloseBeamSim.setValue(true)))
+                .withName("intake.simTriggerShooterCloseBeam");
+    }
+
+    public Command simTriggerShooterFarBeamCommand() {
+        return Commands.runOnce(() -> shooterFarBeamSim.setValue(false))
+                .andThen(Commands.waitSeconds(1))
+                .andThen(Commands.runOnce(() -> shooterFarBeamSim.setValue(true)))
+                .withName("intake.simTriggerShooterFarBeam");
     }
 
     public Command resetControllersCommand() {
