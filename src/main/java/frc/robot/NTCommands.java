@@ -4,6 +4,7 @@ import com.techhounds.houndutil.houndlog.LogGroup;
 import com.techhounds.houndutil.houndlog.LoggingManager;
 import com.techhounds.houndutil.houndlog.loggers.SendableLogger;
 
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Intake;
@@ -28,10 +29,20 @@ public class NTCommands {
                 // leds.requestFireCommand()),
                 new SendableLogger("commands/intake", "resetPosition",
                         intake.resetPositionCommand().ignoringDisable(true)),
+                new SendableLogger("commands/intake", "intakeBeam",
+                        intake.simTriggerIntakeBeamCommand().ignoringDisable(true)),
+                new SendableLogger("commands/intake", "shooterFarBeam",
+                        intake.simTriggerShooterFarBeamCommand().ignoringDisable(true)),
+                new SendableLogger("commands/intake", "shooterCloseBeam",
+                        intake.simTriggerShooterCloseBeamCommand().ignoringDisable(true)),
                 new SendableLogger("commands", "initialize",
-                        GlobalStates.INITIALIZED.enableCommand()),
-                new SendableLogger("commands/intake", "triggerShooterBeam",
-                        intake.simTriggerShooterBeamCommand().ignoringDisable(true)),
+                Commands.sequence(
+                        drivetrain.setInitializedCommand(true),
+                        intake.setInitializedCommand(true),
+                        shooterTilt.setInitializedCommand(true),
+                        climber.setInitializedCommand(true),
+                        noteLift.setInitializedCommand(true),
+                        GlobalStates.INITIALIZED.enableCommand()).ignoringDisable(true)),
                 new SendableLogger("commands/shooterTilt", "resetPosition",
                         shooterTilt.resetPositionCommand().ignoringDisable(true)),
                 new SendableLogger("commands/climber", "resetPosition",
