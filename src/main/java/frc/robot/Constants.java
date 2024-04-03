@@ -79,7 +79,7 @@ public class Constants {
         public static final double FRONT_LEFT_OFFSET = 0.4521484375;
         public static final double FRONT_RIGHT_OFFSET = -0.179443359375;
         public static final double BACK_LEFT_OFFSET = 0.242919921875;
-        public static final double BACK_RIGHT_OFFSET = 0.498046875-0.006;
+        public static final double BACK_RIGHT_OFFSET = 0.498046875 - 0.006;
 
         /** Distance between left and right wheels. */
         public static final double TRACK_WIDTH_METERS = 0.527;
@@ -296,7 +296,7 @@ public class Constants {
         public static enum ShooterTiltPosition {
             BOTTOM(0.389842),
             AMP_EJECT(0.601),
-            INTAKE(0.55+0.035),
+            INTAKE(0.55 + 0.035),
             CLIMB(1.176781),
             SUBWOOFER(1.01572),
             PODIUM(0.651760);
@@ -437,18 +437,18 @@ public class Constants {
         }
 
         // key: distance, value: angle
-        public static final InterpolatingDoubleTreeMap ANGLE_INTERPOLATOR = new InterpolatingDoubleTreeMap();
+        public static final InterpolatingDoubleTreeMap LEAD_SCREW_HEIGHT_INTERPOLATOR = new InterpolatingDoubleTreeMap();
         static {
             // 3/5/24
-            ANGLE_INTERPOLATOR.put(1.1795122686667598, 1.0157209208113183);
-            ANGLE_INTERPOLATOR.put(1.7062360399365777, 0.850934764294403);
-            ANGLE_INTERPOLATOR.put(2.235756419155122, 0.7453064051470202);
-            ANGLE_INTERPOLATOR.put(2.9124685062916904, 0.6297289478451282);
-            ANGLE_INTERPOLATOR.put(3.419734229712845, 0.5651378496391);
-            ANGLE_INTERPOLATOR.put(3.948809911586509, 0.544307740832874);
-            ANGLE_INTERPOLATOR.put(4.239, 0.480486);
-            ANGLE_INTERPOLATOR.put(4.597, 0.46);
-            ANGLE_INTERPOLATOR.put(5.1322, 0.44);
+            LEAD_SCREW_HEIGHT_INTERPOLATOR.put(1.1795122686667598, 0.10887146);
+            LEAD_SCREW_HEIGHT_INTERPOLATOR.put(1.7062360399365777, 0.0889);
+            LEAD_SCREW_HEIGHT_INTERPOLATOR.put(2.235756419155122, 0.06985);
+            LEAD_SCREW_HEIGHT_INTERPOLATOR.put(2.9124685062916904, 0.04472818315);
+            LEAD_SCREW_HEIGHT_INTERPOLATOR.put(3.419734229712845, 0.03299551314);
+            LEAD_SCREW_HEIGHT_INTERPOLATOR.put(3.948809911586509, 0.02273276727);
+            LEAD_SCREW_HEIGHT_INTERPOLATOR.put(4.239, 0.01725753836);
+            LEAD_SCREW_HEIGHT_INTERPOLATOR.put(4.597, 0.0133918667);
+            LEAD_SCREW_HEIGHT_INTERPOLATOR.put(5.1322, 0.009597811761);
 
         }
     }
@@ -527,7 +527,7 @@ public class Constants {
         public static final double MIN_HEIGHT_METERS = 0;
         public static final double MAX_HEIGHT_METERS = 0.69;
 
-        public static final int CURRENT_LIMIT = 40;
+        public static final int CURRENT_LIMIT = 50;
 
         // 2/18/24
         public static final double kP = 30;

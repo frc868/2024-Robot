@@ -235,7 +235,7 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
             Transform3d diff = new Pose3d(robotPoseSupplier.get()).minus(target);
             this.distance = new Translation2d(diff.getX(), diff.getY()).getNorm();
             this.beyondMaxDistance = distance > MAX_SHOOTING_DISTANCE;
-            return ANGLE_INTERPOLATOR.get(distance);
+            return getShooterAngle(LEAD_SCREW_HEIGHT_INTERPOLATOR.get(distance));
         }).withName("shooterTilt.targetSpeaker");
     }
 
