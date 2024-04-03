@@ -31,7 +31,10 @@
       "/HoundLog/autonomous/field": "Field2d",
       "/HoundLog/commands/climber/resetPosition": "Command",
       "/HoundLog/commands/initialize": "Command",
+      "/HoundLog/commands/intake/intakeBeam": "Command",
       "/HoundLog/commands/intake/resetPosition": "Command",
+      "/HoundLog/commands/intake/shooterCloseBeam": "Command",
+      "/HoundLog/commands/intake/shooterFarBeam": "Command",
       "/HoundLog/commands/intake/triggerShooterBeam": "Command",
       "/HoundLog/commands/leds/breathe": "Command",
       "/HoundLog/commands/leds/chase": "Command",
@@ -40,6 +43,7 @@
       "/HoundLog/commands/leds/wave": "Command",
       "/HoundLog/commands/noteLift/resetPosition": "Command",
       "/HoundLog/commands/shooterTilt/resetPosition": "Command",
+      "/HoundLog/subsystems/drivetrain/pigeonSendable": "Gyro",
       "/SmartDashboard/VisionSystemSim-main/Sim Field": "Field2d"
     },
     "windows": {
@@ -103,7 +107,17 @@
           "visible": true
         }
       },
-      "/HoundLog/commands/intake/triggerShooterBeam": {
+      "/HoundLog/commands/intake/intakeBeam": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/commands/intake/shooterCloseBeam": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/commands/intake/shooterFarBeam": {
         "window": {
           "visible": true
         }
