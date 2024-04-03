@@ -435,7 +435,6 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
                     if (RobotBase.isSimulation()) {
                         simOdometry.update(getRotation(), getModulePositions());
                     }
-                    drawRobotOnField(AutoManager.getInstance().getField());
                 } finally {
                     stateLock.writeLock().unlock();
                 }
@@ -467,6 +466,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     @Override
     public void periodic() {
         prevFieldRelVelocities = getFieldRelativeSpeeds();
+        drawRobotOnField(AutoManager.getInstance().getField());
     }
 
     /**
