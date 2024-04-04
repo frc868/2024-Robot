@@ -28,6 +28,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static frc.robot.Constants.Vision.*;
 
@@ -91,20 +92,21 @@ public class Vision extends SubsystemBase {
                         oldPose.getRotation());
 
                 Matrix<N3, N1> stddevs = photonCamera.getEstimationStdDevs(pose,
-                        SINGLE_TAG_STD_DEVS, MULTI_TAG_STD_DEVS);
+                        SINGLE_TAG_STD_DEVS,
+                        DriverStation.isAutonomous() ? MULTI_TAG_STD_DEVS : MULTI_TAG_TELEOP_STD_DEVS);
 
                 double normSpeed = new Translation2d(speedsSupplier.get().vxMetersPerSecond,
                         speedsSupplier.get().vyMetersPerSecond).getNorm();
                 if (normSpeed < 0.5 || !DriverStation.isAutonomous()) {
                     if (photonCamera.getName() == "HoundEye01" || !DriverStation.isAutonomous()) {
-                        visionMeasurementConsumer.accept(pose, estPose.timestampSeconds, stddevs);
+                        visionMeasurementConsumer.accept(pose, Timer.getFPGATimestamp(), stddevs);
                     }
                 }
             }
         }
     }
 
-    @Log
+    // @Log
     public Pose3d[] cameraPoses() {
         List<Pose3d> poses = new ArrayList<Pose3d>();
         for (Transform3d transform : ROBOT_TO_CAMS) {
