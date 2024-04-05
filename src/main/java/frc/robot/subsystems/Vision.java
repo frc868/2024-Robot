@@ -87,9 +87,7 @@ public class Vision extends SubsystemBase {
 
             if (result.isPresent()) {
                 EstimatedRobotPose estPose = result.get();
-                Pose2d oldPose = estPose.estimatedPose.toPose2d();
-                Pose2d pose = new Pose2d(oldPose.getX(), oldPose.getY(),
-                        oldPose.getRotation());
+                Pose2d pose = estPose.estimatedPose.toPose2d();
 
                 Matrix<N3, N1> stddevs = photonCamera.getEstimationStdDevs(pose,
                         SINGLE_TAG_STD_DEVS,
