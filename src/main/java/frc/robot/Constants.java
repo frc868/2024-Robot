@@ -126,8 +126,8 @@ public class Constants {
             SWERVE_CONSTANTS.STEER_MOI = 0.025;
         }
 
-        public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = 8;
-        public static final double MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 30; // TODO
+        public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = 10;
+        public static final double MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 30;
 
         public static final Translation2d[] SWERVE_MODULE_LOCATIONS = new Translation2d[] {
                 new Translation2d(WHEEL_BASE_METERS / 2, TRACK_WIDTH_METERS / 2),
@@ -141,8 +141,8 @@ public class Constants {
                 SWERVE_MODULE_LOCATIONS[2],
                 SWERVE_MODULE_LOCATIONS[3]);
 
-        public static final double PATH_FOLLOWING_TRANSLATION_kP = 8.0; // TODO simvalue
-        public static final double PATH_FOLLOWING_ROTATION_kP = 8.0; // TODO simvalue
+        public static final double PATH_FOLLOWING_TRANSLATION_kP = 8.0;
+        public static final double PATH_FOLLOWING_ROTATION_kP = 8.0;
 
         public static final double XY_kP = 1.4;
         public static final double XY_kI = 0;
@@ -151,9 +151,9 @@ public class Constants {
                 SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND,
                 SWERVE_CONSTANTS.MAX_DRIVING_ACCELERATION_METERS_PER_SECOND_SQUARED);
 
-        public static final double THETA_kP = 1.0; // TODO
-        public static final double THETA_kI = 0; // TODO
-        public static final double THETA_kD = 0.05; // TODO
+        public static final double THETA_kP = 1.3;
+        public static final double THETA_kI = 0;
+        public static final double THETA_kD = 0.05;
         public static final TrapezoidProfile.Constraints THETA_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
                 MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED);
@@ -441,8 +441,8 @@ public class Constants {
         static {
             // 3/5/24
             LEAD_SCREW_HEIGHT_INTERPOLATOR.put(1.1795122686667598, 0.10887146);
-            LEAD_SCREW_HEIGHT_INTERPOLATOR.put(1.7062360399365777, 0.0889);
-            LEAD_SCREW_HEIGHT_INTERPOLATOR.put(2.235756419155122, 0.06985);
+            LEAD_SCREW_HEIGHT_INTERPOLATOR.put(1.7062360399365777, 0.08586998291);
+            LEAD_SCREW_HEIGHT_INTERPOLATOR.put(2.235756419155122, 0.06745673828);
             LEAD_SCREW_HEIGHT_INTERPOLATOR.put(2.9124685062916904, 0.04472818315);
             LEAD_SCREW_HEIGHT_INTERPOLATOR.put(3.419734229712845, 0.03299551314);
             LEAD_SCREW_HEIGHT_INTERPOLATOR.put(3.948809911586509, 0.02273276727);
@@ -552,7 +552,7 @@ public class Constants {
                 Double.MAX_VALUE,
                 Double.MAX_VALUE);
         public static final Matrix<N3, N1> MULTI_TAG_STD_DEVS = VecBuilder.fill(0.1, 0.1, Double.MAX_VALUE);
-        public static final Matrix<N3, N1> MULTI_TAG_TELEOP_STD_DEVS = VecBuilder.fill(0.03, 0.03, Double.MAX_VALUE);
+        public static final Matrix<N3, N1> MULTI_TAG_TELEOP_STD_DEVS = VecBuilder.fill(0.01, 0.01, Double.MAX_VALUE);
 
         public static final PhotonCameraConstants CAMERA_CONSTANTS = new PhotonCameraConstants();
         static {
