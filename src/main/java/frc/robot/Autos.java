@@ -161,7 +161,7 @@ public class Autos {
                                 shooter.targetSpeakerCommand(drivetrain::getPose,
                                         drivetrain::calculateEffectiveTargetLocation).asProxy(),
                                 Commands.waitUntil(shooter::atGoal).andThen(intake.runRollersCommand())),
-                drivetrain.followPathCommand(pathCToB).andThen(Commands.waitSeconds(0))
+                drivetrain.followPathCommand(pathCToB)
                         .deadlineWith(
                                 intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
                                 intake.runRollersCommand(),

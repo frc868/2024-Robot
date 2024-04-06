@@ -77,9 +77,9 @@ public class Constants {
         // public static final double BACK_LEFT_OFFSET = 0.24267578125;
         // public static final double BACK_RIGHT_OFFSET = 0.48583984375;
         public static final double FRONT_LEFT_OFFSET = 0.4521484375;
-        public static final double FRONT_RIGHT_OFFSET = -0.179443359375;
+        public static final double FRONT_RIGHT_OFFSET = -0.179443359375 - 0.00634765625;
         public static final double BACK_LEFT_OFFSET = 0.242919921875;
-        public static final double BACK_RIGHT_OFFSET = 0.498046875 - 0.006;
+        public static final double BACK_RIGHT_OFFSET = 0.498046875 - 0.003;
 
         /** Distance between left and right wheels. */
         public static final double TRACK_WIDTH_METERS = 0.527;
