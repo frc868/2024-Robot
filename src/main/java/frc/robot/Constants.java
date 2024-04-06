@@ -529,14 +529,14 @@ public class Constants {
 
         public static final int CURRENT_LIMIT = 50;
 
-        // 2/18/24
+        // 4/6/24
         public static final double kP = 45;
         public static final double kI = 0;
         public static final double kD = 1;
-        public static final double kS = 0.362388;
-        public static final double kG = -0.23;
-        public static final double kV = 8.18532;
-        public static final double kA = 0.541548;
+        public static final double kS = 0.28746;
+        public static final double kG = -0.335364;
+        public static final double kV = 8.142;
+        public static final double kA = 0.386364;
         public static final double TOLERANCE = 0.01;
 
         public static final double MAX_VELOCITY_METERS_PER_SECOND = 0.7; // TODO
