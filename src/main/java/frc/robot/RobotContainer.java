@@ -199,18 +199,14 @@ public class RobotContainer {
     }
 
     private void configureAuto() {
-        AutoManager.getInstance().addRoutine(Autos.autoTest(drivetrain, intake,
-                shooter, shooterTilt));
-        AutoManager.getInstance().addRoutine(Autos.auto213(drivetrain, intake,
-                shooter, shooterTilt));
-        AutoManager.getInstance().addRoutine(Autos.autoCBA(drivetrain, intake,
-                shooter, shooterTilt));
-        AutoManager.getInstance().addRoutine(Autos.auto453(drivetrain, intake,
-                shooter, shooterTilt));
-        AutoManager.getInstance().addRoutine(Autos.autoCBA1(drivetrain, intake,
-                shooter, shooterTilt));
-        AutoManager.getInstance().addRoutine(Autos.autoCBA12(drivetrain, intake,
-                shooter, shooterTilt));
+        AutoManager.getInstance().addRoutine(Autos.autoCBA(drivetrain, intake, shooter, shooterTilt));
+        AutoManager.getInstance().addRoutine(Autos.autoWaitCBA(drivetrain, intake, shooter, shooterTilt));
+        AutoManager.getInstance().addRoutine(Autos.auto123(drivetrain, intake, shooter, shooterTilt));
+        AutoManager.getInstance().addRoutine(Autos.auto231(drivetrain, intake, shooter, shooterTilt));
+        AutoManager.getInstance().addRoutine(Autos.auto345(drivetrain, intake, shooter, shooterTilt));
+        AutoManager.getInstance().addRoutine(Autos.auto543(drivetrain, intake, shooter, shooterTilt));
+        AutoManager.getInstance().addRoutine(Autos.auto435(drivetrain, intake, shooter, shooterTilt));
+        AutoManager.getInstance().addRoutine(Autos.autoCBA12(drivetrain, intake, shooter, shooterTilt));
     }
 
     @Log
