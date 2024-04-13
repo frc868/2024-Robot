@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.Constants.Climber.ClimberPosition;
 import frc.robot.Constants.Intake.IntakePosition;
 import frc.robot.Constants.ShooterTilt.ShooterTiltPosition;
 import frc.robot.subsystems.Climber;
@@ -46,15 +47,18 @@ public class Controls {
                 .whileTrue(intake.intakeNoteCommand()
                         .alongWith(shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.INTAKE).asProxy()))
                 .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
-
         joystick.centerTopHatButton().whileTrue(
                 Commands.parallel(
                         intake.intakeFromSourceCommand(),
                         leds.requestStateCommand(LEDState.FLASHING_AQUA)))
                 .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
 
-        joystick.centerTopHatUp().whileTrue(climber.moveUpCommand());
-        joystick.centerTopHatDown().whileTrue(climber.moveDownCommand());
+        joystick.centerTopHatUp().whileTrue(
+                climber.moveUpCommand()
+                        .deadlineWith(shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.PODIUM)));
+        joystick.centerTopHatDown().whileTrue(
+                climber.moveDownCommand()
+                        .deadlineWith(shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.PODIUM)));
 
         joystick.redButton().whileTrue(RobotCommands.ampPrepIntakeCommand(intake, shooterTilt))
                 .onFalse(intake.moveToPositionCommand(() -> IntakePosition.AMP));
@@ -135,7 +139,8 @@ public class Controls {
                 GlobalStates.MECH_LIMITS_DISABLED.disableCommand()
                         .andThen(GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.disableCommand()));
 
-        controller.a().onTrue(shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.SUBWOOFER));
+        controller.a().onTrue(shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.SUBWOOFER).asProxy()
+                .andThen(climber.moveToPositionCommand(() -> ClimberPosition.STOW).asProxy()));
     }
 
     public static void configureTestingControls(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
