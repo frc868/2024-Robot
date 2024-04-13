@@ -140,19 +140,12 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
     public void setVoltage(double voltage) {
         voltage = MathUtil.clamp(voltage, -12, 12);
         if (!GlobalStates.MECH_LIMITS_DISABLED.enabled()) {
-            voltage = Utils.applySoftStops(voltage, getPosition(), MIN_HEIGHT_METERS - 0.05, MAX_HEIGHT_METERS);
-            if (getPosition() < ClimberPosition.BOTTOM.value + 0.02) {
-                voltage = MathUtil.clamp(voltage, -3, 12);
-            }
+            voltage = Utils.applySoftStops(voltage, getPosition(), MIN_HEIGHT_METERS, MAX_HEIGHT_METERS);
         }
         if (!GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.enabled()) {
-            if (getPosition() < 1.293 && positionTracker.getShooterTiltAngle() < 1.11 && voltage > 0) {
+            if (getPosition() < 1.044 && positionTracker.getShooterTiltAngle() > 1.11 && voltage < 0) {
                 voltage = 0;
             }
-            if (getPosition() > 1.293 && positionTracker.getShooterTiltAngle() < 1.11 && voltage < 0) {
-                voltage = 0;
-            }
-
             if (getPosition() < 0.5) {
                 voltage = 0.0;
             }
