@@ -237,6 +237,7 @@ public class Constants {
         public static final int CURRENT_LIMIT = 70;
 
         public static final double IDLE_RPS = 35;
+        public static final double PASSING_RPS = 50;
         public static final double SUBWOOFER_RPS = 55;
         public static final double PODIUM_RPS = 84;
 
@@ -299,6 +300,7 @@ public class Constants {
             INTAKE(0.55 + 0.035),
             CLIMB(1.176781),
             SUBWOOFER(1.01572),
+            PASS(1.00),
             PODIUM(0.651760);
 
             public final double value;

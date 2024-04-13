@@ -77,6 +77,10 @@ public class Controls {
                         RobotCommands.shootOnTheMoveCommand(drivetrain, intake, shooter, shooterTilt),
                         new Trigger(GlobalStates.SUBWOOFER_ONLY::enabled).or(GlobalStates.PODIUM_ONLY::enabled)));
 
+        joystick.flipTriggerIn().and(joystick.triggerSoftPress()).whileTrue(
+                RobotCommands.targetPassCommand(drivetrain, shooter, shooterTilt));
+        joystick.flipTriggerIn().and(joystick.triggerHardPress()).whileTrue(intake.runRollersCommand());
+
         joystick.topRightHatUp()
                 .onTrue(GlobalStates.PODIUM_ONLY.enableCommand().andThen(GlobalStates.SUBWOOFER_ONLY.disableCommand()));
         joystick.topRightHatDown()

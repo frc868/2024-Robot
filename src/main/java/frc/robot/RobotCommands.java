@@ -1,8 +1,11 @@
 package frc.robot;
 
+import static frc.robot.Constants.Shooter.PASSING_RPS;
 import static frc.robot.Constants.Shooter.PODIUM_RPS;
 import static frc.robot.Constants.Shooter.SUBWOOFER_RPS;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
@@ -87,6 +90,16 @@ public class RobotCommands {
                 shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.PODIUM).asProxy(),
                 shooter.spinAtVelocityCommand(() -> PODIUM_RPS).asProxy())
                 .withName("RobotCommands.targetSpeakerSubwoofer");
+    }
+
+    public static Command targetPassCommand(Drivetrain drivetrain, Shooter shooter,
+            ShooterTilt shooterTilt) {
+        return Commands.parallel(
+                drivetrain.controlledRotateCommand(
+                        () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue ? 2.5 : -2.5),
+                shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.PASS).asProxy(),
+                shooter.spinAtVelocityCommand(() -> PASSING_RPS).asProxy())
+                .withName("RobotCommands.targetPass");
     }
 
     public static Command shootCommand(Drivetrain drivetrain, Intake intake, Shooter shooter, ShooterTilt shooterTilt) {
