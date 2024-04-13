@@ -90,12 +90,12 @@ public class Constants {
         public static final SwerveConstants SWERVE_CONSTANTS = new SwerveConstants();
         static {
             // 2/24/24
-            SWERVE_CONSTANTS.DRIVE_kP = 0.84056;
+            SWERVE_CONSTANTS.DRIVE_kP = 0.84992;
             SWERVE_CONSTANTS.DRIVE_kI = 0.0;
             SWERVE_CONSTANTS.DRIVE_kD = 0.0;
-            SWERVE_CONSTANTS.DRIVE_kS = 0.24857;
-            SWERVE_CONSTANTS.DRIVE_kV = 0.66681;
-            SWERVE_CONSTANTS.DRIVE_kA = 0.10325;
+            SWERVE_CONSTANTS.DRIVE_kS = 0.2368;
+            SWERVE_CONSTANTS.DRIVE_kV = 0.67229;
+            SWERVE_CONSTANTS.DRIVE_kA = 0.080151;
             SWERVE_CONSTANTS.STEER_kP = 100.0;
             SWERVE_CONSTANTS.STEER_kI = 0.0;
             SWERVE_CONSTANTS.STEER_kD = 1.0;
@@ -106,7 +106,7 @@ public class Constants {
             SWERVE_CONSTANTS.DRIVE_GEARING = 5.357;
             SWERVE_CONSTANTS.STEER_GEARING = 150.0 / 7.0;
             SWERVE_CONSTANTS.COUPLING_RATIO = 50.0 / 16.0;
-            SWERVE_CONSTANTS.WHEEL_CIRCUMFERENCE = 2.0 * Math.PI * 0.04762663828;
+            SWERVE_CONSTANTS.WHEEL_CIRCUMFERENCE = 2.0 * Math.PI * 0.0491630791391;
             SWERVE_CONSTANTS.DRIVE_ENCODER_ROTATIONS_TO_METERS = SWERVE_CONSTANTS.WHEEL_CIRCUMFERENCE
                     / SWERVE_CONSTANTS.DRIVE_GEARING;
             SWERVE_CONSTANTS.STEER_ENCODER_ROTATIONS_TO_RADIANS = 2 * Math.PI
@@ -167,7 +167,7 @@ public class Constants {
         public static enum IntakePosition {
             GROUND(-0.617905),
             AMP(1.18),
-            STOW(1.4),
+            STOW(0.984),
             SOURCE(1.44),
             TOP(1.691);
 
@@ -236,8 +236,8 @@ public class Constants {
                 * Math.pow(WHEEL_RADIUS, 2);
         public static final int CURRENT_LIMIT = 70;
 
-        public static final double IDLE_RPS = 35;
-        public static final double PASSING_RPS = 50;
+        public static final double IDLE_RPS = 47;
+        public static final double PASSING_RPS = 47;
         public static final double SUBWOOFER_RPS = 55;
         public static final double PODIUM_RPS = 84;
 
@@ -300,7 +300,7 @@ public class Constants {
             INTAKE(0.55 + 0.035),
             CLIMB(1.176781),
             SUBWOOFER(1.01572),
-            PASS(1.00),
+            PASS(0.90),
             PODIUM(0.651760);
 
             public final double value;
@@ -458,6 +458,7 @@ public class Constants {
     public static final class Climber {
         public static enum ClimberPosition {
             BOTTOM(0 + 1),
+            STOW(1.032),
             ON_CHAIN(0.5144 + 1),
             CLIMB_PREP(0.605 + 1),
             MAX_HEIGHT(0.67485 + 1);
@@ -479,9 +480,9 @@ public class Constants {
         public static final double ENCODER_ROTATIONS_TO_METERS = WHEEL_CIRCUMFERENCE / GEARING;
 
         public static final double MIN_HEIGHT_METERS = 0 + 1;
-        public static final double MAX_HEIGHT_METERS = 0.67485 + 1;
+        public static final double MAX_HEIGHT_METERS = 0.5 + 1;
 
-        public static final int CURRENT_LIMIT = 50;
+        public static final int CURRENT_LIMIT = 60;
 
         // 3/28/24
         public static final double kP = 20;
