@@ -27,7 +27,7 @@ public class Autos {
                                 RobotCommands.intakeNoteAutoCommand(intake, shooterTilt),
                                 shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
                                 shooter.targetSpeakerCommand(drivetrain::getPose).asProxy()),
-                Commands.waitSeconds(0.3).andThen(intake.runRollersCommand().withTimeout(0.25)).deadlineWith(
+                Commands.waitSeconds(delay).andThen(intake.runRollersCommand().withTimeout(shotTimeout)).deadlineWith(
                         shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
                         shooter.targetSpeakerCommand(drivetrain::getPose).asProxy(),
                         drivetrain.standaloneTargetSpeakerCommand()));
@@ -250,47 +250,6 @@ public class Autos {
                 List.of(pathStartTo1, path1ToScore, pathScoreTo2, path2ToScore, pathScoreTo3, path3ToScore),
                 new Pose2d(startingPose.getX(), startingPose.getY(), new Rotation2d(-2.1045045040359978)));
     }
-    // public static AutoRoutine auto123(Drivetrain drivetrain, Intake intake,
-    // Shooter shooter,
-    // ShooterTilt shooterTilt) {
-    // PathPlannerPath pathStartTo1 = PathPlannerPath.fromChoreoTrajectory("123.1");
-    // PathPlannerPath path1ToScoreTo2 =
-    // PathPlannerPath.fromChoreoTrajectory("123.2");
-    // PathPlannerPath path2ToEnd = PathPlannerPath.fromChoreoTrajectory("123.3");
-    // Pose2d startingPose = pathStartTo1.getPreviewStartingHolonomicPose();
-
-    // Command command = Commands.sequence(
-    // RobotCommands.shootAutoCommand(drivetrain, intake, shooter, shooterTilt),
-
-    // drivetrain.followPathCommand(pathStartTo1)
-    // .deadlineWith(RobotCommands.intakeNoteAutoCommand(intake, shooterTilt)),
-    // drivetrain.followPathCommand(path1ToScoreTo2).alongWith(
-    // Commands.sequence(
-    // Commands.waitSeconds(1.78).andThen(intake.runRollersCommand().withTimeout(0.25)).deadlineWith(
-    // RobotCommands.intakeNoteAutoCommand(intake, shooterTilt),
-    // shooterTilt.targetSpeakerCommand(drivetrain::getPose,
-    // drivetrain::calculateEffectiveTargetLocation).asProxy(),
-    // shooter.targetSpeakerCommand(drivetrain::getPose,
-    // drivetrain::calculateEffectiveTargetLocation).asProxy()),
-    // Commands.waitSeconds(1).deadlineWith(
-    // Commands.waitSeconds(0.3).andThen()
-    // .deadlineWith(
-    // shooterTilt.targetSpeakerCommand(drivetrain::getPose).asProxy(),
-    // shooter.targetSpeakerCommand(drivetrain::getPose).asProxy(),
-    // drivetrain.standaloneTargetSpeakerCommand())))),
-
-    // driveIntakeShootCenterCommand(pathScoreTo2, path2ToScore, 0.25, 0.25,
-    // drivetrain, intake, shooter,
-    // shooterTilt),
-    // driveIntakeShootCenterCommand(pathScoreTo3, path3ToScore, 0.25, 0.25,
-    // drivetrain, intake, shooter,
-    // shooterTilt));
-    // return new AutoRoutine("123", command,
-    // List.of(pathStartTo1, path1ToScore, pathScoreTo2, path2ToScore, pathScoreTo3,
-    // path3ToScore),
-    // new Pose2d(startingPose.getX(), startingPose.getY(), new
-    // Rotation2d(-2.1045045040359978)));
-    // }
 
     public static AutoRoutine auto231(Drivetrain drivetrain, Intake intake, Shooter shooter,
             ShooterTilt shooterTilt) {
@@ -356,16 +315,15 @@ public class Autos {
         Command command = Commands.sequence(
                 RobotCommands.shootAutoCommand(drivetrain, intake, shooter, shooterTilt),
 
-                driveIntakeShootCenterCommand(pathStartTo5, path5ToScore, 0.25, 0.25, drivetrain, intake, shooter,
+                driveIntakeShootCenterCommand(pathStartTo5, path5ToScore, 0.25, 0.15, drivetrain, intake, shooter,
                         shooterTilt),
-                driveIntakeShootCenterCommand(pathScoreTo4, path4ToScore, 0.25, 0.25, drivetrain, intake, shooter,
+                driveIntakeShootCenterCommand(pathScoreTo4, path4ToScore, 0.25, 0.15, drivetrain, intake, shooter,
                         shooterTilt),
-                driveIntakeShootCenterCommand(pathScoreTo3, path3ToScore, 0.25, 0.25, drivetrain, intake, shooter,
+                driveIntakeShootCenterCommand(pathScoreTo3, path3ToScore, 0.25, 0.15, drivetrain, intake, shooter,
                         shooterTilt));
 
         return new AutoRoutine("543", command,
-                List.of(pathStartTo5, path5ToScore, pathScoreTo4, path4ToScore, pathScoreTo3,
-                        path3ToScore),
+                List.of(pathStartTo5, path5ToScore, pathScoreTo4, path4ToScore, pathScoreTo3, path3ToScore),
                 new Pose2d(startingPose.getX(), startingPose.getY(), new Rotation2d(2.146011906845138)));
     }
 
@@ -383,11 +341,11 @@ public class Autos {
         Command command = Commands.sequence(
                 RobotCommands.shootAutoCommand(drivetrain, intake, shooter, shooterTilt),
 
-                driveIntakeShootCenterCommand(pathStartTo4, path4ToScore, 0.25, 0.25, drivetrain, intake, shooter,
+                driveIntakeShootCenterCommand(pathStartTo4, path4ToScore, 0.25, 0.15, drivetrain, intake, shooter,
                         shooterTilt),
-                driveIntakeShootCenterCommand(pathScoreTo3, path3ToScore, 0.25, 0.25, drivetrain, intake, shooter,
+                driveIntakeShootCenterCommand(pathScoreTo3, path3ToScore, 0.25, 0.15, drivetrain, intake, shooter,
                         shooterTilt),
-                driveIntakeShootCenterCommand(pathScoreTo5, path5ToScore, 0.25, 0.25, drivetrain, intake, shooter,
+                driveIntakeShootCenterCommand(pathScoreTo5, path5ToScore, 0.25, 0.15, drivetrain, intake, shooter,
                         shooterTilt));
 
         return new AutoRoutine("435", command,
