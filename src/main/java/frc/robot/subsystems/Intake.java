@@ -290,7 +290,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
 
     public Command runRollersAutoCommand() {
         return Commands.startEnd(
-                () -> setRollerVoltage(8.5),
+                () -> setRollerVoltage(12),
                 () -> setRollerVoltage(0))
                 .withName("intake.runRollers");
     }
