@@ -166,9 +166,8 @@ public class RobotContainer {
                     && climber.getInitialized();
         }).onTrue(GlobalStates.INITIALIZED.enableCommand());
 
-        intake.noteInIntakeFromOutsideTrigger.debounce(0.15)
-                .onTrue(leds.requestStateCommand(LEDState.SOLID_GREEN).withTimeout(1));
-        intake.noteInShooterTrigger.onTrue(leds.requestStateCommand(LEDState.SOLID_BLUE).withTimeout(1));
+        intake.noteInIntakeFromOutsideTrigger.debounce(0.15).whileTrue(leds.requestStateCommand(LEDState.SOLID_GREEN));
+        intake.noteInShooterTrigger.whileTrue(leds.requestStateCommand(LEDState.SOLID_BLUE));
 
         leds.requestStateCommand(LEDState.INITIALIZATION_BLACK_BACKGROUND).until(GlobalStates.INITIALIZED::enabled)
                 .schedule();
