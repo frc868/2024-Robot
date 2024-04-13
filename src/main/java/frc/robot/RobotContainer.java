@@ -26,7 +26,6 @@ import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LEDs;
-import frc.robot.subsystems.NoteLift;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterTilt;
 import frc.robot.subsystems.Vision;
@@ -57,8 +56,8 @@ public class RobotContainer {
     @Log(groups = "subsystems")
     private final Climber climber = new Climber(positionTracker);
 
-    @Log(groups = "subsystems")
-    private final NoteLift noteLift = new NoteLift(positionTracker);
+    // @Log(groups = "subsystems")
+    // private final NoteLift noteLift = new NoteLift(positionTracker);
 
     @Log(groups = "subsystems")
     private final Vision vision = new Vision();
@@ -67,7 +66,7 @@ public class RobotContainer {
     private final LEDs leds = new LEDs();
 
     @Log(groups = "subsystems")
-    private final HoundBrian houndBrian = new HoundBrian(drivetrain, intake, shooterTilt, climber, noteLift, leds);
+    private final HoundBrian houndBrian = new HoundBrian(drivetrain, intake, shooterTilt, climber, leds);
 
     // @Log(groups = { "subsystems", "misc" })
     // private final PowerDistribution pdh = new PowerDistribution();
@@ -133,7 +132,6 @@ public class RobotContainer {
         positionTracker.setIntakePositionSupplier(intake::getPosition);
         positionTracker.setShooterTiltAngleSupplier(shooterTilt::getAngle);
         positionTracker.setClimberPositionSupplier(climber::getPosition);
-        positionTracker.setNoteLiftPositionSupplier(noteLift::getPosition);
 
         SparkConfigurator.safeBurnFlash();
         DataLogManager.logNetworkTables(true);
@@ -159,15 +157,13 @@ public class RobotContainer {
                 .onTrue(Commands.parallel(
                         intake.resetControllersCommand(),
                         shooterTilt.resetControllersCommand(),
-                        noteLift.resetControllersCommand(),
                         climber.resetControllersCommand()).withName("resetControllers"));
 
         new Trigger(() -> {
             return drivetrain.getInitialized()
                     && intake.getInitialized()
                     && shooterTilt.getInitialized()
-                    && climber.getInitialized()
-                    && noteLift.getInitialized();
+                    && climber.getInitialized();
         }).onTrue(GlobalStates.INITIALIZED.enableCommand());
 
         intake.noteInIntakeFromOutsideTrigger.debounce(0.15)
@@ -180,7 +176,6 @@ public class RobotContainer {
         leds.requestStateCommand(LEDState.INTAKE_UNINITIALIZED).until(intake::getInitialized).schedule();
         leds.requestStateCommand(LEDState.SHOOTER_TILT_UNINITIALIZED).until(shooterTilt::getInitialized).schedule();
         leds.requestStateCommand(LEDState.CLIMBER_UNINITIALIZED).until(climber::getInitialized).schedule();
-        leds.requestStateCommand(LEDState.NOTE_LIFT_UNINITIALIZED).until(noteLift::getInitialized).schedule();
 
         new Trigger(GlobalStates.INITIALIZED::enabled)
                 .onTrue(leds.requestStateCommand(LEDState.INITIALIZED_CONFIRM).withTimeout(3));
@@ -188,8 +183,6 @@ public class RobotContainer {
                 .whileTrue(leds.requestStateCommand(LEDState.SUBWOOFER_ONLY));
         new Trigger(GlobalStates.PODIUM_ONLY::enabled)
                 .whileTrue(leds.requestStateCommand(LEDState.PODIUM_ONLY));
-        new Trigger(GlobalStates.QUICK_CLIMB::enabled)
-                .whileTrue(leds.requestStateCommand(LEDState.QUICK_CLIMB));
         new Trigger(GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED::enabled)
                 .whileTrue(leds.requestStateCommand(LEDState.INTER_SUBSYSTEM_SAFETIES_DISABLED));
         new Trigger(GlobalStates.MECH_LIMITS_DISABLED::enabled)
@@ -200,10 +193,10 @@ public class RobotContainer {
     }
 
     private void configureButtonBindings() {
-        Controls.configureDriverControls(0, drivetrain, intake, shooter, shooterTilt, climber, noteLift, leds);
-        Controls.configureOperatorControls(1, drivetrain, intake, shooter, shooterTilt, climber, noteLift);
-        Controls.configureOverridesControls(2, drivetrain, intake, shooter, shooterTilt, climber, noteLift);
-        NTCommands.configureNTCommands(drivetrain, intake, shooter, shooterTilt, climber, noteLift, leds);
+        Controls.configureDriverControls(0, drivetrain, intake, shooter, shooterTilt, climber, leds);
+        Controls.configureOperatorControls(1, drivetrain, intake, shooter, shooterTilt, climber);
+        Controls.configureOverridesControls(2, drivetrain, intake, shooter, shooterTilt, climber);
+        NTCommands.configureNTCommands(drivetrain, intake, shooter, shooterTilt, climber, leds);
     }
 
     private void configureAuto() {
@@ -228,8 +221,7 @@ public class RobotContainer {
                 shooterTilt.getShooterComponentPose(),
                 shooterTilt.getOuterLeadScrewComponentPose(),
                 shooterTilt.getInnerLeadScrewComponentPose(),
-                climber.getComponentPose(),
-                noteLift.getComponentPose()
+                climber.getComponentPose()
         };
     }
 }

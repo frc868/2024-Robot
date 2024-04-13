@@ -9,20 +9,18 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.Intake.IntakePosition;
-import frc.robot.Constants.NoteLift.NoteLiftPosition;
 import frc.robot.Constants.ShooterTilt.ShooterTiltPosition;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LEDs;
-import frc.robot.subsystems.NoteLift;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterTilt;
 import frc.robot.subsystems.LEDs.LEDState;
 
 public class Controls {
     public static void configureDriverControls(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
-            ShooterTilt shooterTilt, Climber climber, NoteLift noteLift, LEDs leds) {
+            ShooterTilt shooterTilt, Climber climber, LEDs leds) {
         CommandVirpilJoystick joystick = new CommandVirpilJoystick(port);
 
         drivetrain.setDefaultCommand(
@@ -55,6 +53,9 @@ public class Controls {
                         leds.requestStateCommand(LEDState.FLASHING_AQUA)))
                 .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
 
+        joystick.centerTopHatUp().whileTrue(climber.moveUpCommand());
+        joystick.centerTopHatDown().whileTrue(climber.moveDownCommand());
+
         joystick.redButton().whileTrue(RobotCommands.ampPrepIntakeCommand(intake, shooterTilt))
                 .onFalse(intake.moveToPositionCommand(() -> IntakePosition.AMP));
 
@@ -80,35 +81,14 @@ public class Controls {
                 .onTrue(GlobalStates.PODIUM_ONLY.enableCommand().andThen(GlobalStates.SUBWOOFER_ONLY.disableCommand()));
         joystick.topRightHatDown()
                 .onTrue(GlobalStates.SUBWOOFER_ONLY.enableCommand().andThen(GlobalStates.PODIUM_ONLY.disableCommand()));
-        joystick.centerTopHatDown()
+        joystick.topRightHatButton()
                 .onTrue(GlobalStates.SUBWOOFER_ONLY.disableCommand()
                         .andThen(GlobalStates.PODIUM_ONLY.disableCommand()));
-
-        joystick.bottomHatButton().or(joystick.bottomHatLeft()).onTrue(
-                GlobalStates.QUICK_CLIMB.disableCommand().andThen(
-                        RobotCommands.intakeToNoteLift(shooter, shooterTilt, noteLift, leds)));
-
-        joystick.dialSoftPress().onTrue(noteLift.moveToPositionCommand(() -> NoteLiftPosition.TRAVEL));
-
-        joystick.flipTriggerIn()
-                .whileTrue(
-                        Commands.either(
-                                RobotCommands.prepareClimb(intake, shooter, shooterTilt, climber, noteLift),
-                                RobotCommands.prepareQuickClimb(intake, shooter, shooterTilt, climber, noteLift),
-                                () -> !GlobalStates.QUICK_CLIMB.enabled()));
-        joystick.flipTriggerIn().and(joystick.triggerSoftPress()).whileTrue(
-                Commands.sequence(
-                        climber.climbToBottomCommand(),
-                        Commands.waitUntil(joystick.triggerHardPress()),
-                        noteLift.scoreNoteCommand()));
-
-        joystick.bottomHatRight()
-                .onTrue(GlobalStates.QUICK_CLIMB.toggleCommand());
 
     }
 
     public static void configureOperatorControls(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
-            ShooterTilt shooterTilt, Climber climber, NoteLift noteLift) {
+            ShooterTilt shooterTilt, Climber climber) {
         CommandXboxController controller = new CommandXboxController(port);
 
         controller.x().toggleOnTrue(intake.setOverridenSpeedCommand(() -> -controller.getLeftY() * 0.25)
@@ -117,8 +97,6 @@ public class Controls {
                 .finallyDo(shooterTilt.resetControllersCommand()::schedule));
         controller.a().toggleOnTrue(climber.setOverridenSpeedCommand(() -> -controller.getLeftY() * 0.75)
                 .finallyDo(climber.resetControllersCommand()::schedule));
-        controller.b().toggleOnTrue(noteLift.setOverridenSpeedCommand(() -> -controller.getRightY() * 0.75)
-                .finallyDo(noteLift.resetControllersCommand()::schedule));
 
         controller.leftBumper().whileTrue(shooter.spinAtVelocityCommand(() -> PODIUM_RPS));
         controller.rightBumper().whileTrue(intake.runRollersCommand());
@@ -128,24 +106,23 @@ public class Controls {
         controller.back().whileTrue(intake.reverseRollersCommand());
 
         controller.povDown().whileTrue(RobotCommands.resetClimb(intake, shooter,
-                shooterTilt, climber, noteLift));
+                shooterTilt, climber));
         controller.povUp().whileTrue(RobotCommands.deClimb(intake, shooter,
-                shooterTilt, climber, noteLift).finallyDo(climber.resetControllersCommand()::schedule));
+                shooterTilt, climber).finallyDo(climber.resetControllersCommand()::schedule));
         controller.povRight()
                 .whileTrue(RobotCommands.moveToHomeCommand(intake, shooter, shooterTilt,
-                        climber, noteLift));
+                        climber));
         controller.povLeft().onTrue(
                 Commands.sequence(
                         drivetrain.setInitializedCommand(true),
                         intake.setInitializedCommand(true),
                         shooterTilt.setInitializedCommand(true),
                         climber.setInitializedCommand(true),
-                        noteLift.setInitializedCommand(true),
                         GlobalStates.INITIALIZED.enableCommand()).ignoringDisable(true));
     }
 
     public static void configureOverridesControls(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
-            ShooterTilt shooterTilt, Climber climber, NoteLift noteLift) {
+            ShooterTilt shooterTilt, Climber climber) {
         CommandXboxController controller = new CommandXboxController(port);
 
         controller.x().onTrue(GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.enableCommand());
@@ -158,7 +135,7 @@ public class Controls {
     }
 
     public static void configureTestingControls(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
-            ShooterTilt shooterTilt, Climber climber, NoteLift noteLift) {
+            ShooterTilt shooterTilt, Climber climber) {
         CommandXboxController controller = new CommandXboxController(port);
 
         controller.x().and(controller.povUp()).whileTrue(intake.sysIdQuasistatic(Direction.kForward));
@@ -175,11 +152,6 @@ public class Controls {
         controller.y().and(controller.povRight()).whileTrue(climber.sysIdQuasistatic(Direction.kReverse));
         controller.a().and(controller.povRight()).whileTrue(climber.sysIdDynamic(Direction.kForward));
         controller.b().and(controller.povRight()).whileTrue(climber.sysIdDynamic(Direction.kReverse));
-
-        controller.x().and(controller.povDown()).whileTrue(noteLift.sysIdQuasistatic(Direction.kForward));
-        controller.y().and(controller.povDown()).whileTrue(noteLift.sysIdQuasistatic(Direction.kReverse));
-        controller.a().and(controller.povDown()).whileTrue(noteLift.sysIdDynamic(Direction.kForward));
-        controller.b().and(controller.povDown()).whileTrue(noteLift.sysIdDynamic(Direction.kReverse));
 
         controller.x().and(controller.leftBumper()).whileTrue(drivetrain.sysIdDriveQuasistatic(Direction.kForward));
         controller.y().and(controller.leftBumper()).whileTrue(drivetrain.sysIdDriveQuasistatic(Direction.kReverse));

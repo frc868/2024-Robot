@@ -171,26 +171,22 @@ public class RobotCommands {
                 climber.moveToPositionCommand(() -> ClimberPosition.MAX_HEIGHT).asProxy());
     }
 
-    public static Command resetClimb(Intake intake, Shooter shooter, ShooterTilt shooterTilt, Climber climber,
-            NoteLift noteLift) {
+    public static Command resetClimb(Intake intake, Shooter shooter, ShooterTilt shooterTilt, Climber climber) {
         return Commands.sequence(
                 shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.CLIMB).asProxy(),
                 climber.moveToPositionCommand(() -> ClimberPosition.BOTTOM).asProxy());
     }
 
-    public static Command deClimb(Intake intake, Shooter shooter, ShooterTilt shooterTilt, Climber climber,
-            NoteLift noteLift) {
+    public static Command deClimb(Intake intake, Shooter shooter, ShooterTilt shooterTilt, Climber climber) {
         return Commands.sequence(
                 shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.CLIMB).asProxy(),
                 climber.moveToPositionCommand(() -> ClimberPosition.CLIMB_PREP).asProxy());
     }
 
-    public static Command moveToHomeCommand(Intake intake, Shooter shooter, ShooterTilt shooterTilt, Climber climber,
-            NoteLift noteLift) {
+    public static Command moveToHomeCommand(Intake intake, Shooter shooter, ShooterTilt shooterTilt, Climber climber) {
         return Commands.sequence(
                 shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.CLIMB).asProxy(),
                 climber.moveToPositionCommand(() -> ClimberPosition.BOTTOM).asProxy(),
-                noteLift.moveToPositionCommand(() -> NoteLiftPosition.TOP).asProxy(),
                 shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.BOTTOM).asProxy(),
                 intake.moveToPositionCommand(() -> IntakePosition.TOP).asProxy());
     }

@@ -153,9 +153,6 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
                 voltage = 0;
             }
 
-            if (positionTracker.getNoteLiftPosition() - getPosition() + 1 < -0.065 && voltage > 0) {
-                voltage = 0;
-            }
             if (getPosition() < 0.5) {
                 voltage = 0.0;
             }
@@ -234,7 +231,7 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
         return sysIdRoutine.dynamic(direction).withName("climber.sysIdDynamic");
     }
 
-    public Command climbToBottomCommand() {
+    public Command moveDownCommand() {
         return run(() -> {
             if (getPosition() > ClimberPosition.BOTTOM.value + 0.008) {
                 setVoltage(-12);
@@ -242,11 +239,17 @@ public class Climber extends SubsystemBase implements BaseElevator<ClimberPositi
                 setVoltage(-3);
             }
         })
-                .until(() -> getPosition() < ClimberPosition.BOTTOM.value + 0.008)
                 .finallyDo(() -> {
                     pidController.reset(getPosition());
                     pidController.setGoal(getPosition());
                 });
+    }
+
+    public Command moveUpCommand() {
+        return run(() -> setVoltage(12)).finallyDo(() -> {
+            pidController.reset(getPosition());
+            pidController.setGoal(getPosition());
+        });
     }
 
     public Command resetControllersCommand() {

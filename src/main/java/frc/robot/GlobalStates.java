@@ -11,7 +11,6 @@ public enum GlobalStates {
     MECH_LIMITS_DISABLED(false),
     BEAMS_BYPASSED(false),
     SUBWOOFER_ONLY(false),
-    QUICK_CLIMB(false),
     PODIUM_ONLY(false);
 
     private boolean isEnabled;

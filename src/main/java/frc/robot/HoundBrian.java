@@ -16,7 +16,6 @@ import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LEDs;
-import frc.robot.subsystems.NoteLift;
 import frc.robot.subsystems.ShooterTilt;
 
 @LoggedObject
@@ -44,8 +43,7 @@ public class HoundBrian {
     private final DIOSim actionButtonSim = new DIOSim(actionButton);
     private final DIOSim actionButton2Sim = new DIOSim(actionButton2);
 
-    public HoundBrian(Drivetrain drivetrain, Intake intake, ShooterTilt shooterTilt, Climber climber, NoteLift noteLift,
-            LEDs leds) {
+    public HoundBrian(Drivetrain drivetrain, Intake intake, ShooterTilt shooterTilt, Climber climber, LEDs leds) {
 
         new Trigger(drivetrainButton::get).negate()
                 // .and(new Trigger(intakeButton::get).negate().debounce(2,
@@ -66,7 +64,7 @@ public class HoundBrian {
                 // .and(new Trigger(climberButton::get).negate().debounce(2,
                 // DebounceType.kFalling))
                 .and(DriverStation::isDisabled)
-                .onTrue(climber.resetPositionCommand().andThen(noteLift.resetPositionCommand()).ignoringDisable(true));
+                .onTrue(climber.resetPositionCommand().ignoringDisable(true));
 
         // new Trigger(intakeButton::get).debounce(3, DebounceType.kBoth)
         // .and(DriverStation::isDisabled)

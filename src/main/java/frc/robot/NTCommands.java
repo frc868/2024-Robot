@@ -9,13 +9,12 @@ import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LEDs;
-import frc.robot.subsystems.NoteLift;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterTilt;
 
 public class NTCommands {
     public static void configureNTCommands(Drivetrain drivetrain, Intake intake, Shooter shooter,
-            ShooterTilt shooterTilt, Climber climber, NoteLift noteLift, LEDs leds) {
+            ShooterTilt shooterTilt, Climber climber, LEDs leds) {
         LoggingManager.getInstance().addGroup(new LogGroup(
                 // new SendableLogger("commands/leds", "chase",
                 // leds.requestChaseCommand()),
@@ -36,19 +35,16 @@ public class NTCommands {
                 new SendableLogger("commands/intake", "shooterCloseBeam",
                         intake.simTriggerShooterCloseBeamCommand().ignoringDisable(true)),
                 new SendableLogger("commands", "initialize",
-                Commands.sequence(
-                        drivetrain.setInitializedCommand(true),
-                        intake.setInitializedCommand(true),
-                        shooterTilt.setInitializedCommand(true),
-                        climber.setInitializedCommand(true),
-                        noteLift.setInitializedCommand(true),
-                        GlobalStates.INITIALIZED.enableCommand()).ignoringDisable(true)),
+                        Commands.sequence(
+                                drivetrain.setInitializedCommand(true),
+                                intake.setInitializedCommand(true),
+                                shooterTilt.setInitializedCommand(true),
+                                climber.setInitializedCommand(true),
+                                GlobalStates.INITIALIZED.enableCommand()).ignoringDisable(true)),
                 new SendableLogger("commands/shooterTilt", "resetPosition",
                         shooterTilt.resetPositionCommand().ignoringDisable(true)),
                 new SendableLogger("commands/climber", "resetPosition",
-                        climber.resetPositionCommand().ignoringDisable(true)),
-                new SendableLogger("commands/noteLift", "resetPosition",
-                        noteLift.resetPositionCommand().ignoringDisable(true))));
+                        climber.resetPositionCommand().ignoringDisable(true))));
     }
 
 }
