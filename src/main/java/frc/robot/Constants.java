@@ -297,7 +297,7 @@ public class Constants {
         public static enum ShooterTiltPosition {
             BOTTOM(0.389842),
             AMP_EJECT(0.601),
-            INTAKE(0.55 + 0.035),
+            INTAKE(0.585),
             CLIMB(1.176781),
             SUBWOOFER(1.01572),
             PASS(0.90),
@@ -612,21 +612,21 @@ public class Constants {
 
     public static final class LEDs {
         public static enum LEDSection implements BaseLEDSection {
-            SHOOTER_RIGHT(0, 27),
-            SHOOTER_TOP(28, 77),
-            SHOOTER_LEFT(78, 110, true),
-            SHOOTER(0, 110),
-            SHOOTER_RIGHT_BOTTOM(0, 13),
-            SHOOTER_RIGHT_TOP(14, 27),
-            SHOOTER_LEFT_BOTTOM(94, 110, true),
-            SHOOTER_LEFT_TOP(78, 93, true),
+            SHOOTER_RIGHT(0, 26),
+            SHOOTER_TOP(27, 74),
+            SHOOTER_LEFT(75, 107, true),
+            SHOOTER(0, 107),
+            SHOOTER_RIGHT_BOTTOM(0, 12),
+            SHOOTER_RIGHT_TOP(13, 26),
+            SHOOTER_LEFT_BOTTOM(92, 107, true),
+            SHOOTER_LEFT_TOP(75, 91, true),
 
-            ELEVATOR_LEFT(111, 221),
-            ELEVATOR_LEFT_TOP(167, 221),
-            ELEVATOR_LEFT_BOTTOM(111, 166),
-            ELEVATOR_RIGHT(222, 332),
-            ELEVATOR_RIGHT_TOP(278, 332),
-            ELEVATOR_RIGHT_BOTTOM(222, 277),
+            ELEVATOR_LEFT(108, 141),
+            ELEVATOR_LEFT_TOP(125, 141),
+            ELEVATOR_LEFT_BOTTOM(108, 124),
+            ELEVATOR_RIGHT(142, 175),
+            ELEVATOR_RIGHT_TOP(159, 175),
+            ELEVATOR_RIGHT_BOTTOM(142, 158),
             ALL(0, 332);
 
             private final int startIdx;

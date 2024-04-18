@@ -36,6 +36,13 @@ public class LEDs extends SubsystemBase {
 
     public enum LEDState {
         OFF(solid(Color.kBlack, LEDSection.ALL)),
+        INTER_SUBSYSTEM_SAFETIES_DISABLED(
+                breathe(Color.kOrange, 0.5, 0, 255, LEDSection.ELEVATOR_LEFT_TOP),
+                breathe(Color.kOrange, 0.5, 0, 255, LEDSection.ELEVATOR_RIGHT_TOP)),
+        MECH_LIMITS_DISABLED(
+                breathe(Color.kOrange, 0.5, 0, 255, LEDSection.ELEVATOR_LEFT_BOTTOM),
+                breathe(Color.kOrange, 0.5, 0, 255, LEDSection.ELEVATOR_RIGHT_BOTTOM)),
+
         RED_BREATHE(breathe(Color.kRed, 3, 0, 255, LEDSection.ALL)),
         NOTE_LIFT_UNINITIALIZED(
                 breathe(Color.kRed, 3, 0, 255, LEDSection.ELEVATOR_LEFT_TOP),
@@ -58,12 +65,6 @@ public class LEDs extends SubsystemBase {
         INITIALIZED_CONFIRM(breathe(Color.kGreen, 2, 0, 255, LEDSection.ALL)),
 
         FLASHING_WHITE(flash(Color.kWhite, 0.5, LEDSection.ALL)),
-        INTER_SUBSYSTEM_SAFETIES_DISABLED(
-                breathe(Color.kOrange, 0.5, 0, 255, LEDSection.ELEVATOR_LEFT_TOP),
-                breathe(Color.kOrange, 0.5, 0, 255, LEDSection.ELEVATOR_RIGHT_TOP)),
-        MECH_LIMITS_DISABLED(
-                breathe(Color.kOrange, 0.5, 0, 255, LEDSection.ELEVATOR_LEFT_BOTTOM),
-                breathe(Color.kOrange, 0.5, 0, 255, LEDSection.ELEVATOR_RIGHT_BOTTOM)),
         QUICK_CLIMB(
                 breathe(Color.kBlue, 0.5, 0, 255, LEDSection.ELEVATOR_LEFT),
                 breathe(Color.kBlue, 0.5, 0, 255, LEDSection.ELEVATOR_RIGHT)),
