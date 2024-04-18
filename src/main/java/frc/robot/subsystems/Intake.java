@@ -297,14 +297,14 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
 
     public Command runRollersHalfCommand() {
         return Commands.startEnd(
-                () -> setRollerVoltage(6),
+                () -> setRollerVoltage(7),
                 () -> setRollerVoltage(0))
                 .withName("intake.runRollers");
     }
 
     public Command runRollersSlowCommand() {
         return Commands.startEnd(
-                () -> setRollerVoltage(2),
+                () -> setRollerVoltage(3),
                 () -> setRollerVoltage(0))
                 .withName("intake.runRollers");
     }
@@ -345,9 +345,10 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
                         .until(noteInIntakeFromOutsideTrigger.or(noteInShooterTrigger)),
                 moveToCurrentGoalCommand().alongWith(runRollersHalfCommand())
                         .until(noteInShooterTrigger),
-                moveToCurrentGoalCommand().alongWith(runRollersSlowCommand())
-                        .until(noteFullyInShooterTrigger),
-                moveToPositionCommand(() -> IntakePosition.STOW)).withName("intake.intakeNote");
+                moveToPositionCommand(() -> IntakePosition.STOW).andThen(moveToCurrentGoalCommand())
+                        .alongWith(runRollersSlowCommand())
+                        .until(noteFullyInShooterTrigger))
+                .withName("intake.intakeNote");
     }
 
     public Command intakeNoteAutoCommand() {
