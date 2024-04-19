@@ -297,14 +297,14 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
 
     public Command runRollersHalfCommand() {
         return Commands.startEnd(
-                () -> setRollerVoltage(7),
+                () -> setRollerVoltage(6),
                 () -> setRollerVoltage(0))
                 .withName("intake.runRollers");
     }
 
     public Command runRollersSlowCommand() {
         return Commands.startEnd(
-                () -> setRollerVoltage(3),
+                () -> setRollerVoltage(2),
                 () -> setRollerVoltage(0))
                 .withName("intake.runRollers");
     }
@@ -325,7 +325,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
 
     public Command ampScoreRollersCommand() {
         return Commands.startEnd(
-                () -> setRollerVoltage(-4.0),
+                () -> setRollerVoltage(-3.75),
                 () -> setRollerVoltage(0))
                 .withName("intake.reverseRollers");
     }
