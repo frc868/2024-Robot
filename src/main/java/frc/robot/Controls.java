@@ -30,7 +30,8 @@ public class Controls {
                         () -> -joystick.getX(),
                         () -> -joystick.getTwist()));
 
-        new Trigger(() -> (Math.abs(joystick.getTwist()) > 0.05)).onTrue(drivetrain.disableControlledRotateCommand());
+        new Trigger(() -> (Math.abs(joystick.getTwist()) > 0.05))
+                .whileTrue(drivetrain.disableControlledRotateCommand());
 
         joystick.stickButton().onTrue(drivetrain.resetGyroCommand());
 
