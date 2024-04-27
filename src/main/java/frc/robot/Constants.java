@@ -613,8 +613,12 @@ public class Constants {
     public static final class LEDs {
         public static enum LEDSection implements BaseLEDSection {
             SHOOTER_RIGHT(0, 26),
-            SHOOTER_TOP(27, 74),
+            SHOOTER_RIGHT_EXT(0, 50, true),
+            SHOOTER_TOP(27, 74, true),
+            SHOOTER_TOP_RIGHT(51, 74, true),
+            SHOOTER_TOP_LEFT(27, 50),
             SHOOTER_LEFT(75, 107, true),
+            SHOOTER_LEFT_EXT(51, 101),
             SHOOTER(0, 107),
             SHOOTER_RIGHT_BOTTOM(0, 12),
             SHOOTER_RIGHT_TOP(13, 26),
@@ -627,7 +631,7 @@ public class Constants {
             ELEVATOR_RIGHT(142, 175),
             ELEVATOR_RIGHT_TOP(159, 175),
             ELEVATOR_RIGHT_BOTTOM(142, 158),
-            ALL(0, 332);
+            ALL(0, 175, true);
 
             private final int startIdx;
             private final int endIdx;
