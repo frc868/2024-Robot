@@ -75,8 +75,12 @@ public class LEDs extends SubsystemBase {
         FLASHING_AQUA(flash(Color.kAqua, 0.5, LEDSection.ALL)),
 
         // decorative
-        PURPLE_WAVE(wave(new Color("#9000DD"), 30, 20, 100, 255,
-                LEDSection.SHOOTER)),
+        PURPLE_WAVE(
+                wave(new Color("#9000DD"), 30, 20, 100, 255, LEDSection.SHOOTER_LEFT_EXT),
+                wave(new Color("#9000DD"), 30, 20, 100, 255, LEDSection.SHOOTER_RIGHT_EXT)),
+        RAINBOW_WAVE(
+                waveRainbow(1, 30, 20, 100, 255, LEDSection.SHOOTER_LEFT_EXT),
+                waveRainbow(1, 30, 20, 100, 255, LEDSection.SHOOTER_RIGHT_EXT)),
         PURPLE_FIRE(
                 fire2012Palette(0.8, 0.4,
                         List.of(Color.kBlack, new Color("#ad3fe8"), new Color("#9000DD"), new Color("#400063")),
@@ -84,6 +88,9 @@ public class LEDs extends SubsystemBase {
                 fire2012Palette(0.8, 0.4,
                         List.of(Color.kBlack, new Color("#ad3fe8"), new Color("#9000DD"), new Color("#400063")),
                         LEDSection.ELEVATOR_RIGHT)),
+        RAINBOW_FIRE(
+                fire2012Rainbow(0.8, 0.4, 1, LEDSection.ELEVATOR_LEFT),
+                fire2012Rainbow(0.8, 0.4, 1, LEDSection.ELEVATOR_RIGHT)),
         RAINBOW(rainbow(255, 3, LEDSection.SHOOTER_LEFT_EXT),
                 rainbow(255, 3, LEDSection.SHOOTER_RIGHT_EXT),
                 rainbow(255, 3, LEDSection.ELEVATOR_LEFT),
@@ -150,8 +157,8 @@ public class LEDs extends SubsystemBase {
         return run(() -> {
             loadingNotifier.stop();
             clear();
-            currentStates.add(LEDState.PURPLE_WAVE);
             currentStates.add(LEDState.PURPLE_FIRE);
+            currentStates.add(LEDState.PURPLE_WAVE);
             currentStates.sort((s1, s2) -> s2.ordinal() - s1.ordinal());
             currentStates.forEach(s -> s.bufferConsumers.forEach(c -> c.accept(buffer)));
             leds.setData(buffer);
