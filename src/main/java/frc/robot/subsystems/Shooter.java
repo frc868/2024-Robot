@@ -121,7 +121,7 @@ public class Shooter extends SubsystemBase implements BaseShooter {
                         },
                         this));
 
-        setDefaultCommand(holdVelocityCommand(() -> IDLE_RPS));
+        setDefaultCommand(holdVelocityCommand(() -> 0.0));
         leftPidController.setTolerance(TOLERANCE);
         rightPidController.setTolerance(TOLERANCE);
 

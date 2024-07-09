@@ -1,5 +1,7 @@
 package frc.robot;
 
+import static frc.robot.Constants.ShooterTilt.DEMO_ANGLE;
+
 import com.techhounds.houndutil.houndlib.AprilTagPhotonCamera.PhotonCameraConstants;
 import com.techhounds.houndutil.houndlib.leds.BaseLEDSection;
 
@@ -17,6 +19,8 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 
 import com.techhounds.houndutil.houndlib.swerve.CoaxialSwerveModule.SwerveConstants;
+import com.techhounds.houndutil.houndlog.logitems.TunableDouble;
+
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 import edu.wpi.first.math.geometry.Translation2d;
@@ -66,6 +70,8 @@ public class Constants {
         public static final String CAN_BUS_NAME = "canivore";
 
         public static final int PIGEON_ID = 0;
+
+        public static final TunableDouble DEMO_SPEED = new TunableDouble("subsystems/drivetrain", "DEMO_SPEED", 1.0);
 
         public static final boolean DRIVE_MOTORS_INVERTED = false;
         public static final boolean STEER_MOTORS_INVERTED = true;
@@ -240,6 +246,7 @@ public class Constants {
         public static final double PASSING_RPS = 47;
         public static final double SUBWOOFER_RPS = 55;
         public static final double PODIUM_RPS = 84;
+        public static final TunableDouble DEMO_RPS = new TunableDouble("subsystems/shooter", "DEMO_RPS", 10);
 
         // 3/3/24
         public static final double left_kP = 0.1;
@@ -323,6 +330,8 @@ public class Constants {
 
         public static final double MIN_ANGLE_RADIANS = 0.389842;
         public static final double MAX_ANGLE_RADIANS = 1.2;
+        public static final TunableDouble DEMO_ANGLE = new TunableDouble("subsystems/shooterTilt", "DEMO_ANGLE",
+                1.01572);
 
         public static final int CURRENT_LIMIT = 25;
 
@@ -613,25 +622,25 @@ public class Constants {
     public static final class LEDs {
         public static enum LEDSection implements BaseLEDSection {
             SHOOTER_RIGHT(0, 26),
-            SHOOTER_RIGHT_EXT(0, 50, true),
+            SHOOTER_RIGHT_EXT(0, 50, false),
             SHOOTER_TOP(27, 74, true),
             SHOOTER_TOP_RIGHT(51, 74, true),
             SHOOTER_TOP_LEFT(27, 50),
             SHOOTER_LEFT(75, 107, true),
-            SHOOTER_LEFT_EXT(51, 101),
+            SHOOTER_LEFT_EXT(51, 101, true),
             SHOOTER(0, 107),
             SHOOTER_RIGHT_BOTTOM(0, 12),
             SHOOTER_RIGHT_TOP(13, 26),
             SHOOTER_LEFT_BOTTOM(92, 107, true),
             SHOOTER_LEFT_TOP(75, 91, true),
 
-            ELEVATOR_LEFT(108, 141),
-            ELEVATOR_LEFT_TOP(125, 141),
-            ELEVATOR_LEFT_BOTTOM(108, 124),
-            ELEVATOR_RIGHT(142, 175),
-            ELEVATOR_RIGHT_TOP(159, 175),
-            ELEVATOR_RIGHT_BOTTOM(142, 158),
-            ALL(0, 175, true);
+            ELEVATOR_LEFT(108, 218),
+            ELEVATOR_LEFT_TOP(164, 218),
+            ELEVATOR_LEFT_BOTTOM(108, 163),
+            ELEVATOR_RIGHT(216, 326),
+            ELEVATOR_RIGHT_TOP(272, 326),
+            ELEVATOR_RIGHT_BOTTOM(216, 271),
+            ALL(0, 326, true);
 
             private final int startIdx;
             private final int endIdx;

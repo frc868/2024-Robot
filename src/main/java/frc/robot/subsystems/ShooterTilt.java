@@ -184,9 +184,9 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
             voltage = Utils.applySoftStops(voltage, getPosition(), MIN_HEIGHT_METERS, MAX_HEIGHT_METERS);
 
         if (!GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.enabled()) {
-            if (positionTracker.getClimberPosition() < 1.03 && voltage > 0) {
-                voltage = 0;
-            }
+            // if (positionTracker.getClimberPosition() < 1.03 && voltage > 0) {
+            // voltage = 0;
+            // }
         }
 
         if (!GlobalStates.INITIALIZED.enabled() && !GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.enabled()) {

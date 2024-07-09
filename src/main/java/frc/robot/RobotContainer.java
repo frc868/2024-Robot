@@ -32,6 +32,10 @@ import frc.robot.subsystems.Vision;
 import frc.robot.subsystems.LEDs.LEDState;
 import frc.robot.utils.TrajectoryCalcs;
 
+import static frc.robot.Constants.Drivetrain.DEMO_SPEED;
+import static frc.robot.Constants.Shooter.DEMO_RPS;
+import static frc.robot.Constants.ShooterTilt.DEMO_ANGLE;
+
 import java.util.ArrayList;
 import java.util.function.Supplier;
 
@@ -142,6 +146,9 @@ public class RobotContainer {
 
         LoggingManager.getInstance().registerRobotContainer(this);
         LoggingManager.getInstance().registerClass(LoggingManager.class, "houndlog", new ArrayList<>());
+        LoggingManager.getInstance().addLogger(DEMO_RPS);
+        LoggingManager.getInstance().addLogger(DEMO_SPEED);
+        LoggingManager.getInstance().addLogger(DEMO_ANGLE);
         LoggingManager.getInstance()
                 .addGroup(new LogGroup("robotController", LogProfileBuilder.buildRobotControllerLogItems()));
         LiveWindow.disableAllTelemetry(); // livewindow is basically deprecated. using houndlog instead.

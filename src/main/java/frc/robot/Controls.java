@@ -1,6 +1,9 @@
 package frc.robot;
 
+import static frc.robot.Constants.Drivetrain.DEMO_SPEED;
+import static frc.robot.Constants.Shooter.DEMO_RPS;
 import static frc.robot.Constants.Shooter.PODIUM_RPS;
+import static frc.robot.Constants.ShooterTilt.DEMO_ANGLE;
 
 import com.techhounds.houndutil.houndlib.oi.CommandVirpilJoystick;
 
@@ -26,9 +29,9 @@ public class Controls {
 
         drivetrain.setDefaultCommand(
                 drivetrain.teleopDriveCommand(
-                        () -> -joystick.getY(),
-                        () -> -joystick.getX(),
-                        () -> -joystick.getTwist()));
+                        () -> -joystick.getY() * DEMO_SPEED.get(),
+                        () -> -joystick.getX() * DEMO_SPEED.get(),
+                        () -> -joystick.getTwist() * DEMO_SPEED.get()));
 
         new Trigger(() -> (Math.abs(joystick.getTwist()) > 0.05))
                 .whileTrue(drivetrain.disableControlledRotateCommand());
@@ -54,12 +57,14 @@ public class Controls {
                         leds.requestStateCommand(LEDState.FLASHING_AQUA)))
                 .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
 
-        joystick.centerTopHatUp().whileTrue(
-                climber.moveUpCommand()
-                        .deadlineWith(shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.PODIUM)));
-        joystick.centerTopHatDown().whileTrue(
-                climber.moveDownCommand()
-                        .deadlineWith(shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.PODIUM)));
+        // joystick.centerTopHatUp().whileTrue(
+        // climber.moveUpCommand()
+        // .deadlineWith(shooterTilt.moveToPositionCommand(() ->
+        // ShooterTiltPosition.PODIUM)));
+        // joystick.centerTopHatDown().whileTrue(
+        // climber.moveDownCommand()
+        // .deadlineWith(shooterTilt.moveToPositionCommand(() ->
+        // ShooterTiltPosition.PODIUM)));
 
         joystick.redButton().whileTrue(RobotCommands.ampPrepIntakeCommand(intake, shooterTilt))
                 .onFalse(intake.moveToPositionCommand(() -> IntakePosition.AMP));
@@ -68,19 +73,10 @@ public class Controls {
                 .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
 
         joystick.triggerSoftPress().and(joystick.flipTriggerIn().negate()).whileTrue(
-                Commands.either(
-                        RobotCommands.targetSpeakerSubwooferCommand(drivetrain, shooter,
-                                shooterTilt),
-                        Commands.either(
-                                RobotCommands.targetSpeakerPodiumCommand(drivetrain, shooter, shooterTilt),
-                                RobotCommands.targetSpeakerOnTheMoveCommand(drivetrain, shooter, shooterTilt),
-                                GlobalStates.PODIUM_ONLY::enabled),
-                        GlobalStates.SUBWOOFER_ONLY::enabled));
-        joystick.triggerHardPress().and(joystick.flipTriggerIn().negate()).whileTrue(
-                Commands.either(
-                        intake.runRollersCommand(),
-                        RobotCommands.shootOnTheMoveCommand(drivetrain, intake, shooter, shooterTilt),
-                        new Trigger(GlobalStates.SUBWOOFER_ONLY::enabled).or(GlobalStates.PODIUM_ONLY::enabled)));
+                Commands.parallel(
+                        shooterTilt.moveToArbitraryPositionCommand(() -> DEMO_ANGLE.get()).asProxy(),
+                        shooter.spinAtVelocityCommand(() -> DEMO_RPS.get()).asProxy()));
+        joystick.triggerHardPress().and(joystick.flipTriggerIn().negate()).whileTrue(intake.runRollersCommand());
 
         joystick.flipTriggerIn().and(joystick.triggerSoftPress()).whileTrue(
                 RobotCommands.targetPassCommand(drivetrain, shooter, shooterTilt));
