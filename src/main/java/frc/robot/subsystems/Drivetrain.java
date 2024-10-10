@@ -569,6 +569,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
     @Override
     public void updatePoseEstimator() {
+        // unused due to multi-threaded odometry
     }
 
     @Override

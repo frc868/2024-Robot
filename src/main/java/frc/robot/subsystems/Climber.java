@@ -7,7 +7,7 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.techhounds.houndutil.houndlib.SparkConfigurator;
 import com.techhounds.houndutil.houndlib.Utils;
-import com.techhounds.houndutil.houndlib.subsystems.BaseElevator;
+import com.techhounds.houndutil.houndlib.subsystems.BaseLinearMechanism;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
 import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
 
@@ -40,7 +40,7 @@ import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.Constants.Climber.*;
 
 @LoggedObject
-public class Climber extends SubsystemBase implements BaseElevator<ClimberPosition> {
+public class Climber extends SubsystemBase implements BaseLinearMechanism<ClimberPosition> {
     @Log
     private CANSparkFlex motor;
 

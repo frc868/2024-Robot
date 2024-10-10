@@ -7,6 +7,7 @@ import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.techhounds.houndutil.houndlib.SparkConfigurator;
 import com.techhounds.houndutil.houndlib.Utils;
+import com.techhounds.houndutil.houndlib.subsystems.BaseIntake;
 import com.techhounds.houndutil.houndlib.subsystems.BaseSingleJointedArm;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
 import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
@@ -46,7 +47,7 @@ import static edu.wpi.first.units.Units.Volts;
  * @author rb, jq, ak
  */
 @LoggedObject
-public class Intake extends SubsystemBase implements BaseSingleJointedArm<IntakePosition> {
+public class Intake extends SubsystemBase implements BaseSingleJointedArm<IntakePosition>, BaseIntake {
     @Log
     private final CANSparkFlex leftArmMotor;
     @Log
@@ -281,11 +282,20 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
                 .withName("intake.coastMotors");
     }
 
+    @Override
     public Command runRollersCommand() {
         return Commands.startEnd(
                 () -> setRollerVoltage(12),
                 () -> setRollerVoltage(0))
                 .withName("intake.runRollers");
+    }
+
+    @Override
+    public Command reverseRollersCommand() {
+        return Commands.startEnd(
+                () -> setRollerVoltage(-12),
+                () -> setRollerVoltage(0))
+                .withName("intake.reverseRollers");
     }
 
     public Command runRollersAutoCommand() {
@@ -307,13 +317,6 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
                 () -> setRollerVoltage(2),
                 () -> setRollerVoltage(0))
                 .withName("intake.runRollers");
-    }
-
-    public Command reverseRollersCommand() {
-        return Commands.startEnd(
-                () -> setRollerVoltage(-12),
-                () -> setRollerVoltage(0))
-                .withName("intake.reverseRollers");
     }
 
     public Command sourceIntakeRollersCommand() {
