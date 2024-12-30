@@ -4,17 +4,19 @@ import com.ctre.phoenix6.SignalLogger;
 import com.techhounds.houndutil.houndauto.AutoManager;
 import com.techhounds.houndutil.houndauto.Reflector;
 import com.techhounds.houndutil.houndlib.SparkConfigurator;
-import com.techhounds.houndutil.houndlog.LogGroup;
-import com.techhounds.houndutil.houndlog.LogProfileBuilder;
+import com.techhounds.houndutil.houndlog.LogProfiles;
 import com.techhounds.houndutil.houndlog.LoggingManager;
-import com.techhounds.houndutil.houndlog.interfaces.Log;
-import com.techhounds.houndutil.houndlog.interfaces.SendableLog;
+import com.techhounds.houndutil.houndlog.annotations.Log;
+import com.techhounds.houndutil.houndlog.annotations.SendableLog;
+import com.techhounds.houndutil.houndlog.loggers.LogGroup;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
@@ -60,9 +62,6 @@ public class RobotContainer {
     @Log(groups = "subsystems")
     private final Climber climber = new Climber(positionTracker);
 
-    // @Log(groups = "subsystems")
-    // private final NoteLift noteLift = new NoteLift(positionTracker);
-
     @Log(groups = "subsystems")
     private final Vision vision = new Vision();
 
@@ -72,8 +71,8 @@ public class RobotContainer {
     @Log(groups = "subsystems")
     private final HoundBrian houndBrian = new HoundBrian(drivetrain, intake, shooterTilt, climber, leds);
 
-    // @Log(groups = { "subsystems", "misc" })
-    // private final PowerDistribution pdh = new PowerDistribution();
+    @Log(groups = { "subsystems", "misc" })
+    private final PowerDistribution pdh = new PowerDistribution();
 
     @SendableLog(groups = "wpilib")
     private final CommandScheduler commandScheduler = CommandScheduler.getInstance();
@@ -144,13 +143,13 @@ public class RobotContainer {
         // URCL.start();
         SignalLogger.start();
 
-        LoggingManager.getInstance().registerRobotContainer(this);
+        LoggingManager.getInstance().registerObject(this);
         LoggingManager.getInstance().registerClass(LoggingManager.class, "houndlog", new ArrayList<>());
         LoggingManager.getInstance().addLogger(DEMO_RPS);
         LoggingManager.getInstance().addLogger(DEMO_SPEED);
         LoggingManager.getInstance().addLogger(DEMO_ANGLE);
         LoggingManager.getInstance()
-                .addGroup(new LogGroup("robotController", LogProfileBuilder.buildRobotControllerLogItems()));
+                .addGroup(new LogGroup("robotController", LogProfiles.logRobotController()));
         LiveWindow.disableAllTelemetry(); // livewindow is basically deprecated. using houndlog instead.
 
         if (RobotBase.isSimulation()) {

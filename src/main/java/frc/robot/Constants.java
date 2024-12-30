@@ -1,7 +1,5 @@
 package frc.robot;
 
-import static frc.robot.Constants.ShooterTilt.DEMO_ANGLE;
-
 import com.techhounds.houndutil.houndlib.AprilTagPhotonCamera.PhotonCameraConstants;
 import com.techhounds.houndutil.houndlib.leds.BaseLEDSection;
 
@@ -19,7 +17,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 
 import com.techhounds.houndutil.houndlib.swerve.CoaxialSwerveModule.SwerveConstants;
-import com.techhounds.houndutil.houndlog.logitems.TunableDouble;
+import com.techhounds.houndutil.houndlog.loggers.TunableDouble;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
@@ -71,7 +69,7 @@ public class Constants {
 
         public static final int PIGEON_ID = 0;
 
-        public static final TunableDouble DEMO_SPEED = new TunableDouble("subsystems/drivetrain", "DEMO_SPEED", 1.0);
+        public static final TunableDouble DEMO_SPEED = new TunableDouble("subsystems/drivetrain/DEMO_SPEED", 1.0);
 
         public static final boolean DRIVE_MOTORS_INVERTED = false;
         public static final boolean STEER_MOTORS_INVERTED = true;
@@ -105,9 +103,9 @@ public class Constants {
             SWERVE_CONSTANTS.STEER_kP = 100.0;
             SWERVE_CONSTANTS.STEER_kI = 0.0;
             SWERVE_CONSTANTS.STEER_kD = 1.0;
-            SWERVE_CONSTANTS.STEER_kS = 0; // TODO
-            SWERVE_CONSTANTS.STEER_kV = 0; // TODO
-            SWERVE_CONSTANTS.STEER_kA = 0; // TODO
+            SWERVE_CONSTANTS.STEER_kS = 0;
+            SWERVE_CONSTANTS.STEER_kV = 0;
+            SWERVE_CONSTANTS.STEER_kA = 0;
 
             SWERVE_CONSTANTS.DRIVE_GEARING = 5.357;
             SWERVE_CONSTANTS.STEER_GEARING = 150.0 / 7.0;
@@ -119,10 +117,10 @@ public class Constants {
                     / SWERVE_CONSTANTS.STEER_GEARING;
 
             SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND = 4.54;
-            SWERVE_CONSTANTS.MAX_DRIVING_ACCELERATION_METERS_PER_SECOND_SQUARED = 8; // TODO
-            SWERVE_CONSTANTS.MAX_STEER_VELOCITY_RADIANS_PER_SECOND = 100 * 2 * Math.PI; // TODO
-            // max velocity in 1/3 sec
-            SWERVE_CONSTANTS.MAX_STEER_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 10 * 100 * 2 * Math.PI; // TODO
+            SWERVE_CONSTANTS.MAX_DRIVING_ACCELERATION_METERS_PER_SECOND_SQUARED = 8;
+            SWERVE_CONSTANTS.MAX_STEER_VELOCITY_RADIANS_PER_SECOND = 100 * 2 * Math.PI;
+            // max velocity in 1/10 sec
+            SWERVE_CONSTANTS.MAX_STEER_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 10 * 100 * 2 * Math.PI;
 
             SWERVE_CONSTANTS.DRIVE_CURRENT_LIMIT = 100;
             SWERVE_CONSTANTS.STEER_CURRENT_LIMIT = 30;
@@ -194,8 +192,8 @@ public class Constants {
 
         public static final DCMotor MOTOR_GEARBOX_REPR = DCMotor.getNeoVortex(2);
         public static final double GEARING = 43.2;
-        public static final double LENGTH_METERS = 0.23; // TODO simvalue
-        public static final double MASS_KG = 4.082; // TODO simv<alue
+        public static final double LENGTH_METERS = 0.23;
+        public static final double MASS_KG = 4.082;
         public static final double MOMENT_OF_INERTIA_KG_METERS_SQUARED = SingleJointedArmSim.estimateMOI(
                 LENGTH_METERS,
                 MASS_KG);
@@ -246,7 +244,7 @@ public class Constants {
         public static final double PASSING_RPS = 47;
         public static final double SUBWOOFER_RPS = 55;
         public static final double PODIUM_RPS = 84;
-        public static final TunableDouble DEMO_RPS = new TunableDouble("subsystems/shooter", "DEMO_RPS", 10);
+        public static final TunableDouble DEMO_RPS = new TunableDouble("subsystems/shooter/DEMO_RPS", 10);
 
         // 3/3/24
         public static final double left_kP = 0.1;
@@ -263,12 +261,6 @@ public class Constants {
         public static final double right_kV = 0.10746;
         public static final double right_kA = 0.021566;
         public static final double TOLERANCE = 5;
-
-        // public static final double MAX_VELOCITY_METERS_PER_SECOND = 80;
-        // public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 10;
-        // public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new
-        // TrapezoidProfile.Constraints(
-        // MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
 
         public static final double GOAL_POSITION_ITERATIONS = 5;
         public static final double ACCELERATION_COMPENSATION_FACTOR = 0.0;
@@ -330,7 +322,7 @@ public class Constants {
 
         public static final double MIN_ANGLE_RADIANS = 0.389842;
         public static final double MAX_ANGLE_RADIANS = 1.2;
-        public static final TunableDouble DEMO_ANGLE = new TunableDouble("subsystems/shooterTilt", "DEMO_ANGLE",
+        public static final TunableDouble DEMO_ANGLE = new TunableDouble("subsystems/shooterTilt/DEMO_ANGLE",
                 1.01572);
 
         public static final int CURRENT_LIMIT = 25;
@@ -503,8 +495,8 @@ public class Constants {
         public static final double kA = 1.68948;
         public static final double TOLERANCE = 0.01;
 
-        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0.28; // TODO
-        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0.5; // TODO
+        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0.28;
+        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0.5;
         public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
 
@@ -551,8 +543,8 @@ public class Constants {
         public static final double kA = 0.386364;
         public static final double TOLERANCE = 0.01;
 
-        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0.7; // TODO
-        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0.7; // TODO
+        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0.7;
+        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0.7;
         public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
 
@@ -613,10 +605,10 @@ public class Constants {
          * A rate limit of 3, for example, means that 0->1 in 1/3 sec.
          * Larger numbers mean less of a rate limit.
          */
-        public static final double JOYSTICK_INPUT_RATE_LIMIT = 15.0; // TODO
-        public static final double JOYSTICK_INPUT_DEADBAND = 0.05; // TODO
-        public static final double JOYSTICK_CURVE_EXP = 2; // TODO
-        public static final double JOYSTICK_ROT_CURVE_EXP = 1; // TODO
+        public static final double JOYSTICK_INPUT_RATE_LIMIT = 15.0;
+        public static final double JOYSTICK_INPUT_DEADBAND = 0.05;
+        public static final double JOYSTICK_CURVE_EXP = 2;
+        public static final double JOYSTICK_ROT_CURVE_EXP = 1;
     }
 
     public static final class LEDs {

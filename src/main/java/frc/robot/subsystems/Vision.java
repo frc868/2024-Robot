@@ -1,7 +1,6 @@
 package frc.robot.subsystems;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -10,8 +9,8 @@ import org.photonvision.simulation.VisionSystemSim;
 
 import com.techhounds.houndutil.houndlib.AprilTagPhotonCamera;
 import com.techhounds.houndutil.houndlib.TriConsumer;
-import com.techhounds.houndutil.houndlog.interfaces.Log;
-import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
+import com.techhounds.houndutil.houndlog.annotations.Log;
+import com.techhounds.houndutil.houndlog.annotations.LoggedObject;
 
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -150,15 +149,27 @@ public class Vision extends SubsystemBase {
     }
 
     @Log
-    // TODO don't use stream
     public Pose3d[] getDetectedAprilTags() {
-        return Arrays
-                .stream(new Pose3d[][] {
-                        houndeye01.getLoggedDetectedAprilTags(),
-                        houndeye02.getLoggedDetectedAprilTags(),
-                        houndeye03.getLoggedDetectedAprilTags() })
-                .flatMap(i -> Arrays.stream(i))
-                .toArray(Pose3d[]::new);
+        Pose3d[][] detectedTags = {
+                houndeye01.getLoggedDetectedAprilTags(),
+                houndeye02.getLoggedDetectedAprilTags(),
+                houndeye03.getLoggedDetectedAprilTags()
+        };
 
+        int totalSize = 0;
+        for (Pose3d[] tags : detectedTags) {
+            totalSize += tags.length;
+        }
+
+        Pose3d[] result = new Pose3d[totalSize];
+
+        int index = 0;
+        for (Pose3d[] tags : detectedTags) {
+            for (Pose3d tag : tags) {
+                result[index++] = tag;
+            }
+        }
+
+        return result;
     }
 }
