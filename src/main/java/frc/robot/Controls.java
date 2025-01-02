@@ -57,14 +57,12 @@ public class Controls {
                         leds.requestStateCommand(LEDState.FLASHING_AQUA)))
                 .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
 
-        // joystick.centerTopHatUp().whileTrue(
-        // climber.moveUpCommand()
-        // .deadlineWith(shooterTilt.moveToPositionCommand(() ->
-        // ShooterTiltPosition.PODIUM)));
-        // joystick.centerTopHatDown().whileTrue(
-        // climber.moveDownCommand()
-        // .deadlineWith(shooterTilt.moveToPositionCommand(() ->
-        // ShooterTiltPosition.PODIUM)));
+        joystick.centerTopHatUp().whileTrue(
+                climber.moveUpCommand()
+                        .deadlineWith(shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.PODIUM)));
+        joystick.centerTopHatDown().whileTrue(
+                climber.moveDownCommand()
+                        .deadlineWith(shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.PODIUM)));
 
         joystick.redButton().whileTrue(RobotCommands.ampPrepIntakeCommand(intake, shooterTilt))
                 .onFalse(intake.moveToPositionCommand(() -> IntakePosition.AMP));
