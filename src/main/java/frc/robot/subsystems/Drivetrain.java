@@ -23,6 +23,7 @@ import com.techhounds.houndutil.houndauto.AutoManager;
 import com.techhounds.houndutil.houndauto.Reflector;
 import com.techhounds.houndutil.houndlib.ChassisAccelerations;
 import com.techhounds.houndutil.houndlib.MotorHoldMode;
+import com.techhounds.houndutil.houndlib.ShootOnTheFlyCalculator;
 import com.techhounds.houndutil.houndlib.subsystems.BaseSwerveDrive;
 import com.techhounds.houndutil.houndlib.swerve.KrakenCoaxialSwerveModule;
 import com.techhounds.houndutil.houndlog.annotations.Log;
@@ -69,8 +70,8 @@ import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.Drivetrain.MusicTrack;
+import frc.robot.Constants;
 import frc.robot.FieldConstants;
-import frc.robot.utils.TrajectoryCalcs;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 
 import static frc.robot.Constants.Drivetrain.*;
@@ -82,6 +83,9 @@ import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
+/**
+ * The drivetrain subsystem. Manages swerve modules and pose estimation.
+ */
 @LoggedObject
 public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     @Log(groups = "modules")
@@ -155,6 +159,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
     private final SwerveDrivePoseEstimator poseEstimator;
 
+    /** Lock used for odometry thread. */
     private final ReadWriteLock stateLock = new ReentrantReadWriteLock();
 
     private final OdometryThread odometryThread;
@@ -186,14 +191,25 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     @Log
     private boolean isControlledRotationEnabled = false;
 
+    /**
+     * Local variable to track the currently targetted position of the stage, when
+     * locking to line is requested.
+     * 
+     * @see #targetStageCommand
+     */
     @Log
     private Pose2d targettedStagePose = new Pose2d();
 
+    /**
+     * Local variable to track the field relative velocities from the previous loop.
+     * Used to calculate the acceleration of the robot.
+     */
     private ChassisSpeeds prevFieldRelVelocities = new ChassisSpeeds();
 
     @Log
     private double averageOdometryLoopTime = 0;
     @Log
+    // DAQ = data acquisition, from CTRE's odometry thread
     private int successfulDaqs = 0;
     @Log
     private int failedDaqs = 0;
@@ -317,6 +333,11 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
     }
 
+    /**
+     * Thread enabling 250Hz odometry. Optimized from CTRE's internal swerve code.
+     * 250Hz odometry reduces discretization error in the odometry loop, and
+     * significantly improves odometry during high speed maneuvers.
+     */
     public class OdometryThread {
         // Testing shows 1 (minimum realtime) is sufficient for tighter odometry loops.
         // If the odometry period is far away from the desired frequency, increasing
@@ -556,10 +577,20 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
         return poseEstimator;
     }
 
+    /**
+     * Adds a vision measurement to the pose estimator. Used by the vision
+     * subsystem.
+     * 
+     * @param visionRobotPoseMeters    the estimated robot pose from vision
+     * @param timestampSeconds         the timestamp of the vision measurement
+     * @param visionMeasurementStdDevs the standard deviations of the measurement
+     */
     public void addVisionMeasurement(Pose2d visionRobotPoseMeters,
             double timestampSeconds,
             Matrix<N3, N1> visionMeasurementStdDevs) {
         try {
+            // since the pose estimator is used by another thread, we need to lock it to be
+            // able to add a vision measurement
             stateLock.writeLock().lock();
             poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
         } finally {
@@ -652,7 +683,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
                 break;
         }
 
-        // compensates for swerve skew
+        // compensates for swerve skew when translating and rotating simultaneously
         adjustedChassisSpeeds = ChassisSpeeds.discretize(adjustedChassisSpeeds, 0.02);
         SwerveModuleState[] states = KINEMATICS.toSwerveModuleStates(adjustedChassisSpeeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(states,
@@ -743,6 +774,13 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
         }).withName("drivetrain.teleopDrive");
     }
 
+    /**
+     * Command to enable rotation to a specific angle while driving (controller used
+     * in {@link #drive}).
+     * 
+     * @param angle the angle to rotate to
+     * @return the command
+     */
     @Override
     public Command controlledRotateCommand(DoubleSupplier angle) {
         return Commands.run(() -> {
@@ -757,12 +795,18 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
         }).withName("drivetrain.controlledRotate");
     }
 
+    /**
+     * Command to take over drivetrain control and rotate the chassis to a specific
+     * angle.
+     * 
+     * @param angle the angle to rotate to
+     * @return the command
+     */
     public Command standaloneControlledRotateCommand(DoubleSupplier angle) {
         return runOnce(() -> {
             if (!isControlledRotationEnabled) {
                 rotationController.reset(getRotation().getRadians());
             }
-            // isControlledRotationEnabled = true;
             if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red)
                 rotationController.setGoal(angle.getAsDouble() + Math.PI);
             else
@@ -813,6 +857,8 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
             driveController.reset(getPose().getTranslation().getDistance(poseSupplier.get().getTranslation()));
             rotationController.reset(getPose().getRotation().getRadians());
         }).andThen(run(() -> {
+            // using one controller (distance from pose) compared to two (x and y distance)
+            // so that we move in a straight line and not a curve
             driveToPoseDistance = getPose().getTranslation().getDistance(poseSupplier.get().getTranslation());
             double driveVelocityScalar = driveController.getSetpoint().velocity + driveController.calculate(
                     driveToPoseDistance, 0.0);
@@ -907,22 +953,8 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
         if (RobotBase.isSimulation())
             field.getObject("simPose").setPose(simOdometry.getPoseMeters());
 
-        // Draw a pose that is based on the robot pose, but shifted by the
-        // translation of the module relative to robot center,
-        // then rotated around its own center by the angle of the module.
-        // field.getObject("modules").setPoses(
-        // getPose().transformBy(
-        // new Transform2d(SWERVE_MODULE_LOCATIONS[0],
-        // getModulePositions()[0].angle)),
-        // getPose().transformBy(
-        // new Transform2d(SWERVE_MODULE_LOCATIONS[1],
-        // getModulePositions()[1].angle)),
-        // getPose().transformBy(
-        // new Transform2d(SWERVE_MODULE_LOCATIONS[2],
-        // getModulePositions()[2].angle)),
-        // getPose().transformBy(
-        // new Transform2d(SWERVE_MODULE_LOCATIONS[3],
-        // getModulePositions()[3].angle)));
+        // omitting old drawing of modules because some dashboards do not handle them
+        // well
     }
 
     public Command sysIdDriveQuasistatic(SysIdRoutine.Direction direction) {
@@ -941,6 +973,12 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
         return sysIdSteer.dynamic(direction).withName("drivetrain.sysIdDriveQuasistatic");
     }
 
+    /**
+     * Gets the distance (projected onto the xy-plane) from the robot to the target
+     * point within the speaker.
+     * 
+     * @return the distance to the goal in meters
+     */
     @Log
     public double getShotDistance() {
         Pose3d target = DriverStation.getAlliance().isPresent()
@@ -953,8 +991,14 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
         return new Translation2d(diff.getX(), diff.getY()).getNorm();
     }
 
+    /**
+     * Creates a command that controls the chassis rotation to keep the shooter
+     * pointed at the target within the speaker.
+     * 
+     * @return the command
+     */
     public Command targetSpeakerCommand() {
-        return targetSpeakerCommand(
+        return targetPoseCommand(
                 () -> DriverStation.getAlliance().isPresent()
                         && DriverStation.getAlliance().get() == Alliance.Red
                                 ? Reflector.reflectPose3d(FieldConstants.SPEAKER_TARGET,
@@ -962,7 +1006,14 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
                                 : FieldConstants.SPEAKER_TARGET);
     }
 
-    public Command targetSpeakerCommand(Supplier<Pose3d> targetPose) {
+    /**
+     * Creates a command that controls the chassis rotation to keep it pointed a
+     * specific target location.
+     * 
+     * @param targetPose a supplier for the target pose to point the chassis at
+     * @return the command
+     */
+    public Command targetPoseCommand(Supplier<Pose3d> targetPose) {
         return controlledRotateCommand(() -> {
             Pose2d target = targetPose.get().toPose2d();
             Transform2d diff = getPose().minus(target);
@@ -972,6 +1023,12 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
         });
     }
 
+    /**
+     * Creates a command that takes over driving and rotates the chassis to
+     * keep the shooter pointed at the target within the speaker.
+     * 
+     * @return the command
+     */
     public Command standaloneTargetSpeakerCommand() {
         return standaloneTargetSpeakerCommand(
                 () -> DriverStation.getAlliance().isPresent()
@@ -981,6 +1038,13 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
                                 : FieldConstants.SPEAKER_TARGET);
     }
 
+    /**
+     * Creates a command that takes over driving and rotates the chassis to keep it
+     * pointed at a specific target location.
+     * 
+     * @param targetPose a supplier for the target pose to point the chassis at
+     * @return the command
+     */
     public Command standaloneTargetSpeakerCommand(Supplier<Pose3d> targetPose) {
         return standaloneControlledRotateCommand(() -> {
             Pose2d target = targetPose.get().toPose2d();
@@ -991,6 +1055,17 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
         });
     }
 
+    /**
+     * Creates a command that locks driving to the closest section of the stage to
+     * the robot when the command is executed. The robot will drive to the closest
+     * section of the stage and maintain its position on the line extending from the
+     * trap to the edge of the field, while allowing the driver to move along this
+     * line.
+     * 
+     * @param xJoystickSupplier the x-axis of the joystick input
+     * @param yJoystickSupplier the y-axis of the joystick input
+     * @return the command
+     */
     public Command targetStageCommand(DoubleSupplier xJoystickSupplier,
             DoubleSupplier yJoystickSupplier) {
         SlewRateLimiter xSpeedLimiter = new SlewRateLimiter(JOYSTICK_INPUT_RATE_LIMIT);
@@ -1052,6 +1127,8 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
                 yJoystick *= -1;
             }
 
+            // transforms the vector created by the joystick input to the line created by
+            // extending the ray from the trap to the edge of the field
             double lineDirX = Math.cos(targettedStagePose.getRotation().getRadians());
             double lineDirY = Math.sin(targettedStagePose.getRotation().getRadians());
 
@@ -1068,12 +1145,6 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
             double thetaSpeed = rotationController.calculate(getRotation().getRadians(),
                     targettedStagePose.getRotation().getRadians());
 
-            // if (GlobalStates.DRIVETRAIN_TARGETTING_DISABLED.enabled()) {
-            // drive(new ChassisSpeeds(xJoystick, yJoystick, thetaSpeed),
-            // DriveMode.FIELD_ORIENTED);
-            // return;
-            // }
-
             drive(new ChassisSpeeds(xSpeed, ySpeed, thetaSpeed), DriveMode.FIELD_ORIENTED);
         })).withName("drivetrain.teleopDrive");
     }
@@ -1085,9 +1156,19 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
         }, orchestra::pause);
     }
 
+    /**
+     * Gets the effective location of the target when the chassis is moving or
+     * accelerating.
+     * 
+     * @see ShootOnTheFlyCalculator#calculateEffectiveTargetLocation
+     * @return the effective target location
+     */
     public Pose3d calculateEffectiveTargetLocation() {
-        return TrajectoryCalcs.calculateEffectiveTargetLocation(getPose(), getFieldRelativeSpeeds(),
-                getFieldRelativeAccelerations());
+        return ShootOnTheFlyCalculator.calculateEffectiveTargetLocation(
+                getPose(), FieldConstants.SPEAKER_TARGET,
+                getFieldRelativeSpeeds(), getFieldRelativeAccelerations(),
+                (d) -> Constants.Shooter.getProjectileSpeed(d),
+                Constants.Shooter.GOAL_POSITION_ITERATIONS, Constants.Shooter.ACCELERATION_COMPENSATION_FACTOR);
     }
 
     public boolean getInitialized() {

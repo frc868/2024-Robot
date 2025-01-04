@@ -1,5 +1,7 @@
 package frc.robot;
 
+import java.util.List;
+
 import com.techhounds.houndutil.houndlib.AprilTagPhotonCamera.PhotonCameraConstants;
 import com.techhounds.houndutil.houndlib.leds.BaseLEDSection;
 
@@ -15,6 +17,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import frc.robot.subsystems.LEDs.LEDState;
 
 import com.techhounds.houndutil.houndlib.swerve.CoaxialSwerveModule.SwerveConstants;
 import com.techhounds.houndutil.houndlog.loggers.TunableDouble;
@@ -285,8 +288,10 @@ public class Constants {
 
         public static final double MAX_SHOOTING_DISTANCE = 5.1322;
 
-        public static final double getProjectileSpeed(double shooterRps) {
-            return shooterRps * 0.1446;
+        public static final double getProjectileSpeed(double distance) {
+            // found via analyzing slow-motion video of shots, shooter speed -> projectile
+            // velocity is linear
+            return SPEED_INTERPOLATOR.get(distance) * 0.1446;
         }
     }
 
@@ -671,6 +676,8 @@ public class Constants {
 
         public static final int PORT = 0;
         public static final int LENGTH = 333;
+
+        public static final List<LEDState> DEFAULT_STATES = List.of(LEDState.BLUE_FIRE, LEDState.GOLD_WAVE);
     }
 
     public static final class HoundBrian {

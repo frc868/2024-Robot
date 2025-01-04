@@ -39,6 +39,10 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.Constants.Climber.*;
 
+/**
+ * The climber subsystem, used to hang on the chain. Handles motion profiling
+ * and positioning of the climbers.
+ */
 @LoggedObject
 public class Climber extends SubsystemBase implements BaseLinearMechanism<ClimberPosition> {
     @Log
@@ -49,6 +53,7 @@ public class Climber extends SubsystemBase implements BaseLinearMechanism<Climbe
 
     private ElevatorFeedforward feedforwardController = new ElevatorFeedforward(kS, kG, kV, kA);
 
+    /** The representation of the "elevator" for simulation. */
     private ElevatorSim elevatorSim = new ElevatorSim(
             MOTOR_GEARBOX_REPR,
             GEARING,
@@ -104,6 +109,10 @@ public class Climber extends SubsystemBase implements BaseLinearMechanism<Climbe
         setDefaultCommand(moveToCurrentGoalCommand());
     }
 
+    /**
+     * Updated the physics simulation, and sets data on motor controllers based on
+     * its results.
+     */
     @Override
     public void simulationPeriodic() {
         elevatorSim.setInput(motor.getAppliedOutput());
@@ -126,6 +135,12 @@ public class Climber extends SubsystemBase implements BaseLinearMechanism<Climbe
             return simVelocity;
     }
 
+    /**
+     * Gets the 3D relative pose of the climber based on its position, for use in
+     * AdvantageScope.
+     * 
+     * @return the 3D pose of the climber
+     */
     public Pose3d getComponentPose() {
         return BASE_COMPONENT_POSE.plus(new Transform3d(0, 0, getPosition(), new Rotation3d()));
     }
@@ -136,6 +151,18 @@ public class Climber extends SubsystemBase implements BaseLinearMechanism<Climbe
         initialized = true;
     }
 
+    /**
+     * Sets the voltage of the motors after applying limits.
+     * 
+     * <p>
+     * Limits include: (1) soft stops between MIN_HEIGHT_METERS and
+     * MAX_HEIGHT_METERS, (2) downwards movement lock-out if the shooter is in the
+     * path of the climber, (3) total lock-out if the climber's encoder value drops
+     * below 0.5 (used at Worlds, to detect state if SPARK Flex erroneously rebooted
+     * and reset position), and (4) total lock-out if the robot is not initialized.
+     * 
+     * @param voltage the voltage to set the motors to
+     */
     @Override
     public void setVoltage(double voltage) {
         voltage = MathUtil.clamp(voltage, -12, 12);
@@ -147,7 +174,7 @@ public class Climber extends SubsystemBase implements BaseLinearMechanism<Climbe
                 voltage = 0;
             }
             if (getPosition() < 0.5) {
-                voltage = 0.0;
+                voltage = 0;
             }
         }
 
@@ -224,6 +251,13 @@ public class Climber extends SubsystemBase implements BaseLinearMechanism<Climbe
         return sysIdRoutine.dynamic(direction).withName("climber.sysIdDynamic");
     }
 
+    /**
+     * Creates a command that manually moves the climber down at maximum speed, and
+     * stalls it against the end stop at 3V when it reaches the bottom, preventing
+     * the robot from slowly moving up.
+     * 
+     * @return the command
+     */
     public Command moveDownCommand() {
         return run(() -> {
             if (getPosition() > ClimberPosition.BOTTOM.value + 0.008) {
@@ -238,6 +272,11 @@ public class Climber extends SubsystemBase implements BaseLinearMechanism<Climbe
                 });
     }
 
+    /**
+     * Creates a command that manually moves the climber up at maximum speed.
+     * 
+     * @return the command
+     */
     public Command moveUpCommand() {
         return run(() -> setVoltage(12)).finallyDo(() -> {
             pidController.reset(getPosition());
@@ -245,6 +284,13 @@ public class Climber extends SubsystemBase implements BaseLinearMechanism<Climbe
         });
     }
 
+    /**
+     * Creates a command that resets the controller's goal to the current position
+     * (used if overrides are enabled, then disabled, so that the mechanism does not
+     * try to move to the previous goal before enabling overrides).
+     * 
+     * @return the command
+     */
     public Command resetControllersCommand() {
         return Commands.runOnce(() -> pidController.reset(getPosition()))
                 .andThen(Commands.runOnce(() -> pidController.setGoal(getPosition())));
@@ -261,6 +307,13 @@ public class Climber extends SubsystemBase implements BaseLinearMechanism<Climbe
         }).withName("climber.setInitialized");
     }
 
+    /**
+     * Creates a command that slowly moves the climber down to the hard stop, and
+     * initializes when a current spike is detected.
+     * 
+     * @apiNote currently unused
+     * @return the command
+     */
     public Command zeroMechanismCommand() {
         return run(() -> {
             motor.setVoltage(-1);

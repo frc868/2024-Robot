@@ -42,8 +42,11 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
-/*
- * The Intake subsystem, which pulls in a note and can be sent to a shooter or can be used to score the amp. 
+/**
+ * The Intake subsystem, which pulls in a note and can be sent to a shooter or
+ * can be used to score the amp. Handles sensing the position of the note in the
+ * intake and moving it to requested positions.
+ * 
  * @author rb, jq, ak
  */
 @LoggedObject
@@ -56,10 +59,22 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
     @Log
     private final CANSparkFlex rollerMotor;
 
+    /**
+     * The beam sensor within the entrance to the intake (1st beam passed by a
+     * note).
+     */
     @Log
     private final DigitalInput intakeBeam = new DigitalInput(INTAKE_BEAM_ID);
+    /**
+     * The beam sensor closer to the intake, within the shooter's storage (2nd beam
+     * passed by a note).
+     */
     @Log
     private final DigitalInput shooterCloseBeam = new DigitalInput(SHOOTER_CLOSE_BEAM_ID);
+    /**
+     * The beam sensor closer to the shooter wheels, within the shooter's storage
+     * (3rd beam passed by a note).
+     */
     @Log
     private final DigitalInput shooterFarBeam = new DigitalInput(SHOOTER_FAR_BEAM_ID);
 
@@ -68,6 +83,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
 
     private final ArmFeedforward feedforwardController = new ArmFeedforward(kS, kG, kV, kA);
 
+    /** The representation of the "arm" for simulation. */
     private final SingleJointedArmSim armSim = new SingleJointedArmSim(
             MOTOR_GEARBOX_REPR,
             GEARING,
@@ -95,15 +111,29 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
 
     private final SysIdRoutine sysIdRoutine;
 
+    /**
+     * Trigger that becomes active when a note is is in the shooter.
+     */
     public final Trigger noteInShooterTrigger = new Trigger(shooterCloseBeam::get).negate();
+    /**
+     * Trigger that becomes active when a note is fully in the shooter.
+     */
     public final Trigger noteFullyInShooterTrigger = new Trigger(shooterFarBeam::get).negate();
 
     private boolean prevIntakeBeamState = true;
+
+    /**
+     * Trigger that becomes active when a note successfully moves from the shooter
+     * to the intake, identified by the intake beam moving from off -> on.
+     */
     public final Trigger noteInIntakeFromShooterTrigger = new Trigger(() -> {
         boolean triggered = !prevIntakeBeamState && intakeBeam.get();
         prevIntakeBeamState = intakeBeam.get();
         return triggered;
     });
+    /**
+     * Trigger that becomes active when a note enters the intake from the outside.
+     */
     public final Trigger noteInIntakeFromOutsideTrigger = new Trigger(intakeBeam::get).negate();
 
     @Log
@@ -161,6 +191,10 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
         setDefaultCommand(moveToCurrentGoalCommand());
     }
 
+    /**
+     * Updated the physics simulation, and sets data on motor controllers based on
+     * its results.
+     */
     @Override
     public void simulationPeriodic() {
         armSim.setInput(leftArmMotor.getAppliedOutput());
@@ -169,6 +203,12 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
         simVelocity = armSim.getVelocityRadPerSec();
     }
 
+    /**
+     * Gets the 3D relative pose of the intake based on its position, for use in
+     * AdvantageScope.
+     * 
+     * @return the 3D pose of the intake
+     */
     public Pose3d getComponentPose() {
         return BASE_COMPONENT_POSE.plus(new Transform3d(0, 0, 0, new Rotation3d(0, -getPosition(), 0)));
     }
@@ -193,6 +233,15 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
         initialized = true;
     }
 
+    /**
+     * Sets the voltage of the motors after applying limits.
+     * 
+     * <p>
+     * Limits include: (1) soft stops between MIN_ANGLE_RADIANS and
+     * MIN_ANGLE_RADIANS and (2) total lock-out if the robot is not initialized.
+     * 
+     * @param voltage the voltage to set the motors to
+     */
     @Override
     public void setVoltage(double voltage) {
         voltage = MathUtil.clamp(voltage, -12, 12);
@@ -298,6 +347,15 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
                 .withName("intake.reverseRollers");
     }
 
+    /**
+     * Command to run the intake rollers during autonomous (with a safer voltage
+     * than teleop).
+     * 
+     * @apiNote this function is technically no longer necessary, as the final
+     *          iteration at Worlds had used the same voltage for both teleop and
+     *          auto.
+     * @return the command
+     */
     public Command runRollersAutoCommand() {
         return Commands.startEnd(
                 () -> setRollerVoltage(12),
@@ -305,32 +363,55 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
                 .withName("intake.runRollers");
     }
 
+    /**
+     * Command to run the intake rollers at half speed, used when moving a note from
+     * the 1st to the 2nd beam.
+     * 
+     * @return the command
+     */
     public Command runRollersHalfCommand() {
         return Commands.startEnd(
                 () -> setRollerVoltage(6),
                 () -> setRollerVoltage(0))
-                .withName("intake.runRollers");
+                .withName("intake.runRollersHalf");
     }
 
+    /**
+     * Command to run the intake rollers at a slow speed, used when moving a note
+     * from the 2nd to the 3rd beam.
+     * 
+     * @return the command
+     */
     public Command runRollersSlowCommand() {
         return Commands.startEnd(
                 () -> setRollerVoltage(2),
                 () -> setRollerVoltage(0))
-                .withName("intake.runRollers");
+                .withName("intake.runRollersSlow");
     }
 
+    /**
+     * Command to run the rollers at an appropriate speed for intaking a note from
+     * the source.
+     * 
+     * @return the command
+     */
     public Command sourceIntakeRollersCommand() {
         return Commands.startEnd(
                 () -> setRollerVoltage(5),
                 () -> setRollerVoltage(0))
-                .withName("intake.reverseRollers");
+                .withName("intake.sourceIntakeRollers");
     }
 
+    /**
+     * Command to run the rollers at an appropriate speed for scoring in the amp.
+     * 
+     * @return the command
+     */
     public Command ampScoreRollersCommand() {
         return Commands.startEnd(
                 () -> setRollerVoltage(-3.75),
                 () -> setRollerVoltage(0))
-                .withName("intake.reverseRollers");
+                .withName("intake.ampScoreRollers");
     }
 
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
@@ -341,6 +422,13 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
         return sysIdRoutine.dynamic(direction).withName("intake.sysIdQuasistatic");
     }
 
+    /**
+     * Compound command that moves the intake down, intakes a note from the ground,
+     * moves it to the stowed location in the shooter, and stows the intake when
+     * appropriate.
+     * 
+     * @return the command
+     */
     public Command intakeNoteCommand() {
         return Commands.sequence(
                 moveToPositionCommand(() -> IntakePosition.GROUND),
@@ -354,6 +442,13 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
                 .withName("intake.intakeNote");
     }
 
+    /**
+     * Compound command that moves the intake down (and keeps it there), intakes a
+     * note, and selectively triggers portions of the intaking sequence depending on
+     * where the note is detected.
+     * 
+     * @return the command
+     */
     public Command intakeNoteAutoCommand() {
         return Commands.parallel(
                 moveToPositionCommand(() -> IntakePosition.GROUND),
@@ -372,6 +467,12 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
                 .withName("intake.intakeNoteAuto");
     }
 
+    /**
+     * Command that intakes a note from the source until it is detected, then stops
+     * the rollers and stows the intake.
+     * 
+     * @return the command
+     */
     public Command intakeFromSourceCommand() {
         return Commands.sequence(
                 moveToPositionCommand(() -> IntakePosition.SOURCE),
@@ -380,6 +481,12 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
                 moveToPositionCommand(() -> IntakePosition.STOW)).withName("intake.intakeNote");
     }
 
+    /**
+     * Command that simulates the the intake beam being triggered. Used in
+     * simulation to validate autonomous commands.
+     * 
+     * @return the command
+     */
     public Command simTriggerIntakeBeamCommand() {
         return Commands.runOnce(() -> intakeBeamSim.setValue(false))
                 .andThen(Commands.waitSeconds(1))
@@ -387,6 +494,12 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
                 .withName("intake.simTriggerIntakeBeam");
     }
 
+    /**
+     * Command that simulates the shooter close beam being triggered. Used in
+     * simulation to validate autonomous commands.
+     * 
+     * @return the command
+     */
     public Command simTriggerShooterCloseBeamCommand() {
         return Commands.runOnce(() -> shooterCloseBeamSim.setValue(false))
                 .andThen(Commands.waitSeconds(1))
@@ -394,6 +507,12 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
                 .withName("intake.simTriggerShooterCloseBeam");
     }
 
+    /**
+     * Command that simulates the shooter far beam being triggered. Used in
+     * simulation to validate autonomous commands.
+     * 
+     * @return the command
+     */
     public Command simTriggerShooterFarBeamCommand() {
         return Commands.runOnce(() -> shooterFarBeamSim.setValue(false))
                 .andThen(Commands.waitSeconds(1))
@@ -401,6 +520,13 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
                 .withName("intake.simTriggerShooterFarBeam");
     }
 
+    /**
+     * Creates a command that resets the controller's goal to the current position
+     * (used if overrides are enabled, then disabled, so that the mechanism does not
+     * try to move to the previous goal before enabling overrides).
+     * 
+     * @return the command
+     */
     public Command resetControllersCommand() {
         return Commands.runOnce(() -> pidController.reset(getPosition()))
                 .andThen(Commands.runOnce(() -> pidController.setGoal(getPosition())));
@@ -416,6 +542,13 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
         }).withName("intake.setInitialized");
     }
 
+    /**
+     * Creates a command that slowly moves the climber down to the hard stop, and
+     * initializes when a current spike is detected.
+     * 
+     * @apiNote currently unused
+     * @return the command
+     */
     public Command zeroMechanismCommand() {
         return run(() -> {
             leftArmMotor.setVoltage(1);

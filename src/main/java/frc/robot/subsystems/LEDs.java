@@ -20,8 +20,10 @@ import static frc.robot.Constants.LEDs.*;
 import static com.techhounds.houndutil.houndlib.leds.LEDPatterns.*;
 
 /**
- * The LEDs subsystem, which controls the state of the LEDs through an internal
- * state machine and continuously updates the LED's buffer.
+ * The LED subsystem, which controls the state of the LEDs by superimposing
+ * requested LED states and continuously updates the LED's buffer. Other classes
+ * can request specific LED states to be active, and they will be applied in
+ * priority order.
  * 
  * @author dr
  */
@@ -30,10 +32,14 @@ public class LEDs extends SubsystemBase {
     /** The LEDs. */
     private AddressableLED leds = new AddressableLED(9);
     private AddressableLEDBuffer buffer = new AddressableLEDBuffer(LENGTH);
+    /** Notifier thread for displaying when the robot code is initializing. */
     private final Notifier loadingNotifier;
 
     private ArrayList<LEDState> currentStates = new ArrayList<LEDState>();
 
+    /**
+     * An enum of all possible LED states.
+     */
     public enum LEDState {
         OFF(solid(Color.kBlack, LEDSection.ALL)),
         INTER_SUBSYSTEM_SAFETIES_DISABLED(
@@ -156,28 +162,42 @@ public class LEDs extends SubsystemBase {
                 });
         loadingNotifier.startPeriodic(0.02);
 
-        setDefaultCommand(updateStateMachineCommand());
+        setDefaultCommand(updateBufferCommand());
     }
 
+    /**
+     * Creates a command that requests a specific LED state to be active. When
+     * command is cancelled, the state will no longer be active.
+     * 
+     * @param state the state to request
+     * @return the command
+     */
     public Command requestStateCommand(LEDState state) {
         return Commands.run(() -> currentStates.add(state)).ignoringDisable(true);
     }
 
-    public Command updateStateMachineCommand() {
+    /**
+     * Creates a command that updates the LED buffer with the contents of the
+     * current LED states.
+     * 
+     * @return
+     */
+    public Command updateBufferCommand() {
         return run(() -> {
             loadingNotifier.stop();
             clear();
-            currentStates.add(LEDState.BLUE_FIRE);
-            currentStates.add(LEDState.GOLD_WAVE);
+            // default LED states
+            currentStates.addAll(DEFAULT_STATES);
             currentStates.sort((s1, s2) -> s2.ordinal() - s1.ordinal());
             currentStates.forEach(s -> s.bufferConsumers.forEach(c -> c.accept(buffer)));
             leds.setData(buffer);
             currentStates.clear();
         })
                 .ignoringDisable(true)
-                .withName("leds.updateStateMachine");
+                .withName("leds.updateBuffer");
     }
 
+    /** Clears the buffer. */
     public void clear() {
         for (int i = 0; i < buffer.getLength(); i++) {
             buffer.setLED(i, Color.kBlack);

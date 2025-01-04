@@ -3,6 +3,7 @@ package frc.robot;
 import com.ctre.phoenix6.SignalLogger;
 import com.techhounds.houndutil.houndauto.AutoManager;
 import com.techhounds.houndutil.houndauto.Reflector;
+import com.techhounds.houndutil.houndlib.ShootOnTheFlyCalculator;
 import com.techhounds.houndutil.houndlib.SparkConfigurator;
 import com.techhounds.houndutil.houndlog.LogProfiles;
 import com.techhounds.houndutil.houndlog.LoggingManager;
@@ -10,7 +11,6 @@ import com.techhounds.houndutil.houndlog.annotations.Log;
 import com.techhounds.houndutil.houndlog.annotations.SendableLog;
 import com.techhounds.houndutil.houndlog.loggers.LogGroup;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -32,8 +32,6 @@ import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterTilt;
 import frc.robot.subsystems.Vision;
 import frc.robot.subsystems.LEDs.LEDState;
-import frc.robot.utils.TrajectoryCalcs;
-
 import static frc.robot.Constants.Drivetrain.DEMO_SPEED;
 import static frc.robot.Constants.Shooter.DEMO_RPS;
 import static frc.robot.Constants.ShooterTilt.DEMO_ANGLE;
@@ -104,14 +102,22 @@ public class RobotContainer {
 
     @Log
     private final Supplier<Pose3d> shootOnTheMovePose = () -> {
-        return TrajectoryCalcs.calculateEffectiveTargetLocation(drivetrain.getPose(),
-                drivetrain.getFieldRelativeSpeeds(), drivetrain.getFieldRelativeAccelerations());
+        return ShootOnTheFlyCalculator.calculateEffectiveTargetLocation(
+                drivetrain.getPose(), FieldConstants.SPEAKER_TARGET,
+                drivetrain.getFieldRelativeSpeeds(), drivetrain.getFieldRelativeAccelerations(),
+                (d) -> Constants.Shooter.getProjectileSpeed(d),
+                Constants.Shooter.GOAL_POSITION_ITERATIONS, Constants.Shooter.ACCELERATION_COMPENSATION_FACTOR);
     };
     @Log
     private final Supplier<Double> shotTime = () -> {
-        return TrajectoryCalcs.getTimeToShoot(drivetrain.getPose(),
-                TrajectoryCalcs.calculateEffectiveTargetLocation(drivetrain.getPose(),
-                        drivetrain.getFieldRelativeSpeeds(), drivetrain.getFieldRelativeAccelerations()));
+        return ShootOnTheFlyCalculator.getTimeToShoot(drivetrain.getPose(),
+                ShootOnTheFlyCalculator.calculateEffectiveTargetLocation(
+                        drivetrain.getPose(), FieldConstants.SPEAKER_TARGET,
+                        drivetrain.getFieldRelativeSpeeds(), drivetrain.getFieldRelativeAccelerations(),
+                        (d) -> Constants.Shooter.getProjectileSpeed(d),
+                        Constants.Shooter.GOAL_POSITION_ITERATIONS,
+                        Constants.Shooter.ACCELERATION_COMPENSATION_FACTOR),
+                (d) -> Constants.Shooter.getProjectileSpeed(d));
     };
 
     @Log

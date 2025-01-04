@@ -46,6 +46,10 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
+/**
+ * The shooter tilt subsystem, used to control the angle of the shooter via the
+ * attached lead screw. Handles motion profiling and positioning of the screw.
+ */
 @LoggedObject
 public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<ShooterTiltPosition> {
     @Log
@@ -58,11 +62,16 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
     private final ElevatorFeedforward feedforwardController = new ElevatorFeedforward(kS,
             kG, kV, kA);
 
+    /**
+     * The representation of the "elevator" for simulation. (even though this is a
+     * rotational mechanism w.r.t. its setpoints, we still control it as a linear
+     * mechanism since that is the cloest physical mechanism to this)
+     */
     private final ElevatorSim elevatorSim = new ElevatorSim(
             MOTOR_GEARBOX_REPR,
-            1 / ENCODER_ROTATIONS_TO_METERS,
+            1 / ENCODER_ROTATIONS_TO_METERS, // includes lead screw pitch
             MASS_KG,
-            1 / (2.0 * Math.PI),
+            1 / (2.0 * Math.PI), // negates the effect of the spool radius (no spool on a lead screw)
             MIN_HEIGHT_METERS,
             MAX_HEIGHT_METERS,
             false,
@@ -128,6 +137,10 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
         setDefaultCommand(moveToCurrentGoalCommand());
     }
 
+    /**
+     * Updated the physics simulation, and sets data on motor controllers based on
+     * its results.
+     */
     @Override
     public void simulationPeriodic() {
         elevatorSim.setInput(motor.getAppliedOutput());
@@ -136,10 +149,22 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
         simVelocity = elevatorSim.getVelocityMetersPerSecond();
     }
 
+    /**
+     * Gets the 3D relative pose of the shooter based on its position, for use in
+     * AdvantageScope.
+     * 
+     * @return the 3D pose of the shooter
+     */
     public Pose3d getShooterComponentPose() {
         return BASE_SHOOTER_POSE.plus(new Transform3d(0, 0, 0, new Rotation3d(0, -getAngle(), 0)));
     }
 
+    /**
+     * Gets the 3D relative pose of the outer component of the lead screw based on
+     * its position, for use in AdvantageScope.
+     * 
+     * @return the 3D pose of the outer component of the lead screw
+     */
     public Pose3d getOuterLeadScrewComponentPose() {
         // small offset of 0.03rad added to fix an alignment issue between the two;
         // since this is constant, it's likely a CAD zeroing problem
@@ -147,6 +172,12 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
                 .plus(new Transform3d(0, 0, 0, new Rotation3d(0, -getLeadScrewAngle(getPosition()) + 0.03, 0)));
     }
 
+    /**
+     * Gets the 3D relative pose of the inner component of the lead screw based on
+     * its position, for use in AdvantageScope.
+     * 
+     * @return the 3D pose of the inner component of the lead screw
+     */
     public Pose3d getInnerLeadScrewComponentPose() {
         return getOuterLeadScrewComponentPose().plus(OUTER_LEAD_SCREW_TO_INNER_LEAD_SCREW)
                 .plus(new Transform3d(getPosition(), 0, 0, new Rotation3d()));
@@ -177,6 +208,16 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
         initialized = true;
     }
 
+    /**
+     * Sets the voltage of the motors after applying limits.
+     * 
+     * <p>
+     * Limits include: (1) soft stops between MIN_HEIGHT_METERS and
+     * MAX_HEIGHT_METERS, (2) upwards movement lock-out if the shooter is in the
+     * path of the climber, and (3) total lock-out if the robot is not initialized.
+     * 
+     * @param voltage the voltage to set the motors to
+     */
     @Override
     public void setVoltage(double voltage) {
         voltage = MathUtil.clamp(voltage, -12, 12);
@@ -184,9 +225,9 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
             voltage = Utils.applySoftStops(voltage, getPosition(), MIN_HEIGHT_METERS, MAX_HEIGHT_METERS);
 
         if (!GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.enabled()) {
-            // if (positionTracker.getClimberPosition() < 1.03 && voltage > 0) {
-            // voltage = 0;
-            // }
+            if (positionTracker.getClimberPosition() < 1.03 && voltage > 0) {
+                voltage = 0;
+            }
         }
 
         if (!GlobalStates.INITIALIZED.enabled() && !GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.enabled()) {
@@ -226,6 +267,13 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
                 .withName("shooterTilt.moveToArbitraryPosition");
     }
 
+    /**
+     * Creates a command that angles toe shooter to match the distance
+     * from the robot to the target within the speaker.
+     * 
+     * @param robotPoseSupplier a supplier for the robot's pose
+     * @return the command
+     */
     public Command targetSpeakerCommand(Supplier<Pose2d> robotPoseSupplier) {
         return targetSpeakerCommand(robotPoseSupplier,
                 () -> DriverStation.getAlliance().isPresent()
@@ -235,6 +283,14 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
                                 : FieldConstants.SPEAKER_TARGET);
     }
 
+    /**
+     * Creates a command that angles the shooter to match the distance
+     * from the robot to a specified target.
+     * 
+     * @param robotPoseSupplier a supplier for the robot's pose
+     * @param targetSupplier    a supplier for the target's pose
+     * @return the command
+     */
     public Command targetSpeakerCommand(Supplier<Pose2d> robotPoseSupplier, Supplier<Pose3d> targetSupplier) {
         return moveToArbitraryPositionCommand(() -> {
             Pose3d target = targetSupplier.get();
@@ -306,6 +362,13 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
                 || GlobalStates.AT_GOAL_OVERRIDE.enabled();
     }
 
+    /**
+     * Creates a command that resets the controller's goal to the current position
+     * (used if overrides are enabled, then disabled, so that the mechanism does not
+     * try to move to the previous goal before enabling overrides).
+     * 
+     * @return the command
+     */
     public Command resetControllersCommand() {
         return Commands.runOnce(() -> pidController.reset(getPosition()))
                 .andThen(Commands.runOnce(() -> pidController.setGoal(getPosition())));
@@ -321,6 +384,13 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
         }).withName("shooterTilt.setInitialized");
     }
 
+    /**
+     * Creates a command that slowly moves the shooter down to the hard stop, and
+     * initializes when a current spike is detected.
+     * 
+     * @apiNote currently unused
+     * @return the command
+     */
     public Command zeroMechanismCommand() {
         return run(() -> {
             motor.setVoltage(-1);

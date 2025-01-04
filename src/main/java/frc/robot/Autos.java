@@ -125,7 +125,7 @@ public class Autos {
                                 intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
                                 shooterTilt.targetSpeakerCommand(drivetrain::getPose,
                                         drivetrain::calculateEffectiveTargetLocation).asProxy(),
-                                shooter.targetSpeakerCommand(drivetrain::getPose,
+                                shooter.targetPoseCommand(drivetrain::getPose,
                                         drivetrain::calculateEffectiveTargetLocation).asProxy(),
                                 Commands.waitUntil(shooter::atGoal).andThen(intake.runRollersCommand())),
                 drivetrain.followPathCommand(pathCToB)
@@ -184,7 +184,7 @@ public class Autos {
                                 intake.moveToPositionCommand(() -> IntakePosition.GROUND).asProxy(),
                                 shooterTilt.targetSpeakerCommand(drivetrain::getPose,
                                         drivetrain::calculateEffectiveTargetLocation).asProxy(),
-                                shooter.targetSpeakerCommand(drivetrain::getPose,
+                                shooter.targetPoseCommand(drivetrain::getPose,
                                         drivetrain::calculateEffectiveTargetLocation).asProxy(),
                                 Commands.waitUntil(shooter::atGoal).andThen(intake.runRollersCommand())),
 
@@ -195,7 +195,7 @@ public class Autos {
                                 RobotCommands.intakeNoteAutoCommand(intake, shooterTilt),
                                 shooterTilt.targetSpeakerCommand(drivetrain::getPose,
                                         drivetrain::calculateEffectiveTargetLocation).asProxy(),
-                                shooter.targetSpeakerCommand(drivetrain::getPose,
+                                shooter.targetPoseCommand(drivetrain::getPose,
                                         drivetrain::calculateEffectiveTargetLocation).asProxy(),
                                 Commands.waitSeconds(1.6).andThen(intake.runRollersCommand().withTimeout(0.25))),
 
@@ -206,7 +206,7 @@ public class Autos {
                                 RobotCommands.intakeNoteAutoCommand(intake, shooterTilt),
                                 shooterTilt.targetSpeakerCommand(drivetrain::getPose,
                                         drivetrain::calculateEffectiveTargetLocation).asProxy(),
-                                shooter.targetSpeakerCommand(drivetrain::getPose,
+                                shooter.targetPoseCommand(drivetrain::getPose,
                                         drivetrain::calculateEffectiveTargetLocation).asProxy(),
                                 Commands.waitSeconds(1.51).andThen(intake.runRollersCommand().withTimeout(0.25))),
 
@@ -217,7 +217,7 @@ public class Autos {
                                 RobotCommands.intakeNoteAutoCommand(intake, shooterTilt),
                                 shooterTilt.targetSpeakerCommand(drivetrain::getPose,
                                         drivetrain::calculateEffectiveTargetLocation).asProxy(),
-                                shooter.targetSpeakerCommand(drivetrain::getPose,
+                                shooter.targetPoseCommand(drivetrain::getPose,
                                         drivetrain::calculateEffectiveTargetLocation).asProxy(),
                                 Commands.waitSeconds(1.55).andThen(intake.runRollersCommand().withTimeout(0.25)))
 

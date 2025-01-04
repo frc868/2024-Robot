@@ -68,10 +68,10 @@ public class RobotCommands {
     public static Command targetSpeakerOnTheMoveCommand(Drivetrain drivetrain, Shooter shooter,
             ShooterTilt shooterTilt) {
         return Commands.parallel(
-                drivetrain.targetSpeakerCommand(drivetrain::calculateEffectiveTargetLocation),
+                drivetrain.targetPoseCommand(drivetrain::calculateEffectiveTargetLocation),
                 shooterTilt.targetSpeakerCommand(drivetrain::getPose,
                         drivetrain::calculateEffectiveTargetLocation).asProxy(),
-                shooter.targetSpeakerCommand(drivetrain::getPose, drivetrain::calculateEffectiveTargetLocation)
+                shooter.targetPoseCommand(drivetrain::getPose, drivetrain::calculateEffectiveTargetLocation)
                         .asProxy())
                 .withName("RobotCommands.targetSpeakerOnTheMove");
     }
@@ -145,10 +145,10 @@ public class RobotCommands {
     public static Command shootOnTheMoveCommand(Drivetrain drivetrain, Intake intake, Shooter shooter,
             ShooterTilt shooterTilt) {
         return Commands.parallel(
-                drivetrain.targetSpeakerCommand(drivetrain::calculateEffectiveTargetLocation),
+                drivetrain.targetPoseCommand(drivetrain::calculateEffectiveTargetLocation),
                 shooterTilt.targetSpeakerCommand(drivetrain::getPose,
                         drivetrain::calculateEffectiveTargetLocation).asProxy(),
-                shooter.targetSpeakerCommand(drivetrain::getPose,
+                shooter.targetPoseCommand(drivetrain::getPose,
                         drivetrain::calculateEffectiveTargetLocation).asProxy(),
                 Commands.waitUntil(() -> shooter.atGoal() && shooterTilt.atGoal())
                         .andThen(intake.runRollersCommand().withTimeout(1)))

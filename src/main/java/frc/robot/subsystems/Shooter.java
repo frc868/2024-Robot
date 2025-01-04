@@ -39,6 +39,10 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.FieldConstants;
 import frc.robot.GlobalStates;
 
+/**
+ * The shooter subsystem, used to shoot notes into the speaker. Controls the two
+ * motors powering the flywheel.
+ */
 @LoggedObject
 public class Shooter extends SubsystemBase implements BaseShooter {
     @Log
@@ -121,7 +125,7 @@ public class Shooter extends SubsystemBase implements BaseShooter {
                         },
                         this));
 
-        setDefaultCommand(holdVelocityCommand(() -> 0.0));
+        setDefaultCommand(holdVelocityCommand(() -> IDLE_RPS));
         leftPidController.setTolerance(TOLERANCE);
         rightPidController.setTolerance(TOLERANCE);
 
@@ -191,8 +195,15 @@ public class Shooter extends SubsystemBase implements BaseShooter {
         }).withName("shooter.spinAtVelocity");
     }
 
+    /**
+     * Creates a command that spins the shooter at a velocity to match the distance
+     * from the robot to the target within the speaker.
+     * 
+     * @param robotPoseSupplier a supplier for the robot's pose
+     * @return the command
+     */
     public Command targetSpeakerCommand(Supplier<Pose2d> robotPoseSupplier) {
-        return targetSpeakerCommand(robotPoseSupplier,
+        return targetPoseCommand(robotPoseSupplier,
                 () -> DriverStation.getAlliance().isPresent()
                         && DriverStation.getAlliance().get() == Alliance.Red
                                 ? Reflector.reflectPose3d(FieldConstants.SPEAKER_TARGET,
@@ -200,15 +211,31 @@ public class Shooter extends SubsystemBase implements BaseShooter {
                                 : FieldConstants.SPEAKER_TARGET);
     }
 
-    public Command targetSpeakerCommand(Supplier<Pose2d> robotPoseSupplier, Supplier<Pose3d> targetSupplier) {
+    /**
+     * Creates a command that spins the shooter at a velocity to match the distance
+     * from the robot to a specified target.
+     * 
+     * @param robotPoseSupplier a supplier for the robot's pose
+     * @param targetSupplier    a supplier for the target's pose
+     * @return the command
+     */
+    public Command targetPoseCommand(Supplier<Pose2d> robotPoseSupplier, Supplier<Pose3d> targetSupplier) {
         return spinAtVelocityCommand(() -> {
             Pose3d target = targetSupplier.get();
             Transform3d diff = new Pose3d(robotPoseSupplier.get()).minus(target);
             return SPEED_INTERPOLATOR.get(new Translation2d(diff.getX(), diff.getY()).getNorm());
-        }).withName("shooter.targetSpeaker");
+        }).withName("shooter.targetPose");
     }
 
-    // will get up to speed, but slowly ramp down at only FF
+    /**
+     * Creates a command that holds the shooter at a specified velocity (for
+     * idling). Will reach the target velocity using PID control, but if the current
+     * velocity is significantly higher than the target velocity, the shooter is
+     * allowed to ramp down on its own without braking, to conserve power.
+     * 
+     * @param goalVelocitySupplier a supplier for the target velocity
+     * @return the command
+     */
     public Command holdVelocityCommand(Supplier<Double> goalVelocitySupplier) {
         return run(() -> {
             if (getVelocity() > goalVelocitySupplier.get() * 1.2) {
