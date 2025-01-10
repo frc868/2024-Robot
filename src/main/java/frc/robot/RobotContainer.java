@@ -136,7 +136,7 @@ public class RobotContainer {
         vision.setPoseEstimator(drivetrain.getPoseEstimator());
         vision.setVisionMeasurementConsumer(drivetrain::addVisionMeasurement);
         vision.setSimPoseSupplier(drivetrain::getSimPose);
-        vision.setSpeedsSupplier(drivetrain::getChassisSpeeds);
+        vision.setChassisSpeedsSupplier(drivetrain::getChassisSpeeds);
 
         positionTracker.setIntakePositionSupplier(intake::getPosition);
         positionTracker.setShooterTiltAngleSupplier(shooterTilt::getAngle);
