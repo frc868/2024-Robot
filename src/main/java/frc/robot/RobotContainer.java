@@ -208,6 +208,7 @@ public class RobotContainer {
         Controls.configureDriverControls(0, drivetrain, intake, shooter, shooterTilt, climber, leds);
         Controls.configureOperatorControls(1, drivetrain, intake, shooter, shooterTilt, climber);
         Controls.configureOverridesControls(2, drivetrain, intake, shooter, shooterTilt, climber);
+        Controls.configureTestingControls(3, drivetrain, intake, shooter, shooterTilt, climber);
         NTCommands.configureNTCommands(drivetrain, intake, shooter, shooterTilt, climber, leds);
     }
 
