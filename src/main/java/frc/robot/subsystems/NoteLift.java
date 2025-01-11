@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.techhounds.houndutil.houndlib.PositionTracker;
 import com.techhounds.houndutil.houndlib.SparkConfigurator;
 import com.techhounds.houndutil.houndlib.Utils;
 import com.techhounds.houndutil.houndlib.subsystems.BaseLinearMechanism;
@@ -31,8 +32,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import frc.robot.Constants.NoteLift.NoteLiftPosition;
 import frc.robot.GlobalStates;
-import frc.robot.PositionTracker;
-
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Volts;
@@ -177,13 +176,13 @@ public class NoteLift extends SubsystemBase implements BaseLinearMechanism<NoteL
                     MAX_HEIGHT_METERS + 0.03); // allows note lift to unspool slightly
 
         if (!GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.enabled()) {
-            if (getPosition() - positionTracker.getClimberPosition() + 1 < -0.065 && voltage < 0) {
+            if (getPosition() - positionTracker.getPosition("climber") + 1 < -0.065 && voltage < 0) {
                 voltage = 0;
             }
-            if (getPosition() < 0.233 && positionTracker.getShooterTiltAngle() < 1.11 && voltage > 0) {
+            if (getPosition() < 0.233 && positionTracker.getPosition("shooterTilt") < 1.11 && voltage > 0) {
                 voltage = 0;
             }
-            if (getPosition() > 0.233 && positionTracker.getShooterTiltAngle() < 1.11 && voltage < 0) {
+            if (getPosition() > 0.233 && positionTracker.getPosition("shooterTilt") < 1.11 && voltage < 0) {
                 voltage = 0;
             }
         }

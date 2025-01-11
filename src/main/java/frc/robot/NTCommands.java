@@ -12,7 +12,22 @@ import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterTilt;
 
+/**
+ * Contains commands that are sent over NetworkTables (mainly for simulation,
+ * but some are applicable to real robot).
+ */
 public class NTCommands {
+    /**
+     * Adds commands to NetworkTables for mechanism resetting, initialization, and
+     * simulation triggering of beam breaks.
+     * 
+     * @param drivetrain  the drivetrain
+     * @param intake      the intake
+     * @param shooter     the shooter
+     * @param shooterTilt the shooter tilt
+     * @param climber     the climber
+     * @param leds        the LEDs
+     */
     public static void configureNTCommands(Drivetrain drivetrain, Intake intake, Shooter shooter,
             ShooterTilt shooterTilt, Climber climber, LEDs leds) {
         LoggingManager.getInstance().addGroup(new LogGroup("commands",

@@ -9,6 +9,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.util.Units;
 
+/**
+ * Contains constants that map out the 2024 field and its elements.
+ */
 @LoggedObject
 public class FieldConstants {
     public static final double FIELD_LENGTH = Units.inchesToMeters(651.223);

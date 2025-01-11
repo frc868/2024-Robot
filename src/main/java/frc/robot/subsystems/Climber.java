@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.techhounds.houndutil.houndlib.PositionTracker;
 import com.techhounds.houndutil.houndlib.SparkConfigurator;
 import com.techhounds.houndutil.houndlib.Utils;
 import com.techhounds.houndutil.houndlib.subsystems.BaseLinearMechanism;
@@ -32,8 +33,6 @@ import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.Climber.ClimberPosition;
 import frc.robot.GlobalStates;
-import frc.robot.PositionTracker;
-
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Volts;
@@ -170,7 +169,7 @@ public class Climber extends SubsystemBase implements BaseLinearMechanism<Climbe
             voltage = Utils.applySoftStops(voltage, getPosition(), MIN_HEIGHT_METERS, MAX_HEIGHT_METERS);
         }
         if (!GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.enabled()) {
-            if (getPosition() < 1.044 && positionTracker.getShooterTiltAngle() > 1.11 && voltage < 0) {
+            if (getPosition() < 1.044 && positionTracker.getPosition("shooterTilt") > 1.11 && voltage < 0) {
                 voltage = 0;
             }
             if (getPosition() < 0.5) {

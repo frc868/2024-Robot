@@ -6,6 +6,7 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.techhounds.houndutil.houndauto.Reflector;
+import com.techhounds.houndutil.houndlib.PositionTracker;
 import com.techhounds.houndutil.houndlib.SparkConfigurator;
 import com.techhounds.houndutil.houndlib.Utils;
 import com.techhounds.houndutil.houndlib.subsystems.BaseSingleJointedArm;
@@ -38,8 +39,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.ShooterTilt.ShooterTiltPosition;
 import frc.robot.FieldConstants;
 import frc.robot.GlobalStates;
-import frc.robot.PositionTracker;
-
 import static frc.robot.Constants.Shooter.MAX_SHOOTING_DISTANCE;
 import static frc.robot.Constants.ShooterTilt.*;
 import static edu.wpi.first.units.Units.Meters;
@@ -225,7 +224,7 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
             voltage = Utils.applySoftStops(voltage, getPosition(), MIN_HEIGHT_METERS, MAX_HEIGHT_METERS);
 
         if (!GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.enabled()) {
-            if (positionTracker.getClimberPosition() < 1.03 && voltage > 0) {
+            if (positionTracker.getPosition("climber") < 1.03 && voltage > 0) {
                 voltage = 0;
             }
         }

@@ -3,6 +3,7 @@ package frc.robot;
 import com.ctre.phoenix6.SignalLogger;
 import com.techhounds.houndutil.houndauto.AutoManager;
 import com.techhounds.houndutil.houndauto.Reflector;
+import com.techhounds.houndutil.houndlib.PositionTracker;
 import com.techhounds.houndutil.houndlib.ShootOnTheFlyCalculator;
 import com.techhounds.houndutil.houndlib.SparkConfigurator;
 import com.techhounds.houndutil.houndlog.LogProfiles;
@@ -138,9 +139,9 @@ public class RobotContainer {
         vision.setSimPoseSupplier(drivetrain::getSimPose);
         vision.setChassisSpeedsSupplier(drivetrain::getChassisSpeeds);
 
-        positionTracker.setIntakePositionSupplier(intake::getPosition);
-        positionTracker.setShooterTiltAngleSupplier(shooterTilt::getAngle);
-        positionTracker.setClimberPositionSupplier(climber::getPosition);
+        positionTracker.addPositionSupplier("intake", intake::getPosition);
+        positionTracker.addPositionSupplier("shooterTilt", shooterTilt::getAngle);
+        positionTracker.addPositionSupplier("climber", climber::getPosition);
 
         SparkConfigurator.safeBurnFlash();
         DataLogManager.logNetworkTables(true);

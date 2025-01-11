@@ -15,8 +15,26 @@ import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterTilt;
 
+/**
+ * Defines autonomous routines for the robot.
+ */
 public class Autos {
-    public static Command driveIntakeShootCenterCommand(PathPlannerPath intakingPath, PathPlannerPath shootingPath,
+    /**
+     * Creates a command that drives the robot to a specific note, intakes it,
+     * drives it back, targets the speaker, and shoots.
+     * 
+     * @param intakingPath the path to the note
+     * @param shootingPath the path back within range of the speaker
+     * @param delay        the delay between the end of the shooting path and
+     *                     actually shooting
+     * @param shotTimeout  the timeout for the rollers to run while shooting
+     * @param drivetrain   the drivetrain
+     * @param intake       the intake
+     * @param shooter      the shooter
+     * @param shooterTilt  the shooter tilt
+     * @return
+     */
+    public static Command driveIntakeShootCommand(PathPlannerPath intakingPath, PathPlannerPath shootingPath,
             double delay, double shotTimeout, Drivetrain drivetrain, Intake intake, Shooter shooter,
             ShooterTilt shooterTilt) {
         return Commands.sequence(
@@ -33,6 +51,16 @@ public class Autos {
                         drivetrain.standaloneTargetSpeakerCommand()));
     }
 
+    /**
+     * Creates an auto routine that scores the preloaded note, then intakes and
+     * shoots notes C, B, and A, next to the speaker.
+     * 
+     * @param drivetrain  the drivetrain
+     * @param intake      the intake
+     * @param shooter     the shooter
+     * @param shooterTilt the shooter tilt
+     * @return the auto routine
+     */
     public static AutoRoutine autoCBA(Drivetrain drivetrain, Intake intake, Shooter shooter,
             ShooterTilt shooterTilt) {
         PathPlannerPath pathStartToC = PathPlannerPath.fromChoreoTrajectory("CBA.1");
@@ -68,6 +96,16 @@ public class Autos {
                 new Pose2d(startingPose.getX(), startingPose.getY(), new Rotation2d(Math.PI)));
     }
 
+    /**
+     * Creates a path that pauses for 7 seconds, then executes the CBA auto (to
+     * allow for other robots to leave the starting area).
+     * 
+     * @param drivetrain  the drivetrain
+     * @param intake      the intake
+     * @param shooter     the shooter
+     * @param shooterTilt the shooter tilt
+     * @return the auto routine
+     */
     public static AutoRoutine autoWaitCBA(Drivetrain drivetrain, Intake intake, Shooter shooter,
             ShooterTilt shooterTilt) {
         PathPlannerPath pathStartToC = PathPlannerPath.fromChoreoTrajectory("CBA.1");
@@ -104,6 +142,16 @@ public class Autos {
                 new Pose2d(startingPose.getX(), startingPose.getY(), new Rotation2d(Math.PI)));
     }
 
+    /**
+     * Creates an auto routine that scores the preloaded note, then intakes and
+     * scores C, B, A, 1, and 2, in that order.
+     * 
+     * @param drivetrain  the drivetrain
+     * @param intake      the intake
+     * @param shooter     the shooter
+     * @param shooterTilt the shooter tilt
+     * @return the auto routine
+     */
     public static AutoRoutine autoCBA12(Drivetrain drivetrain, Intake intake, Shooter shooter,
             ShooterTilt shooterTilt) {
         PathPlannerPath pathStartToC = PathPlannerPath.fromChoreoTrajectory("CBA12.1");
@@ -170,6 +218,16 @@ public class Autos {
                 new Pose2d(startingPose.getX(), startingPose.getY(), new Rotation2d(Math.PI)));
     }
 
+    /**
+     * Creates an auto routine that scores the preloaded note, then intakes and
+     * scores notes C, B, A, 1, 2, and 3, in that order. Not currently stable.
+     * 
+     * @param drivetrain  the drivetrain
+     * @param intake      the intake
+     * @param shooter     the shooter
+     * @param shooterTilt the shooter tilt
+     * @return the auto routine
+     */
     public static AutoRoutine autoCBA123(Drivetrain drivetrain, Intake intake, Shooter shooter,
             ShooterTilt shooterTilt) {
         PathPlannerPath path = PathPlannerPath.fromChoreoTrajectory("CBA123.1");
@@ -228,6 +286,16 @@ public class Autos {
                 new Pose2d(startingPose.getX(), startingPose.getY(), new Rotation2d(Math.PI)));
     }
 
+    /**
+     * Creates an auto routine that shoots the preloaded note, then moves around the
+     * notes near the speaker and shoots notes 1, 2, and 3. Not currently stable.
+     * 
+     * @param drivetrain  the drivetrain
+     * @param intake      the intake
+     * @param shooter     the shooter
+     * @param shooterTilt the shooter tilt
+     * @return the auto routine
+     */
     public static AutoRoutine auto123(Drivetrain drivetrain, Intake intake, Shooter shooter,
             ShooterTilt shooterTilt) {
         PathPlannerPath pathStartTo1 = PathPlannerPath.fromChoreoTrajectory("123.1");
@@ -240,17 +308,27 @@ public class Autos {
 
         Command command = Commands.sequence(
                 RobotCommands.shootAutoCommand(drivetrain, intake, shooter, shooterTilt),
-                driveIntakeShootCenterCommand(pathStartTo1, path1ToScore, 0.25, 0.25, drivetrain, intake, shooter,
+                driveIntakeShootCommand(pathStartTo1, path1ToScore, 0.25, 0.25, drivetrain, intake, shooter,
                         shooterTilt),
-                driveIntakeShootCenterCommand(pathScoreTo2, path2ToScore, 0.25, 0.25, drivetrain, intake, shooter,
+                driveIntakeShootCommand(pathScoreTo2, path2ToScore, 0.25, 0.25, drivetrain, intake, shooter,
                         shooterTilt),
-                driveIntakeShootCenterCommand(pathScoreTo3, path3ToScore, 0.25, 0.25, drivetrain, intake, shooter,
+                driveIntakeShootCommand(pathScoreTo3, path3ToScore, 0.25, 0.25, drivetrain, intake, shooter,
                         shooterTilt));
         return new AutoRoutine("123", command,
                 List.of(pathStartTo1, path1ToScore, pathScoreTo2, path2ToScore, pathScoreTo3, path3ToScore),
                 new Pose2d(startingPose.getX(), startingPose.getY(), new Rotation2d(-2.1045045040359978)));
     }
 
+    /**
+     * Creates an auto routine that shoots the preloaded note, then moves around the
+     * notes near the speaker and shoots notes 2, 3, and 1. Not currently stable.
+     * 
+     * @param drivetrain  the drivetrain
+     * @param intake      the intake
+     * @param shooter     the shooter
+     * @param shooterTilt the shooter tilt
+     * @return the auto routine
+     */
     public static AutoRoutine auto231(Drivetrain drivetrain, Intake intake, Shooter shooter,
             ShooterTilt shooterTilt) {
         PathPlannerPath pathStartTo2 = PathPlannerPath.fromChoreoTrajectory("231.1");
@@ -263,17 +341,27 @@ public class Autos {
 
         Command command = Commands.sequence(
                 RobotCommands.shootAutoCommand(drivetrain, intake, shooter, shooterTilt),
-                driveIntakeShootCenterCommand(pathStartTo2, path2ToScore, 0.25, 0.25, drivetrain, intake, shooter,
+                driveIntakeShootCommand(pathStartTo2, path2ToScore, 0.25, 0.25, drivetrain, intake, shooter,
                         shooterTilt),
-                driveIntakeShootCenterCommand(pathScoreTo1, path1ToScore, 0.25, 0.25, drivetrain, intake, shooter,
+                driveIntakeShootCommand(pathScoreTo1, path1ToScore, 0.25, 0.25, drivetrain, intake, shooter,
                         shooterTilt),
-                driveIntakeShootCenterCommand(pathScoreTo3, path3ToScore, 0.25, 0.25, drivetrain, intake, shooter,
+                driveIntakeShootCommand(pathScoreTo3, path3ToScore, 0.25, 0.25, drivetrain, intake, shooter,
                         shooterTilt));
         return new AutoRoutine("231", command,
                 List.of(pathStartTo2, path2ToScore, pathScoreTo3, path3ToScore, pathScoreTo1, path1ToScore),
                 new Pose2d(startingPose.getX(), startingPose.getY(), new Rotation2d(-2.1045045040359978)));
     }
 
+    /**
+     * Creates an auto routine that shoots the preloaded note, then moves around the
+     * notes near the speaker and shoots notes 3, 4, and 5. Not currently stable.
+     * 
+     * @param drivetrain  the drivetrain
+     * @param intake      the intake
+     * @param shooter     the shooter
+     * @param shooterTilt the shooter tilt
+     * @return the auto routine
+     */
     public static AutoRoutine auto345(Drivetrain drivetrain, Intake intake,
             Shooter shooter, ShooterTilt shooterTilt) {
         PathPlannerPath pathStartTo3 = PathPlannerPath.fromChoreoTrajectory("345.1");
@@ -288,11 +376,11 @@ public class Autos {
         Command command = Commands.sequence(
                 RobotCommands.shootAutoCommand(drivetrain, intake, shooter, shooterTilt),
 
-                driveIntakeShootCenterCommand(pathStartTo3, path3ToScore, 0.25, 0.25, drivetrain, intake, shooter,
+                driveIntakeShootCommand(pathStartTo3, path3ToScore, 0.25, 0.25, drivetrain, intake, shooter,
                         shooterTilt),
-                driveIntakeShootCenterCommand(pathScoreTo4, path4ToScore, 0.25, 0.25, drivetrain, intake, shooter,
+                driveIntakeShootCommand(pathScoreTo4, path4ToScore, 0.25, 0.25, drivetrain, intake, shooter,
                         shooterTilt),
-                driveIntakeShootCenterCommand(pathScoreTo5, path5ToScore, 0.25, 0.25, drivetrain, intake, shooter,
+                driveIntakeShootCommand(pathScoreTo5, path5ToScore, 0.25, 0.25, drivetrain, intake, shooter,
                         shooterTilt));
 
         return new AutoRoutine("345", command,
@@ -301,6 +389,16 @@ public class Autos {
                 new Pose2d(startingPose.getX(), startingPose.getY(), new Rotation2d(2.146011906845138)));
     }
 
+    /**
+     * Creates an auto routine that shoots the preloaded note, then moves around the
+     * notes near the speaker and shoots notes 5, 4, and 3. Relatively stable.
+     * 
+     * @param drivetrain  the drivetrain
+     * @param intake      the intake
+     * @param shooter     the shooter
+     * @param shooterTilt the shooter tilt
+     * @return the auto routine
+     */
     public static AutoRoutine auto543(Drivetrain drivetrain, Intake intake,
             Shooter shooter, ShooterTilt shooterTilt) {
         PathPlannerPath pathStartTo5 = PathPlannerPath.fromChoreoTrajectory("543.1");
@@ -315,11 +413,11 @@ public class Autos {
         Command command = Commands.sequence(
                 RobotCommands.shootAutoCommand(drivetrain, intake, shooter, shooterTilt),
 
-                driveIntakeShootCenterCommand(pathStartTo5, path5ToScore, 0.25, 0.15, drivetrain, intake, shooter,
+                driveIntakeShootCommand(pathStartTo5, path5ToScore, 0.25, 0.15, drivetrain, intake, shooter,
                         shooterTilt),
-                driveIntakeShootCenterCommand(pathScoreTo4, path4ToScore, 0.25, 0.15, drivetrain, intake, shooter,
+                driveIntakeShootCommand(pathScoreTo4, path4ToScore, 0.25, 0.15, drivetrain, intake, shooter,
                         shooterTilt),
-                driveIntakeShootCenterCommand(pathScoreTo3, path3ToScore, 0.25, 0.15, drivetrain, intake, shooter,
+                driveIntakeShootCommand(pathScoreTo3, path3ToScore, 0.25, 0.15, drivetrain, intake, shooter,
                         shooterTilt));
 
         return new AutoRoutine("543", command,
@@ -327,6 +425,16 @@ public class Autos {
                 new Pose2d(startingPose.getX(), startingPose.getY(), new Rotation2d(2.146011906845138)));
     }
 
+    /**
+     * Creates an auto routine that shoots the preloaded note, then moves around the
+     * notes near the speaker and shoots notes 4, 3, and 5. Not currently stable.
+     * 
+     * @param drivetrain  the drivetrain
+     * @param intake      the intake
+     * @param shooter     the shooter
+     * @param shooterTilt the shooter tilt
+     * @return the auto routine
+     */
     public static AutoRoutine auto435(Drivetrain drivetrain, Intake intake,
             Shooter shooter, ShooterTilt shooterTilt) {
         PathPlannerPath pathStartTo4 = PathPlannerPath.fromChoreoTrajectory("435.1");
@@ -341,11 +449,11 @@ public class Autos {
         Command command = Commands.sequence(
                 RobotCommands.shootAutoCommand(drivetrain, intake, shooter, shooterTilt),
 
-                driveIntakeShootCenterCommand(pathStartTo4, path4ToScore, 0.25, 0.15, drivetrain, intake, shooter,
+                driveIntakeShootCommand(pathStartTo4, path4ToScore, 0.25, 0.15, drivetrain, intake, shooter,
                         shooterTilt),
-                driveIntakeShootCenterCommand(pathScoreTo3, path3ToScore, 0.25, 0.15, drivetrain, intake, shooter,
+                driveIntakeShootCommand(pathScoreTo3, path3ToScore, 0.25, 0.15, drivetrain, intake, shooter,
                         shooterTilt),
-                driveIntakeShootCenterCommand(pathScoreTo5, path5ToScore, 0.25, 0.15, drivetrain, intake, shooter,
+                driveIntakeShootCommand(pathScoreTo5, path5ToScore, 0.25, 0.15, drivetrain, intake, shooter,
                         shooterTilt));
 
         return new AutoRoutine("435", command,

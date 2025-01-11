@@ -28,19 +28,25 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.system.plant.DCMotor;
 
+/**
+ * Contains constants that are used throughout the robot code.
+ */
 public class Constants {
+    /** The type of controller to use for the driver controller. */
     enum ControllerType {
         XboxController,
         FlightStick
     }
 
-    public static final boolean DEBUG_MODE = false;
-
+    /** The current control type in use. */
     public static final ControllerType CONTROLLER_TYPE = ControllerType.FlightStick;
 
+    /** The period at which the robot code updates. */
     public static final double PERIOD = 0.020;
 
+    /** Constants for the drivetrain. */
     public static final class Drivetrain {
+        /** Music tracks that are able to be played with CTRE motor controllers. */
         public static enum MusicTrack {
             IMPERIAL_MARCH("imperial_march.chrp"),
             MEGALOVANIA("megalovania.chrp"),
@@ -79,19 +85,16 @@ public class Constants {
         public static final boolean STEER_CANCODERS_INVERTED = RobotBase.isReal() ? false : true;
 
         // 2/17/24
-        // public static final double FRONT_LEFT_OFFSET = 0.457763671875;
-        // public static final double FRONT_RIGHT_OFFSET = -0.183349609375;
-        // public static final double BACK_LEFT_OFFSET = 0.24267578125;
-        // public static final double BACK_RIGHT_OFFSET = 0.48583984375;
         public static final double FRONT_LEFT_OFFSET = 0.4521484375;
-        public static final double FRONT_RIGHT_OFFSET = -0.179443359375 - 0.00634765625;
+        public static final double FRONT_RIGHT_OFFSET = -0.1857910156;
         public static final double BACK_LEFT_OFFSET = 0.242919921875;
-        public static final double BACK_RIGHT_OFFSET = 0.498046875 - 0.003;
+        public static final double BACK_RIGHT_OFFSET = 0.495046875;
 
         /** Distance between left and right wheels. */
         public static final double TRACK_WIDTH_METERS = 0.527;
         /** Distance between front and back wheels. */
         public static final double WHEEL_BASE_METERS = 0.527;
+        /** Distance between the center of the robot and the */
         public static final double DRIVE_BASE_RADIUS_METERS = 0.3727;
 
         public static final SwerveConstants SWERVE_CONSTANTS = new SwerveConstants();
@@ -238,7 +241,7 @@ public class Constants {
         public static final double GEARING = 1.0;
         public static final double WHEEL_AXLE_MASS = Units.lbsToKilograms(2.5);
         public static final double WHEEL_RADIUS = Units.inchesToMeters(2);
-        // 3lb, 2in radius, 1/2mr^2
+        // 2.5lb, 2in radius, 1/2mr^2
         public static final double MOMENT_OF_INERTIA_KG_METERS_SQUARED = (1.0 / 2.0) * WHEEL_AXLE_MASS
                 * Math.pow(WHEEL_RADIUS, 2);
         public static final int CURRENT_LIMIT = 70;
@@ -269,6 +272,10 @@ public class Constants {
         public static final double ACCELERATION_COMPENSATION_FACTOR = 0.0;
 
         // key: distance, value: speed
+        /**
+         * Interpolator tht takes in the xy distance from the target and returns the
+         * setpoint shooter speed.
+         */
         public static final InterpolatingDoubleTreeMap SPEED_INTERPOLATOR = new InterpolatingDoubleTreeMap();
         static {
             // 3/5/24
@@ -288,6 +295,13 @@ public class Constants {
 
         public static final double MAX_SHOOTING_DISTANCE = 5.1322;
 
+        /**
+         * Get the speed of a note shot by the shooter given the distance from the goal.
+         * Used for on-the-fly shooting.
+         * 
+         * @param distance the xy distance from the goal
+         * @return the speed of the note
+         */
         public static final double getProjectileSpeed(double distance) {
             // found via analyzing slow-motion video of shots, shooter speed -> projectile
             // velocity is linear
@@ -365,6 +379,12 @@ public class Constants {
                 -0.1737,
                 new Rotation3d());
 
+        /**
+         * Gets the length of the lead screw given the angle of the shooter tilt.
+         * 
+         * @param angle the angle of the shooter tilt
+         * @return the length of the lead screw
+         */
         public static final double getLinearActuatorLength(double angle) {
             double shooterToBottomLeadScrewAngle = Math
                     .atan(Math.abs(SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getX())
@@ -390,7 +410,15 @@ public class Constants {
                     - INITIAL_LEAD_SCREW_LENGTH;
         }
 
-        // https://www.desmos.com/calculator/7ojeknrpiq
+        /**
+         * Gets the angle of the shooter tilt given the length of the lead screw.
+         * 
+         * <p>
+         * https://www.desmos.com/calculator/7ojeknrpiq
+         * 
+         * @param linearActuatorLength the length of the lead screw
+         * @return the angle of the shooter tilt
+         */
         public static final double getShooterAngle(double linearActuatorLength) {
             double fullLeadScrewLength = INITIAL_LEAD_SCREW_LENGTH + linearActuatorLength;
 
@@ -419,7 +447,13 @@ public class Constants {
                     - Math.PI / 2.0;
         }
 
-        // used only in simulation
+        /**
+         * Gets the angle of the lead screw from its rotation axis given its length.
+         * Used for simulation.
+         * 
+         * @param linearActuatorLength the length of the lead screw
+         * @return the angle of the lead screw
+         */
         public static final double getLeadScrewAngle(double linearActuatorLength) {
             double fullLeadScrewLength = INITIAL_LEAD_SCREW_LENGTH + linearActuatorLength;
 
@@ -444,7 +478,10 @@ public class Constants {
             return Math.PI - leadScrewInteriorAngle - bottomLeadScrewToShooterAngle;
         }
 
-        // key: distance, value: angle
+        /**
+         * Interpolator tht takes in the xy distance from the target and returns the
+         * setpoint tilt angle.
+         */
         public static final InterpolatingDoubleTreeMap LEAD_SCREW_HEIGHT_INTERPOLATOR = new InterpolatingDoubleTreeMap();
         static {
             // 3/5/24
