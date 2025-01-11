@@ -1,5 +1,7 @@
 package frc.robot;
 
+import java.util.List;
+
 import com.techhounds.houndutil.houndlib.AprilTagPhotonCamera.PhotonCameraConstants;
 import com.techhounds.houndutil.houndlib.leds.BaseLEDSection;
 
@@ -15,27 +17,36 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import frc.robot.subsystems.LEDs.LEDState;
 
 import com.techhounds.houndutil.houndlib.swerve.CoaxialSwerveModule.SwerveConstants;
+import com.techhounds.houndutil.houndlog.loggers.TunableDouble;
+
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.system.plant.DCMotor;
 
+/**
+ * Contains constants that are used throughout the robot code.
+ */
 public class Constants {
+    /** The type of controller to use for the driver controller. */
     enum ControllerType {
         XboxController,
         FlightStick
     }
 
-    public static final boolean DEBUG_MODE = false;
-
+    /** The current control type in use. */
     public static final ControllerType CONTROLLER_TYPE = ControllerType.FlightStick;
 
+    /** The period at which the robot code updates. */
     public static final double PERIOD = 0.020;
 
+    /** Constants for the drivetrain. */
     public static final class Drivetrain {
+        /** Music tracks that are able to be played with CTRE motor controllers. */
         public static enum MusicTrack {
             IMPERIAL_MARCH("imperial_march.chrp"),
             MEGALOVANIA("megalovania.chrp"),
@@ -67,24 +78,23 @@ public class Constants {
 
         public static final int PIGEON_ID = 0;
 
+        public static final TunableDouble DEMO_SPEED = new TunableDouble("subsystems/drivetrain/DEMO_SPEED", 1.0);
+
         public static final boolean DRIVE_MOTORS_INVERTED = false;
         public static final boolean STEER_MOTORS_INVERTED = true;
         public static final boolean STEER_CANCODERS_INVERTED = RobotBase.isReal() ? false : true;
 
         // 2/17/24
-        // public static final double FRONT_LEFT_OFFSET = 0.457763671875;
-        // public static final double FRONT_RIGHT_OFFSET = -0.183349609375;
-        // public static final double BACK_LEFT_OFFSET = 0.24267578125;
-        // public static final double BACK_RIGHT_OFFSET = 0.48583984375;
         public static final double FRONT_LEFT_OFFSET = 0.4521484375;
-        public static final double FRONT_RIGHT_OFFSET = -0.179443359375 - 0.00634765625;
+        public static final double FRONT_RIGHT_OFFSET = -0.1857910156;
         public static final double BACK_LEFT_OFFSET = 0.242919921875;
-        public static final double BACK_RIGHT_OFFSET = 0.498046875 - 0.003;
+        public static final double BACK_RIGHT_OFFSET = 0.495046875;
 
         /** Distance between left and right wheels. */
         public static final double TRACK_WIDTH_METERS = 0.527;
         /** Distance between front and back wheels. */
         public static final double WHEEL_BASE_METERS = 0.527;
+        /** Distance between the center of the robot and the */
         public static final double DRIVE_BASE_RADIUS_METERS = 0.3727;
 
         public static final SwerveConstants SWERVE_CONSTANTS = new SwerveConstants();
@@ -99,9 +109,9 @@ public class Constants {
             SWERVE_CONSTANTS.STEER_kP = 100.0;
             SWERVE_CONSTANTS.STEER_kI = 0.0;
             SWERVE_CONSTANTS.STEER_kD = 1.0;
-            SWERVE_CONSTANTS.STEER_kS = 0; // TODO
-            SWERVE_CONSTANTS.STEER_kV = 0; // TODO
-            SWERVE_CONSTANTS.STEER_kA = 0; // TODO
+            SWERVE_CONSTANTS.STEER_kS = 0;
+            SWERVE_CONSTANTS.STEER_kV = 0;
+            SWERVE_CONSTANTS.STEER_kA = 0;
 
             SWERVE_CONSTANTS.DRIVE_GEARING = 5.357;
             SWERVE_CONSTANTS.STEER_GEARING = 150.0 / 7.0;
@@ -113,10 +123,10 @@ public class Constants {
                     / SWERVE_CONSTANTS.STEER_GEARING;
 
             SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND = 4.54;
-            SWERVE_CONSTANTS.MAX_DRIVING_ACCELERATION_METERS_PER_SECOND_SQUARED = 8; // TODO
-            SWERVE_CONSTANTS.MAX_STEER_VELOCITY_RADIANS_PER_SECOND = 100 * 2 * Math.PI; // TODO
-            // max velocity in 1/3 sec
-            SWERVE_CONSTANTS.MAX_STEER_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 10 * 100 * 2 * Math.PI; // TODO
+            SWERVE_CONSTANTS.MAX_DRIVING_ACCELERATION_METERS_PER_SECOND_SQUARED = 8;
+            SWERVE_CONSTANTS.MAX_STEER_VELOCITY_RADIANS_PER_SECOND = 100 * 2 * Math.PI;
+            // max velocity in 1/10 sec
+            SWERVE_CONSTANTS.MAX_STEER_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 10 * 100 * 2 * Math.PI;
 
             SWERVE_CONSTANTS.DRIVE_CURRENT_LIMIT = 100;
             SWERVE_CONSTANTS.STEER_CURRENT_LIMIT = 30;
@@ -188,8 +198,8 @@ public class Constants {
 
         public static final DCMotor MOTOR_GEARBOX_REPR = DCMotor.getNeoVortex(2);
         public static final double GEARING = 43.2;
-        public static final double LENGTH_METERS = 0.23; // TODO simvalue
-        public static final double MASS_KG = 4.082; // TODO simv<alue
+        public static final double LENGTH_METERS = 0.23;
+        public static final double MASS_KG = 4.082;
         public static final double MOMENT_OF_INERTIA_KG_METERS_SQUARED = SingleJointedArmSim.estimateMOI(
                 LENGTH_METERS,
                 MASS_KG);
@@ -231,7 +241,7 @@ public class Constants {
         public static final double GEARING = 1.0;
         public static final double WHEEL_AXLE_MASS = Units.lbsToKilograms(2.5);
         public static final double WHEEL_RADIUS = Units.inchesToMeters(2);
-        // 3lb, 2in radius, 1/2mr^2
+        // 2.5lb, 2in radius, 1/2mr^2
         public static final double MOMENT_OF_INERTIA_KG_METERS_SQUARED = (1.0 / 2.0) * WHEEL_AXLE_MASS
                 * Math.pow(WHEEL_RADIUS, 2);
         public static final int CURRENT_LIMIT = 70;
@@ -240,6 +250,7 @@ public class Constants {
         public static final double PASSING_RPS = 47;
         public static final double SUBWOOFER_RPS = 55;
         public static final double PODIUM_RPS = 84;
+        public static final TunableDouble DEMO_RPS = new TunableDouble("subsystems/shooter/DEMO_RPS", 10);
 
         // 3/3/24
         public static final double left_kP = 0.1;
@@ -257,16 +268,14 @@ public class Constants {
         public static final double right_kA = 0.021566;
         public static final double TOLERANCE = 5;
 
-        // public static final double MAX_VELOCITY_METERS_PER_SECOND = 80;
-        // public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 10;
-        // public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new
-        // TrapezoidProfile.Constraints(
-        // MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
-
         public static final double GOAL_POSITION_ITERATIONS = 5;
         public static final double ACCELERATION_COMPENSATION_FACTOR = 0.0;
 
         // key: distance, value: speed
+        /**
+         * Interpolator tht takes in the xy distance from the target and returns the
+         * setpoint shooter speed.
+         */
         public static final InterpolatingDoubleTreeMap SPEED_INTERPOLATOR = new InterpolatingDoubleTreeMap();
         static {
             // 3/5/24
@@ -286,8 +295,17 @@ public class Constants {
 
         public static final double MAX_SHOOTING_DISTANCE = 5.1322;
 
-        public static final double getProjectileSpeed(double shooterRps) {
-            return shooterRps * 0.1446;
+        /**
+         * Get the speed of a note shot by the shooter given the distance from the goal.
+         * Used for on-the-fly shooting.
+         * 
+         * @param distance the xy distance from the goal
+         * @return the speed of the note
+         */
+        public static final double getProjectileSpeed(double distance) {
+            // found via analyzing slow-motion video of shots, shooter speed -> projectile
+            // velocity is linear
+            return SPEED_INTERPOLATOR.get(distance) * 0.1446;
         }
     }
 
@@ -323,6 +341,8 @@ public class Constants {
 
         public static final double MIN_ANGLE_RADIANS = 0.389842;
         public static final double MAX_ANGLE_RADIANS = 1.2;
+        public static final TunableDouble DEMO_ANGLE = new TunableDouble("subsystems/shooterTilt/DEMO_ANGLE",
+                1.01572);
 
         public static final int CURRENT_LIMIT = 25;
 
@@ -359,6 +379,12 @@ public class Constants {
                 -0.1737,
                 new Rotation3d());
 
+        /**
+         * Gets the length of the lead screw given the angle of the shooter tilt.
+         * 
+         * @param angle the angle of the shooter tilt
+         * @return the length of the lead screw
+         */
         public static final double getLinearActuatorLength(double angle) {
             double shooterToBottomLeadScrewAngle = Math
                     .atan(Math.abs(SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getX())
@@ -384,7 +410,15 @@ public class Constants {
                     - INITIAL_LEAD_SCREW_LENGTH;
         }
 
-        // https://www.desmos.com/calculator/7ojeknrpiq
+        /**
+         * Gets the angle of the shooter tilt given the length of the lead screw.
+         * 
+         * <p>
+         * https://www.desmos.com/calculator/7ojeknrpiq
+         * 
+         * @param linearActuatorLength the length of the lead screw
+         * @return the angle of the shooter tilt
+         */
         public static final double getShooterAngle(double linearActuatorLength) {
             double fullLeadScrewLength = INITIAL_LEAD_SCREW_LENGTH + linearActuatorLength;
 
@@ -413,7 +447,13 @@ public class Constants {
                     - Math.PI / 2.0;
         }
 
-        // used only in simulation
+        /**
+         * Gets the angle of the lead screw from its rotation axis given its length.
+         * Used for simulation.
+         * 
+         * @param linearActuatorLength the length of the lead screw
+         * @return the angle of the lead screw
+         */
         public static final double getLeadScrewAngle(double linearActuatorLength) {
             double fullLeadScrewLength = INITIAL_LEAD_SCREW_LENGTH + linearActuatorLength;
 
@@ -438,7 +478,10 @@ public class Constants {
             return Math.PI - leadScrewInteriorAngle - bottomLeadScrewToShooterAngle;
         }
 
-        // key: distance, value: angle
+        /**
+         * Interpolator tht takes in the xy distance from the target and returns the
+         * setpoint tilt angle.
+         */
         public static final InterpolatingDoubleTreeMap LEAD_SCREW_HEIGHT_INTERPOLATOR = new InterpolatingDoubleTreeMap();
         static {
             // 3/5/24
@@ -494,8 +537,8 @@ public class Constants {
         public static final double kA = 1.68948;
         public static final double TOLERANCE = 0.01;
 
-        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0.28; // TODO
-        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0.5; // TODO
+        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0.28;
+        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0.5;
         public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
 
@@ -542,8 +585,8 @@ public class Constants {
         public static final double kA = 0.386364;
         public static final double TOLERANCE = 0.01;
 
-        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0.7; // TODO
-        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0.7; // TODO
+        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0.7;
+        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0.7;
         public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
 
@@ -604,30 +647,34 @@ public class Constants {
          * A rate limit of 3, for example, means that 0->1 in 1/3 sec.
          * Larger numbers mean less of a rate limit.
          */
-        public static final double JOYSTICK_INPUT_RATE_LIMIT = 15.0; // TODO
-        public static final double JOYSTICK_INPUT_DEADBAND = 0.05; // TODO
-        public static final double JOYSTICK_CURVE_EXP = 2; // TODO
-        public static final double JOYSTICK_ROT_CURVE_EXP = 1; // TODO
+        public static final double JOYSTICK_INPUT_RATE_LIMIT = 15.0;
+        public static final double JOYSTICK_INPUT_DEADBAND = 0.05;
+        public static final double JOYSTICK_CURVE_EXP = 2;
+        public static final double JOYSTICK_ROT_CURVE_EXP = 1;
     }
 
     public static final class LEDs {
         public static enum LEDSection implements BaseLEDSection {
             SHOOTER_RIGHT(0, 26),
-            SHOOTER_TOP(27, 74),
+            SHOOTER_RIGHT_EXT(0, 50, false),
+            SHOOTER_TOP(27, 74, true),
+            SHOOTER_TOP_RIGHT(51, 74, true),
+            SHOOTER_TOP_LEFT(27, 50),
             SHOOTER_LEFT(75, 107, true),
+            SHOOTER_LEFT_EXT(51, 101, true),
             SHOOTER(0, 107),
             SHOOTER_RIGHT_BOTTOM(0, 12),
             SHOOTER_RIGHT_TOP(13, 26),
             SHOOTER_LEFT_BOTTOM(92, 107, true),
             SHOOTER_LEFT_TOP(75, 91, true),
 
-            ELEVATOR_LEFT(108, 141),
-            ELEVATOR_LEFT_TOP(125, 141),
-            ELEVATOR_LEFT_BOTTOM(108, 124),
-            ELEVATOR_RIGHT(142, 175),
-            ELEVATOR_RIGHT_TOP(159, 175),
-            ELEVATOR_RIGHT_BOTTOM(142, 158),
-            ALL(0, 332);
+            ELEVATOR_LEFT(108, 218),
+            ELEVATOR_LEFT_TOP(164, 218),
+            ELEVATOR_LEFT_BOTTOM(108, 163),
+            ELEVATOR_RIGHT(216, 326),
+            ELEVATOR_RIGHT_TOP(272, 326),
+            ELEVATOR_RIGHT_BOTTOM(216, 271),
+            ALL(0, 326, true);
 
             private final int startIdx;
             private final int endIdx;
@@ -666,6 +713,8 @@ public class Constants {
 
         public static final int PORT = 0;
         public static final int LENGTH = 333;
+
+        public static final List<LEDState> DEFAULT_STATES = List.of(LEDState.BLUE_FIRE, LEDState.GOLD_WAVE);
     }
 
     public static final class HoundBrian {

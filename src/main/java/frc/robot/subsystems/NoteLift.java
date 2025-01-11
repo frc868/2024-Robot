@@ -5,11 +5,12 @@ import java.util.function.Supplier;
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.techhounds.houndutil.houndlib.PositionTracker;
 import com.techhounds.houndutil.houndlib.SparkConfigurator;
 import com.techhounds.houndutil.houndlib.Utils;
-import com.techhounds.houndutil.houndlib.subsystems.BaseElevator;
-import com.techhounds.houndutil.houndlog.interfaces.Log;
-import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
+import com.techhounds.houndutil.houndlib.subsystems.BaseLinearMechanism;
+import com.techhounds.houndutil.houndlog.annotations.Log;
+import com.techhounds.houndutil.houndlog.annotations.LoggedObject;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
@@ -31,15 +32,20 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import frc.robot.Constants.NoteLift.NoteLiftPosition;
 import frc.robot.GlobalStates;
-import frc.robot.PositionTracker;
-
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.Constants.NoteLift.*;
 
+/**
+ * The note lift subsystem, used to score in the trap. Handles motion profiling
+ * and positioning of the carriage.
+ * 
+ * @apiNote This subsystem is no longer attached to the robot, and still exists
+ *          for when the robot is in the pre-worlds configuration.
+ */
 @LoggedObject
-public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosition> {
+public class NoteLift extends SubsystemBase implements BaseLinearMechanism<NoteLiftPosition> {
     @Log
     private CANSparkFlex motor;
 
@@ -49,6 +55,7 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
     @Log(groups = "control")
     private ElevatorFeedforward feedforwardController = new ElevatorFeedforward(kS, kG, kV, kA);
 
+    /** The representation of the "elevator" for simulation. */
     private ElevatorSim elevatorSim = new ElevatorSim(
             MOTOR_GEARBOX_REPR,
             GEARING,
@@ -105,6 +112,10 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
         setDefaultCommand(moveToCurrentGoalCommand());
     }
 
+    /**
+     * Updated the physics simulation, and sets data on motor controllers based on
+     * its results.
+     */
     @Override
     public void simulationPeriodic() {
         elevatorSim.setInput(motor.getAppliedOutput());
@@ -127,6 +138,12 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
             return simVelocity;
     }
 
+    /**
+     * Gets the 3D relative pose of the climber based on its position, for use in
+     * AdvantageScope.
+     * 
+     * @return the 3D pose of the climber
+     */
     public Pose3d getComponentPose() {
         return BASE_COMPONENT_POSE.plus(new Transform3d(0, 0, getPosition(), new Rotation3d()));
     }
@@ -137,6 +154,20 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
         initialized = true;
     }
 
+    /**
+     * Sets the voltage of the motors after applying limits.
+     * 
+     * <p>
+     * Limits include: (1) soft stops between MIN_HEIGHT_METERS and
+     * MAX_HEIGHT_METERS (with allowance for the mechanism to proceed 3cm beyond
+     * this), (2) downwards movement lock-out if the climber is in the
+     * path of the note lift, (3) downwards movement lock-out if the note lift is
+     * above the shooter and is about to enter its path, (4) upwards movement
+     * lock-out if the note lift is below the shooter and is about to enter its
+     * path, and (5) total lock-out if the robot is not initialized.
+     * 
+     * @param voltage the voltage to set the motors to
+     */
     @Override
     public void setVoltage(double voltage) {
         voltage = MathUtil.clamp(voltage, -12, 12);
@@ -145,13 +176,13 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
                     MAX_HEIGHT_METERS + 0.03); // allows note lift to unspool slightly
 
         if (!GlobalStates.INTER_SUBSYSTEM_SAFETIES_DISABLED.enabled()) {
-            if (getPosition() - positionTracker.getClimberPosition() + 1 < -0.065 && voltage < 0) {
+            if (getPosition() - positionTracker.getPosition("climber") + 1 < -0.065 && voltage < 0) {
                 voltage = 0;
             }
-            if (getPosition() < 0.233 && positionTracker.getShooterTiltAngle() < 1.11 && voltage > 0) {
+            if (getPosition() < 0.233 && positionTracker.getPosition("shooterTilt") < 1.11 && voltage > 0) {
                 voltage = 0;
             }
-            if (getPosition() > 0.233 && positionTracker.getShooterTiltAngle() < 1.11 && voltage < 0) {
+            if (getPosition() > 0.233 && positionTracker.getPosition("shooterTilt") < 1.11 && voltage < 0) {
                 voltage = 0;
             }
         }
@@ -229,6 +260,12 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
         return sysIdRoutine.dynamic(direction).withName("noteLift.sysIdDynamic");
     }
 
+    /**
+     * Creates a command that moves the note lift up to the top at maximum velocity,
+     * until it slightly depools and triggers.
+     * 
+     * @return the command
+     */
     public Command scoreNoteCommand() {
         return run(() -> {
             if (getPosition() < MAX_HEIGHT_METERS + 0.03)
@@ -241,6 +278,13 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
         });
     }
 
+    /**
+     * Creates a command that resets the controller's goal to the current position
+     * (used if overrides are enabled, then disabled, so that the mechanism does not
+     * try to move to the previous goal before enabling overrides).
+     * 
+     * @return the command
+     */
     public Command resetControllersCommand() {
         return Commands.runOnce(() -> pidController.reset(getPosition()))
                 .andThen(Commands.runOnce(() -> pidController.setGoal(getPosition())));
@@ -256,6 +300,13 @@ public class NoteLift extends SubsystemBase implements BaseElevator<NoteLiftPosi
         }).withName("noteLift.setInitialized");
     }
 
+    /**
+     * Creates a command that slowly moves the note lift up to the hard stop, and
+     * initializes when a current spike is detected.
+     * 
+     * @apiNote currently unused
+     * @return the command
+     */
     public Command zeroMechanismCommand() {
         return run(() -> {
             motor.setVoltage(1);

@@ -1,6 +1,9 @@
 package frc.robot;
 
+import static frc.robot.Constants.Drivetrain.DEMO_SPEED;
+import static frc.robot.Constants.Shooter.DEMO_RPS;
 import static frc.robot.Constants.Shooter.PODIUM_RPS;
+import static frc.robot.Constants.ShooterTilt.DEMO_ANGLE;
 
 import com.techhounds.houndutil.houndlib.oi.CommandVirpilJoystick;
 
@@ -19,16 +22,31 @@ import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterTilt;
 import frc.robot.subsystems.LEDs.LEDState;
 
+/**
+ * Defines static methods that configure controls for specific operators of the
+ * robot.
+ */
 public class Controls {
+    /**
+     * Configures driver controls on a Virpil Controls Alpha-R joystick.
+     * 
+     * @param port        the port that the joystick is connected to
+     * @param drivetrain  the drivetrain
+     * @param intake      the intake
+     * @param shooter     the shooter
+     * @param shooterTilt the shooter tilt
+     * @param climber     the climber
+     * @param leds        the LEDs
+     */
     public static void configureDriverControls(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
             ShooterTilt shooterTilt, Climber climber, LEDs leds) {
         CommandVirpilJoystick joystick = new CommandVirpilJoystick(port);
 
         drivetrain.setDefaultCommand(
                 drivetrain.teleopDriveCommand(
-                        () -> -joystick.getY(),
-                        () -> -joystick.getX(),
-                        () -> -joystick.getTwist()));
+                        () -> -joystick.getY() * DEMO_SPEED.get(),
+                        () -> -joystick.getX() * DEMO_SPEED.get(),
+                        () -> -joystick.getTwist() * DEMO_SPEED.get()));
 
         new Trigger(() -> (Math.abs(joystick.getTwist()) > 0.05))
                 .whileTrue(drivetrain.disableControlledRotateCommand());
@@ -68,19 +86,10 @@ public class Controls {
                 .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
 
         joystick.triggerSoftPress().and(joystick.flipTriggerIn().negate()).whileTrue(
-                Commands.either(
-                        RobotCommands.targetSpeakerSubwooferCommand(drivetrain, shooter,
-                                shooterTilt),
-                        Commands.either(
-                                RobotCommands.targetSpeakerPodiumCommand(drivetrain, shooter, shooterTilt),
-                                RobotCommands.targetSpeakerOnTheMoveCommand(drivetrain, shooter, shooterTilt),
-                                GlobalStates.PODIUM_ONLY::enabled),
-                        GlobalStates.SUBWOOFER_ONLY::enabled));
-        joystick.triggerHardPress().and(joystick.flipTriggerIn().negate()).whileTrue(
-                Commands.either(
-                        intake.runRollersCommand(),
-                        RobotCommands.shootOnTheMoveCommand(drivetrain, intake, shooter, shooterTilt),
-                        new Trigger(GlobalStates.SUBWOOFER_ONLY::enabled).or(GlobalStates.PODIUM_ONLY::enabled)));
+                Commands.parallel(
+                        shooterTilt.moveToArbitraryPositionCommand(() -> DEMO_ANGLE.get()).asProxy(),
+                        shooter.spinAtVelocityCommand(() -> DEMO_RPS.get()).asProxy()));
+        joystick.triggerHardPress().and(joystick.flipTriggerIn().negate()).whileTrue(intake.runRollersCommand());
 
         joystick.flipTriggerIn().and(joystick.triggerSoftPress()).whileTrue(
                 RobotCommands.targetPassCommand(drivetrain, shooter, shooterTilt));
@@ -96,6 +105,17 @@ public class Controls {
 
     }
 
+    /**
+     * Configures operator controls on a Xbox controller. Contains manual overrides
+     * in case automated features stop working.
+     * 
+     * @param port        the port that the controller is connected to
+     * @param drivetrain  the drivetrain
+     * @param intake      the intake
+     * @param shooter     the shooter
+     * @param shooterTilt the shooter tilt
+     * @param climber     the climber
+     */
     public static void configureOperatorControls(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
             ShooterTilt shooterTilt, Climber climber) {
         CommandXboxController controller = new CommandXboxController(port);
@@ -130,6 +150,18 @@ public class Controls {
                         GlobalStates.INITIALIZED.enableCommand()).ignoringDisable(true));
     }
 
+    /**
+     * Configures secondary override control on a Xbox controller. Contains
+     * overrides for safeties and limits of mechanisms. Also contains a command to
+     * move the robot to a match-ready position.
+     * 
+     * @param port        the port that the controller is connected to
+     * @param drivetrain  the drivetrain
+     * @param intake      the intake
+     * @param shooter     the shooter
+     * @param shooterTilt the shooter tilt
+     * @param climber     the climber
+     */
     public static void configureOverridesControls(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
             ShooterTilt shooterTilt, Climber climber) {
         CommandXboxController controller = new CommandXboxController(port);
@@ -144,6 +176,17 @@ public class Controls {
                 .andThen(climber.moveToPositionCommand(() -> ClimberPosition.STOW).asProxy()));
     }
 
+    /**
+     * Configures controls for software testing on a Xbox controller. Allows for all
+     * SysId routines to be run for tuning.
+     * 
+     * @param port        the port that the controller is connected to
+     * @param drivetrain  the drivetrain
+     * @param intake      the intake
+     * @param shooter     the shooter
+     * @param shooterTilt the shooter tilt
+     * @param climber     the climber
+     */
     public static void configureTestingControls(int port, Drivetrain drivetrain, Intake intake, Shooter shooter,
             ShooterTilt shooterTilt, Climber climber) {
         CommandXboxController controller = new CommandXboxController(port);

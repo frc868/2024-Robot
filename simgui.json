@@ -2,7 +2,7 @@
   "HALProvider": {
     "Addressable LEDs": {
       "0": {
-        "columns": 42
+        "columns": 34
       },
       "window": {
         "visible": true
@@ -44,7 +44,8 @@
       "/HoundLog/commands/noteLift/resetPosition": "Command",
       "/HoundLog/commands/shooterTilt/resetPosition": "Command",
       "/HoundLog/subsystems/drivetrain/pigeonSendable": "Gyro",
-      "/SmartDashboard/VisionSystemSim-main/Sim Field": "Field2d"
+      "/SmartDashboard/VisionSystemSim-main/Sim Field": "Field2d",
+      "/unassigned": "String Chooser"
     },
     "windows": {
       "/HoundLog//wpilib/commandScheduler": {
@@ -127,12 +128,24 @@
   "NetworkTables": {
     "transitory": {
       "HoundLog": {
+        "Pose3d##v_/HoundLog//shootOnTheMovePose": {
+          "Rotation3d##v_rotation": {
+            "open": true
+          }
+        },
         "open": true,
         "subsystems": {
           "drivetrain": {
             "modules": {
+              "backLeft": {
+                "SwerveModuleState##v_/HoundLog/subsystems/drivetrain/modules/backLeft/state": {
+                  "open": true
+                },
+                "open": true
+              },
               "open": true
-            }
+            },
+            "open": true
           },
           "open": true,
           "shooterTilt": {
