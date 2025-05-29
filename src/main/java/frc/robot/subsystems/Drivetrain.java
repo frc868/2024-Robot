@@ -52,12 +52,12 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.Angle;
-import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.MutableMeasure;
-import edu.wpi.first.units.Velocity;
-import edu.wpi.first.units.Voltage;
+import edu.wpi.first.units.measure.Velocity;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Threads;
@@ -143,15 +143,15 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     private SwerveDriveOdometry simOdometry;
     private SwerveModulePosition[] lastModulePositions = getModulePositions();
 
-    private final MutableMeasure<Voltage> sysidDriveAppliedVoltageMeasure = mutable(Volts.of(0));
-    private final MutableMeasure<Distance> sysidDrivePositionMeasure = mutable(Meters.of(0));
-    private final MutableMeasure<Velocity<Distance>> sysidDriveVelocityMeasure = mutable(MetersPerSecond.of(0));
+    private final MutVoltage sysidDriveAppliedVoltageMeasure = mutable(Volts.of(0));
+    private final MutDistance sysidDrivePositionMeasure = mutable(Meters.of(0));
+    private final MutLinearVelocity sysidDriveVelocityMeasure = mutable(MetersPerSecond.of(0));
 
     private final SysIdRoutine sysIdDrive;
 
-    private final MutableMeasure<Voltage> sysidSteerAppliedVoltageMeasure = mutable(Volts.of(0));
-    private final MutableMeasure<Angle> sysidSteerPositionMeasure = mutable(Rotations.of(0));
-    private final MutableMeasure<Velocity<Angle>> sysidSteerVelocityMeasure = mutable(RotationsPerSecond.of(0));
+    private final MutVoltage sysidSteerAppliedVoltageMeasure = mutable(Volts.of(0));
+    private final MutAngle sysidSteerPositionMeasure = mutable(Rotations.of(0));
+    private final MutAngularVelocity sysidSteerVelocityMeasure = mutable(RotationsPerSecond.of(0));
 
     private final SysIdRoutine sysIdSteer;
 
@@ -239,7 +239,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
                 new SysIdRoutine.Config(null, Volts.of(3), null,
                         (state) -> SignalLogger.writeString("sysid_state", state.toString())),
                 new SysIdRoutine.Mechanism(
-                        (Measure<Voltage> volts) -> {
+                        (Voltage volts) -> {
                             drive(new ChassisSpeeds(
                                     SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND * volts.magnitude() / 12.0,
                                     0,
@@ -280,7 +280,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
         sysIdSteer = new SysIdRoutine(
                 new SysIdRoutine.Config(),
                 new SysIdRoutine.Mechanism(
-                        (Measure<Voltage> volts) -> {
+                        (Voltage volts) -> {
                             drive(new ChassisSpeeds(
                                     SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND * volts.magnitude() /
                                             12.0,

@@ -19,11 +19,11 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.units.Angle;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.MutableMeasure;
-import edu.wpi.first.units.Velocity;
-import edu.wpi.first.units.Voltage;
+import edu.wpi.first.units.measure.Velocity;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.DIOSim;
@@ -105,9 +105,9 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
 
     private double simVelocity = 0.0;
 
-    private final MutableMeasure<Voltage> sysidAppliedVoltageMeasure = MutableMeasure.mutable(Volts.of(0));
-    private final MutableMeasure<Angle> sysidPositionMeasure = MutableMeasure.mutable(Radians.of(0));
-    private final MutableMeasure<Velocity<Angle>> sysidVelocityMeasure = MutableMeasure.mutable(RadiansPerSecond.of(0));
+    private final MutVoltage sysidAppliedVoltageMeasure = MutableMeasure.mutable(Volts.of(0));
+    private final MutAngle sysidPositionMeasure = MutableMeasure.mutable(Radians.of(0));
+    private final MutAngularVelocity sysidVelocityMeasure = MutableMeasure.mutable(RadiansPerSecond.of(0));
 
     private final SysIdRoutine sysIdRoutine;
 
@@ -161,7 +161,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
         sysIdRoutine = new SysIdRoutine(
                 new SysIdRoutine.Config(Volts.of(1).per(Seconds.of(1)), Volts.of(3), null, null),
                 new SysIdRoutine.Mechanism(
-                        (Measure<Voltage> volts) -> setVoltage(volts.magnitude()),
+                        (Voltage volts) -> setVoltage(volts.magnitude()),
                         log -> {
                             log.motor("primary")
                                     .voltage(sysidAppliedVoltageMeasure.mut_replace(leftArmMotor.getAppliedOutput(),

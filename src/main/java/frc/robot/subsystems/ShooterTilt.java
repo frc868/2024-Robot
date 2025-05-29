@@ -21,11 +21,11 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.MutableMeasure;
-import edu.wpi.first.units.Velocity;
-import edu.wpi.first.units.Voltage;
+import edu.wpi.first.units.measure.Velocity;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -83,9 +83,9 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
 
     private double simVelocity = 0.0;
 
-    private final MutableMeasure<Voltage> sysidAppliedVoltageMeasure = MutableMeasure.mutable(Volts.of(0));
-    private final MutableMeasure<Distance> sysidPositionMeasure = MutableMeasure.mutable(Meters.of(0));
-    private final MutableMeasure<Velocity<Distance>> sysidVelocityMeasure = MutableMeasure
+    private final MutVoltage sysidAppliedVoltageMeasure = MutableMeasure.mutable(Volts.of(0));
+    private final MutDistance sysidPositionMeasure = MutableMeasure.mutable(Meters.of(0));
+    private final MutLinearVelocity sysidVelocityMeasure = MutableMeasure
             .mutable(MetersPerSecond.of(0));
 
     private final SysIdRoutine sysIdRoutine;
@@ -110,7 +110,7 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
         sysIdRoutine = new SysIdRoutine(
                 new SysIdRoutine.Config(),
                 new SysIdRoutine.Mechanism(
-                        (Measure<Voltage> volts) -> setVoltage(volts.magnitude()),
+                        (Voltage volts) -> setVoltage(volts.magnitude()),
                         log -> {
                             log.motor("primary")
                                     .voltage(sysidAppliedVoltageMeasure.mut_replace(motor.getAppliedOutput(), Volts))

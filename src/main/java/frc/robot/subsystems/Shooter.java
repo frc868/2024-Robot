@@ -23,11 +23,11 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.units.Angle;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.MutableMeasure;
-import edu.wpi.first.units.Velocity;
-import edu.wpi.first.units.Voltage;
+import edu.wpi.first.units.measure.Velocity;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -77,9 +77,9 @@ public class Shooter extends SubsystemBase implements BaseShooter {
 
     private double simVelocity = 0.0;
 
-    private final MutableMeasure<Voltage> sysidAppliedVoltageMeasure = MutableMeasure.mutable(Volts.of(0));
-    private final MutableMeasure<Angle> sysidPositionMeasure = MutableMeasure.mutable(Rotations.of(0));
-    private final MutableMeasure<Velocity<Angle>> sysidVelocityMeasure = MutableMeasure
+    private final MutVoltage sysidAppliedVoltageMeasure = MutableMeasure.mutable(Volts.of(0));
+    private final MutAngle sysidPositionMeasure = MutableMeasure.mutable(Rotations.of(0));
+    private final MutAngularVelocity sysidVelocityMeasure = MutableMeasure
             .mutable(RotationsPerSecond.of(0));
 
     private final SysIdRoutine sysIdRoutine;
@@ -104,7 +104,7 @@ public class Shooter extends SubsystemBase implements BaseShooter {
         sysIdRoutine = new SysIdRoutine(
                 new SysIdRoutine.Config(),
                 new SysIdRoutine.Mechanism(
-                        (Measure<Voltage> volts) -> setVoltage(volts.magnitude()),
+                        (Voltage volts) -> setVoltage(volts.magnitude()),
                         log -> {
                             log.motor("left")
                                     .voltage(sysidAppliedVoltageMeasure.mut_replace(leftMotor.getAppliedOutput(),
