@@ -97,7 +97,7 @@ public class Climber extends SubsystemBase implements BaseLinearMechanism<Climbe
     @Log
     private SparkFlex motor;
 
-    private SparkFlexConfig motorConfig;
+    private SparkFlexConfig motorConfig = new SparkFlexConfig();
 
     @Log(groups = "control")
     private ProfiledPIDController pidController = new ProfiledPIDController(kP, kI, kD, MOVEMENT_CONSTRAINTS);
