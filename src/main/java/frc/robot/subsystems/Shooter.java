@@ -1,8 +1,11 @@
 package frc.robot.subsystems;
 
-import com.revrobotics.CANSparkFlex;
-import com.revrobotics.CANSparkBase.IdleMode;
-import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import com.techhounds.houndutil.houndauto.Reflector;
 import com.techhounds.houndutil.houndlib.SparkConfigurator;
 import com.techhounds.houndutil.houndlib.subsystems.BaseShooter;
@@ -24,6 +27,9 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.MutAngle;
+import edu.wpi.first.units.measure.MutAngularVelocity;
+import edu.wpi.first.units.measure.MutVoltage;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.MutableMeasure;
 import edu.wpi.first.units.measure.Velocity;
@@ -46,11 +52,11 @@ import frc.robot.GlobalStates;
 @LoggedObject
 public class Shooter extends SubsystemBase implements BaseShooter {
     @Log
-    private final CANSparkFlex leftMotor;
-
+    private final SparkFlex leftMotor;
+    private SparkFlexConfig leftMotorConfig = new SparkFlexConfig();
     @Log
-    private final CANSparkFlex rightMotor;
-
+    private final SparkFlex rightMotor;
+    private SparkFlexConfig rightMotorConfig = new SparkFlexConfig();
     @Log(groups = "control")
     private final PIDController leftPidController = new PIDController(left_kP, left_kI, left_kD);
     @Log(groups = "control")
@@ -77,29 +83,35 @@ public class Shooter extends SubsystemBase implements BaseShooter {
 
     private double simVelocity = 0.0;
 
-    private final MutVoltage sysidAppliedVoltageMeasure = MutableMeasure.mutable(Volts.of(0));
-    private final MutAngle sysidPositionMeasure = MutableMeasure.mutable(Rotations.of(0));
-    private final MutAngularVelocity sysidVelocityMeasure = MutableMeasure
-            .mutable(RotationsPerSecond.of(0));
+    private final MutVoltage sysidAppliedVoltageMeasure = Volts.mutable(0);
+    private final MutAngle sysidPositionMeasure = Rotations.mutable(0);
+    private final MutAngularVelocity sysidVelocityMeasure = RotationsPerSecond.mutable(0);
 
     private final SysIdRoutine sysIdRoutine;
 
     public Shooter() {
-        leftMotor = SparkConfigurator.createSparkFlex(LEFT_MOTOR_ID, MotorType.kBrushless, true,
-                (s) -> s.setIdleMode(IdleMode.kCoast),
-                (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
-                (s) -> s.getEncoder().setPositionConversionFactor(1.0),
-                (s) -> s.getEncoder().setVelocityConversionFactor(1.0 / 60.0),
-                (s) -> s.getEncoder().setAverageDepth(2),
-                (s) -> s.getEncoder().setMeasurementPeriod(16));
+        leftMotorConfig
+            .inverted(true)
+            .idleMode(IdleMode.kCoast)
+            .smartCurrentLimit(CURRENT_LIMIT)
+            .encoder
+                .positionConversionFactor(1.0)
+                .velocityConversionFactor(1.0/60.0)
+                .quadratureAverageDepth(2)
+                .quadratureMeasurementPeriod(16);
+        leftMotor.configure(leftMotorConfig,ResetMode.kResetSafeParameters,PersistMode.kPersistParameters);
 
-        rightMotor = SparkConfigurator.createSparkFlex(RIGHT_MOTOR_ID, MotorType.kBrushless, true,
-                (s) -> s.setIdleMode(IdleMode.kCoast),
-                (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
-                (s) -> s.getEncoder().setPositionConversionFactor(1.0),
-                (s) -> s.getEncoder().setVelocityConversionFactor(1.0 / 60.0),
-                (s) -> s.getEncoder().setAverageDepth(2),
-                (s) -> s.getEncoder().setMeasurementPeriod(16));
+        rightMotorConfig
+            .inverted(true)
+            .idleMode(IdleMode.kCoast)
+            .smartCurrentLimit(CURRENT_LIMIT)
+            .encoder
+                .positionConversionFactor(1.0)
+                .velocityConversionFactor(1.0/60.0)
+                .quadratureAverageDepth(2)
+                .quadratureMeasurementPeriod(16);
+        rightMotor.configure(rightMotorConfig,ResetMode.kResetSafeParameters,PersistMode.kPersistParameters);
+
 
         sysIdRoutine = new SysIdRoutine(
                 new SysIdRoutine.Config(),
@@ -264,12 +276,20 @@ public class Shooter extends SubsystemBase implements BaseShooter {
     public Command coastMotorsCommand() {
         return runOnce(() -> leftMotor.stopMotor())
                 .andThen(() -> {
-                    leftMotor.setIdleMode(IdleMode.kCoast);
-                    rightMotor.setIdleMode(IdleMode.kCoast);
+                    leftMotorConfig
+                        .idleMode(IdleMode.kCoast);
+                    leftMotor.configure(leftMotorConfig, ResetMode.kNoResetSafeParameters,PersistMode.kNoPersistParameters);
+                    rightMotorConfig
+                        .idleMode(IdleMode.kCoast);
+                    rightMotor.configure(rightMotorConfig, ResetMode.kNoResetSafeParameters,PersistMode.kNoPersistParameters);
                 })
                 .finallyDo((d) -> {
-                    leftMotor.setIdleMode(IdleMode.kBrake);
-                    rightMotor.setIdleMode(IdleMode.kBrake);
+                    leftMotorConfig
+                        .idleMode(IdleMode.kBrake);
+                    leftMotor.configure(leftMotorConfig, ResetMode.kNoResetSafeParameters,PersistMode.kNoPersistParameters);
+                    rightMotorConfig
+                        .idleMode(IdleMode.kBrake);
+                    rightMotor.configure(rightMotorConfig, ResetMode.kNoResetSafeParameters,PersistMode.kNoPersistParameters);
                 }).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
                 .withName("shooter.coastMotors");
     }
