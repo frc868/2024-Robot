@@ -82,6 +82,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
 
         public static final DCMotor MOTOR_GEARBOX_REPR = DCMotor.getNeoVortex(2);
         public static final double GEARING = 43.2;
+        public static final boolean INVERTED = true;
         public static final double LENGTH_METERS = 0.23;
         public static final double MASS_KG = 4.082;
         public static final double MOMENT_OF_INERTIA_KG_METERS_SQUARED = SingleJointedArmSim.estimateMOI(
@@ -212,7 +213,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
 
         leftArmMotor = new SparkFlex(PRIMARY_ARM_MOTOR_ID, MotorType.kBrushless);
         leftArmMotorConfig
-            .inverted(true)
+            .inverted(INVERTED)
             .idleMode(IdleMode.kBrake)
             .smartCurrentLimit(ARM_CURRENT_LIMIT)
             .encoder
@@ -222,10 +223,10 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
 
         rightArmMotor = new SparkFlex(SECONDARY_ARM_MOTOR_ID, MotorType.kBrushless);
         rightArmMotorConfig
-            .inverted(true)
+            .inverted(INVERTED)
             .idleMode(IdleMode.kBrake)
             .smartCurrentLimit(ARM_CURRENT_LIMIT)
-            .follow(leftArmMotor, true);
+            .follow(leftArmMotor, INVERTED);
 
         rollerMotor = new SparkFlex(ROLLER_MOTOR_ID, MotorType.kBrushless);
         rollerMotorConfig

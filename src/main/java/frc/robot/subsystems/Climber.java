@@ -67,6 +67,7 @@ public class Climber extends SubsystemBase implements BaseLinearMechanism<Climbe
 
         public static final DCMotor MOTOR_GEARBOX_REPR = DCMotor.getNeoVortex(1);
         public static final double GEARING = 36;
+        public static final boolean INVERTED = true;
         public static final double CARRIAGE_MASS_KG = Units.lbsToKilograms(3);
         public static final double DRUM_RADIUS_METERS = Units.inchesToMeters(0.75);
         public static final double WHEEL_CIRCUMFERENCE = 2.0 * Math.PI * DRUM_RADIUS_METERS;
@@ -137,7 +138,7 @@ public class Climber extends SubsystemBase implements BaseLinearMechanism<Climbe
 
         motorConfig
             .idleMode(IdleMode.kBrake)
-            .inverted(true)
+            .inverted(INVERTED)
             .smartCurrentLimit(CURRENT_LIMIT)
             .encoder
                 .positionConversionFactor(ENCODER_ROTATIONS_TO_METERS)
