@@ -27,10 +27,12 @@ import com.techhounds.houndutil.houndlib.ChassisAccelerations;
 import com.techhounds.houndutil.houndlib.MotorHoldMode;
 import com.techhounds.houndutil.houndlib.ShootOnTheFlyCalculator;
 import com.techhounds.houndutil.houndlib.subsystems.BaseSwerveDrive;
+import com.techhounds.houndutil.houndlib.swerve.CoaxialSwerveModule.SwerveConstants;
 import com.techhounds.houndutil.houndlib.swerve.KrakenCoaxialSwerveModule;
 import com.techhounds.houndutil.houndlog.annotations.Log;
 import com.techhounds.houndutil.houndlog.annotations.LoggedObject;
 import com.techhounds.houndutil.houndlog.annotations.SendableLog;
+import com.techhounds.houndutil.houndlog.loggers.TunableDouble;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
@@ -52,6 +54,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.MutAngle;
@@ -76,7 +79,8 @@ import frc.robot.Constants;
 import frc.robot.FieldConstants;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 
-import static frc.robot.Constants.Drivetrain.*;
+import static frc.robot.subsystems.Drivetrain.Constants.*;
+import frc.robot.Constants.Shooter.*;
 import static frc.robot.Constants.Teleop.*;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
@@ -90,6 +94,135 @@ import static edu.wpi.first.units.Units.Volts;
  */
 @LoggedObject
 public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
+    public static final class Constants {
+        /** Music tracks that are able to be played with CTRE motor controllers. */
+        public static enum MusicTrack {
+            IMPERIAL_MARCH("imperial_march.chrp"),
+            MEGALOVANIA("megalovania.chrp"),
+            NATIONAL_ANTHEM("national_anthem.chrp"),
+            SHAKE_IT_OFF("shake_it_off.chrp");
+
+            private MusicTrack(String filename) {
+                this.filename = filename;
+            }
+
+            public final String filename;
+        }
+
+        public static final int FRONT_LEFT_DRIVE_MOTOR_ID = 1;
+        public static final int FRONT_LEFT_STEER_MOTOR_ID = 2;
+        public static final int FRONT_RIGHT_DRIVE_MOTOR_ID = 3;
+        public static final int FRONT_RIGHT_STEER_MOTOR_ID = 4;
+        public static final int BACK_LEFT_DRIVE_MOTOR_ID = 5;
+        public static final int BACK_LEFT_STEER_MOTOR_ID = 6;
+        public static final int BACK_RIGHT_DRIVE_MOTOR_ID = 7;
+        public static final int BACK_RIGHT_STEER_MOTOR_ID = 8;
+
+        public static final int FRONT_LEFT_STEER_ENCODER_ID = 0;
+        public static final int FRONT_RIGHT_STEER_ENCODER_ID = 1;
+        public static final int BACK_LEFT_STEER_ENCODER_ID = 2;
+        public static final int BACK_RIGHT_STEER_ENCODER_ID = 3;
+
+        public static final String CAN_BUS_NAME = "canivore";
+
+        public static final int PIGEON_ID = 0;
+
+        public static final TunableDouble DEMO_SPEED = new TunableDouble("subsystems/drivetrain/DEMO_SPEED", 1.0);
+
+        public static final boolean DRIVE_MOTORS_INVERTED = false;
+        public static final boolean STEER_MOTORS_INVERTED = true;
+        public static final boolean STEER_CANCODERS_INVERTED = RobotBase.isReal() ? false : true;
+
+        // 2/17/24
+        public static final double FRONT_LEFT_OFFSET = 0.4521484375;
+        public static final double FRONT_RIGHT_OFFSET = -0.1857910156;
+        public static final double BACK_LEFT_OFFSET = 0.242919921875;
+        public static final double BACK_RIGHT_OFFSET = 0.495046875;
+
+        /** Distance between left and right wheels. */
+        public static final double TRACK_WIDTH_METERS = 0.527;
+        /** Distance between front and back wheels. */
+        public static final double WHEEL_BASE_METERS = 0.527;
+        /** Distance between the center of the robot and the */
+        public static final double DRIVE_BASE_RADIUS_METERS = 0.3727;
+
+        public static final SwerveConstants SWERVE_CONSTANTS = new SwerveConstants();
+        static {
+            // 2/24/24
+            SWERVE_CONSTANTS.DRIVE_kP = 0.84992;
+            SWERVE_CONSTANTS.DRIVE_kI = 0.0;
+            SWERVE_CONSTANTS.DRIVE_kD = 0.0;
+            SWERVE_CONSTANTS.DRIVE_kS = 0.2368;
+            SWERVE_CONSTANTS.DRIVE_kV = 0.67229;
+            SWERVE_CONSTANTS.DRIVE_kA = 0.080151;
+            SWERVE_CONSTANTS.STEER_kP = 100.0;
+            SWERVE_CONSTANTS.STEER_kI = 0.0;
+            SWERVE_CONSTANTS.STEER_kD = 1.0;
+            SWERVE_CONSTANTS.STEER_kS = 0;
+            SWERVE_CONSTANTS.STEER_kV = 0;
+            SWERVE_CONSTANTS.STEER_kA = 0;
+
+            SWERVE_CONSTANTS.DRIVE_GEARING = 5.357;
+            SWERVE_CONSTANTS.STEER_GEARING = 150.0 / 7.0;
+            SWERVE_CONSTANTS.COUPLING_RATIO = 50.0 / 16.0;
+            SWERVE_CONSTANTS.WHEEL_CIRCUMFERENCE = 2.0 * Math.PI * 0.0491630791391;
+            SWERVE_CONSTANTS.DRIVE_ENCODER_ROTATIONS_TO_METERS = SWERVE_CONSTANTS.WHEEL_CIRCUMFERENCE
+                    / SWERVE_CONSTANTS.DRIVE_GEARING;
+            SWERVE_CONSTANTS.STEER_ENCODER_ROTATIONS_TO_RADIANS = 2 * Math.PI
+                    / SWERVE_CONSTANTS.STEER_GEARING;
+
+            SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND = 4.54;
+            SWERVE_CONSTANTS.MAX_DRIVING_ACCELERATION_METERS_PER_SECOND_SQUARED = 8;
+            SWERVE_CONSTANTS.MAX_STEER_VELOCITY_RADIANS_PER_SECOND = 100 * 2 * Math.PI;
+            // max velocity in 1/10 sec
+            SWERVE_CONSTANTS.MAX_STEER_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 10 * 100 * 2 * Math.PI;
+
+            SWERVE_CONSTANTS.DRIVE_CURRENT_LIMIT = 100;
+            SWERVE_CONSTANTS.STEER_CURRENT_LIMIT = 30;
+            SWERVE_CONSTANTS.DRIVE_GEARBOX_REPR = DCMotor.getKrakenX60(1);
+            SWERVE_CONSTANTS.STEER_GEARBOX_REPR = DCMotor.getKrakenX60(1);
+            SWERVE_CONSTANTS.DRIVE_MOI = 0.01;
+            SWERVE_CONSTANTS.STEER_MOI = 0.025;
+        }
+
+        public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = 10;
+        public static final double MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 30;
+
+        public static final Translation2d[] SWERVE_MODULE_LOCATIONS = new Translation2d[] {
+                new Translation2d(WHEEL_BASE_METERS / 2, TRACK_WIDTH_METERS / 2),
+                new Translation2d(WHEEL_BASE_METERS / 2, -TRACK_WIDTH_METERS / 2),
+                new Translation2d(-WHEEL_BASE_METERS / 2, TRACK_WIDTH_METERS / 2),
+                new Translation2d(-WHEEL_BASE_METERS / 2, -TRACK_WIDTH_METERS / 2) };
+
+        public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(
+                SWERVE_MODULE_LOCATIONS[0],
+                SWERVE_MODULE_LOCATIONS[1],
+                SWERVE_MODULE_LOCATIONS[2],
+                SWERVE_MODULE_LOCATIONS[3]);
+
+        public static final double PATH_FOLLOWING_TRANSLATION_kP = 8.0;
+        public static final double PATH_FOLLOWING_ROTATION_kP = 8.0;
+
+        public static final double XY_kP = 1.4;
+        public static final double XY_kI = 0;
+        public static final double XY_kD = 0.05;
+        public static final TrapezoidProfile.Constraints XY_CONSTRAINTS = new TrapezoidProfile.Constraints(
+                SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND,
+                SWERVE_CONSTANTS.MAX_DRIVING_ACCELERATION_METERS_PER_SECOND_SQUARED);
+
+        public static final double THETA_kP = 1.3;
+        public static final double THETA_kI = 0;
+        public static final double THETA_kD = 0.05;
+        public static final TrapezoidProfile.Constraints THETA_CONSTRAINTS = new TrapezoidProfile.Constraints(
+                MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+                MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED);
+
+        public static final double MASS_KG = Units.lbsToKilograms(125);
+        public static final double MOI = 6.0;
+        public static final double WHEEL_RADIUS_METERS = Units.inchesToMeters(2);
+        public static final double WHEEL_COF = 1.3;
+    }
+
     @Log(groups = "modules")
     private final KrakenCoaxialSwerveModule frontLeft = new KrakenCoaxialSwerveModule(
             FRONT_LEFT_DRIVE_MOTOR_ID,
@@ -1176,8 +1309,8 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
         return ShootOnTheFlyCalculator.calculateEffectiveTargetLocation(
                 getPose(), FieldConstants.SPEAKER_TARGET,
                 getFieldRelativeSpeeds(), getFieldRelativeAccelerations(),
-                (d) -> Constants.Shooter.getProjectileSpeed(d),
-                Constants.Shooter.GOAL_POSITION_ITERATIONS, Constants.Shooter.ACCELERATION_COMPENSATION_FACTOR);
+                (d) -> frc.robot.Constants.Shooter.getProjectileSpeed(d),
+                frc.robot.Constants.Shooter.GOAL_POSITION_ITERATIONS, frc.robot.Constants.Shooter.ACCELERATION_COMPENSATION_FACTOR); // TODO chance to constants in Shooter.java once moved
     }
 
     public boolean getInitialized() {
