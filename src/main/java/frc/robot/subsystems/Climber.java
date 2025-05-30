@@ -137,6 +137,7 @@ public class Climber extends SubsystemBase implements BaseLinearMechanism<Climbe
 
         motorConfig
             .idleMode(IdleMode.kBrake)
+            .inverted(true)
             .smartCurrentLimit(CURRENT_LIMIT)
             .encoder
                 .positionConversionFactor(ENCODER_ROTATIONS_TO_METERS)
