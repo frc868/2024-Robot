@@ -1,9 +1,9 @@
 package frc.robot;
 
-import static frc.robot.Constants.Drivetrain.DEMO_SPEED;
-import static frc.robot.Constants.Shooter.DEMO_RPS;
-import static frc.robot.Constants.Shooter.PODIUM_RPS;
-import static frc.robot.Constants.ShooterTilt.DEMO_ANGLE;
+import static frc.robot.Constants.Drivetrain.DEMO_SPEED; //TODO
+import static frc.robot.Constants.Shooter.DEMO_RPS; //TODO
+import static frc.robot.Constants.Shooter.PODIUM_RPS; //TODO
+import static frc.robot.Constants.ShooterTilt.DEMO_ANGLE; //TODO
 
 import com.techhounds.houndutil.houndlib.oi.CommandVirpilJoystick;
 
@@ -11,9 +11,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.Constants.Climber.ClimberPosition;
-import frc.robot.Constants.Intake.IntakePosition;
-import frc.robot.Constants.ShooterTilt.ShooterTiltPosition;
+import frc.robot.subsystems.Climber.Constants.ClimberPosition;
+import frc.robot.subsystems.Intake.Constants.IntakePosition;
+import frc.robot.Constants.ShooterTilt.ShooterTiltPosition; //TODO
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Intake;

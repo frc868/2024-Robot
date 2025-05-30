@@ -5,7 +5,6 @@ import com.techhounds.houndutil.houndauto.AutoManager;
 import com.techhounds.houndutil.houndauto.Reflector;
 import com.techhounds.houndutil.houndlib.PositionTracker;
 import com.techhounds.houndutil.houndlib.ShootOnTheFlyCalculator;
-import com.techhounds.houndutil.houndlib.SparkConfigurator;
 import com.techhounds.houndutil.houndlog.LogProfiles;
 import com.techhounds.houndutil.houndlog.LoggingManager;
 import com.techhounds.houndutil.houndlog.annotations.Log;
@@ -33,9 +32,9 @@ import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterTilt;
 import frc.robot.subsystems.Vision;
 import frc.robot.subsystems.LEDs.LEDState;
-import static frc.robot.Constants.Drivetrain.DEMO_SPEED;
-import static frc.robot.Constants.Shooter.DEMO_RPS;
-import static frc.robot.Constants.ShooterTilt.DEMO_ANGLE;
+import static frc.robot.Constants.Drivetrain.DEMO_SPEED; //TODO
+import static frc.robot.Constants.Shooter.DEMO_RPS; //TODO
+import static frc.robot.Constants.ShooterTilt.DEMO_ANGLE; //TODO
 
 import java.util.ArrayList;
 import java.util.function.Supplier;
@@ -143,7 +142,6 @@ public class RobotContainer {
         positionTracker.addPositionSupplier("shooterTilt", shooterTilt::getAngle);
         positionTracker.addPositionSupplier("climber", climber::getPosition);
 
-        SparkConfigurator.safeBurnFlash();
         DataLogManager.logNetworkTables(true);
         DriverStation.startDataLog(DataLogManager.getLog());
         DataLogManager.start();

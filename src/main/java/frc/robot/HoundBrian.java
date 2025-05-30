@@ -1,6 +1,6 @@
 package frc.robot;
 
-import static frc.robot.Constants.HoundBrian.*;
+import static frc.robot.HoundBrian.Constants.*;
 
 import com.techhounds.houndutil.houndlog.annotations.Log;
 import com.techhounds.houndutil.houndlog.annotations.LoggedObject;
@@ -21,6 +21,15 @@ import frc.robot.subsystems.ShooterTilt;
  */
 @LoggedObject
 public class HoundBrian {
+    public static final class Constants {
+        public static final int BUTTON_1 = 3;
+        public static final int BUTTON_2 = 4;
+        public static final int BUTTON_3 = 5;
+        public static final int BUTTON_4 = 6;
+        public static final int BUTTON_5 = 7;
+        public static final int BUTTON_6 = 8;
+        public static final int BUTTON_7 = 9;
+    }
     @Log
     private final DigitalInput drivetrainButton = new DigitalInput(BUTTON_1);
     @Log
