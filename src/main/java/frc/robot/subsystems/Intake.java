@@ -2,11 +2,13 @@ package frc.robot.subsystems;
 
 import java.util.function.Supplier;
 
-import com.revrobotics.CANSparkBase.IdleMode;
-import com.revrobotics.CANSparkFlex;
-import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import com.techhounds.houndutil.houndlib.PositionTracker;
-import com.techhounds.houndutil.houndlib.SparkConfigurator;
 import com.techhounds.houndutil.houndlib.Utils;
 import com.techhounds.houndutil.houndlib.subsystems.BaseIntake;
 import com.techhounds.houndutil.houndlib.subsystems.BaseSingleJointedArm;
@@ -19,10 +21,12 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.MutableMeasure;
-import edu.wpi.first.units.measure.Velocity;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.MutAngle;
+import edu.wpi.first.units.measure.MutAngularVelocity;
+import edu.wpi.first.units.measure.MutVoltage;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -35,13 +39,11 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.GlobalStates;
-import frc.robot.Constants.Intake.IntakePosition;
-import static frc.robot.Constants.Intake.*;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
-
+import static frc.robot.subsystems.Intake.Constants.*;
 /**
  * The Intake subsystem, which pulls in a note and can be sent to a shooter or
  * can be used to score the amp. Handles sensing the position of the note in the
@@ -49,16 +51,80 @@ import static edu.wpi.first.units.Units.Volts;
  * 
  * @author rb, jq, ak
  */
+
 @LoggedObject
 public class Intake extends SubsystemBase implements BaseSingleJointedArm<IntakePosition>, BaseIntake {
-    @Log
-    private final CANSparkFlex leftArmMotor;
-    @Log
-    private final CANSparkFlex rightArmMotor;
+    public static final class Constants {
+        // RANGE OF MOTION: 2.301
 
-    @Log
-    private final CANSparkFlex rollerMotor;
+        // 2/15/24
+        public static enum IntakePosition {
+            GROUND(-0.617905),
+            AMP(1.18),
+            STOW(0.984),
+            SOURCE(1.44),
+            TOP(1.691);
 
+            public final double value;
+
+            private IntakePosition(double value) {
+                this.value = value;
+            }
+        }
+
+        public static final int PRIMARY_ARM_MOTOR_ID = 9;
+        public static final int SECONDARY_ARM_MOTOR_ID = 10;
+        public static final int ROLLER_MOTOR_ID = 13;
+
+        public static final int SHOOTER_CLOSE_BEAM_ID = 0;
+        public static final int SHOOTER_FAR_BEAM_ID = 1;
+        public static final int INTAKE_BEAM_ID = 2;
+
+        public static final DCMotor MOTOR_GEARBOX_REPR = DCMotor.getNeoVortex(2);
+        public static final double GEARING = 43.2;
+        public static final double LENGTH_METERS = 0.23;
+        public static final double MASS_KG = 4.082;
+        public static final double MOMENT_OF_INERTIA_KG_METERS_SQUARED = SingleJointedArmSim.estimateMOI(
+                LENGTH_METERS,
+                MASS_KG);
+
+        public static final double MIN_ANGLE_RADIANS = -0.610;
+        public static final double MAX_ANGLE_RADIANS = 1.691;
+
+        public static final double ENCODER_ROTATIONS_TO_RADIANS = 2 * Math.PI / GEARING;
+        public static final int ARM_CURRENT_LIMIT = 30;
+        public static final int ROLLER_CURRENT_LIMIT = 65;
+
+        // 3/28/24
+        public static final double kP = 3.5;
+        public static final double kI = 0.0;
+        public static final double kD = 0.1;
+        public static final double kS = 0.132468;
+        public static final double kG = 0.273264;
+        public static final double kV = 0.77622;
+        public static final double kA = 0;
+        public static final double TOLERANCE = 0.05;
+
+        // max theoretical velocity: 15.777 rad/s
+        // 2/14/24
+        public static final double MAX_VELOCITY_RADIANS_PER_SECOND = 7;
+        public static final double MAX_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 14;
+        public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
+                MAX_VELOCITY_RADIANS_PER_SECOND, MAX_ACCELERATION_RADIANS_PER_SECOND_SQUARED);
+
+        public static final Pose3d BASE_COMPONENT_POSE = new Pose3d(-0.19, 0, 0.299,
+                new Rotation3d(0, -Units.degreesToRadians(35), Math.PI));
+
+    }
+    @Log
+    private final SparkFlex leftArmMotor;
+    private SparkFlexConfig leftArmMotorConfig = new SparkFlexConfig();
+    @Log
+    private final SparkFlex rightArmMotor;
+    private SparkFlexConfig rightArmMotorConfig = new SparkFlexConfig();
+    @Log
+    private final SparkFlex rollerMotor;
+    private SparkFlexConfig rollerMotorConfig = new SparkFlexConfig();
     /**
      * The beam sensor within the entrance to the intake (1st beam passed by a
      * note).
@@ -105,9 +171,9 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
 
     private double simVelocity = 0.0;
 
-    private final MutVoltage sysidAppliedVoltageMeasure = MutableMeasure.mutable(Volts.of(0));
-    private final MutAngle sysidPositionMeasure = MutableMeasure.mutable(Radians.of(0));
-    private final MutAngularVelocity sysidVelocityMeasure = MutableMeasure.mutable(RadiansPerSecond.of(0));
+    private final MutVoltage sysidAppliedVoltageMeasure = Volts.mutable(0);
+    private final MutAngle sysidPositionMeasure = Radians.mutable(0);
+    private final MutAngularVelocity sysidVelocityMeasure = RadiansPerSecond.mutable(0);
 
     private final SysIdRoutine sysIdRoutine;
 
@@ -143,23 +209,32 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
     private PositionTracker positionTracker;
 
     public Intake(PositionTracker positionTracker) {
-        leftArmMotor = SparkConfigurator.createSparkFlex(PRIMARY_ARM_MOTOR_ID, MotorType.kBrushless, true,
-                (s) -> s.setIdleMode(IdleMode.kBrake),
-                (s) -> s.setSmartCurrentLimit(ARM_CURRENT_LIMIT),
-                (s) -> s.getEncoder().setPositionConversionFactor(ENCODER_ROTATIONS_TO_RADIANS),
-                (s) -> s.getEncoder().setVelocityConversionFactor(ENCODER_ROTATIONS_TO_RADIANS / 60.0));
 
-        rightArmMotor = SparkConfigurator.createSparkFlex(SECONDARY_ARM_MOTOR_ID, MotorType.kBrushless, true,
-                (s) -> s.setIdleMode(IdleMode.kBrake),
-                (s) -> s.setSmartCurrentLimit(ARM_CURRENT_LIMIT),
-                (s) -> s.follow(leftArmMotor, true));
+        leftArmMotor = new SparkFlex(PRIMARY_ARM_MOTOR_ID, MotorType.kBrushless);
+        leftArmMotorConfig
+            .inverted(true)
+            .idleMode(IdleMode.kBrake)
+            .smartCurrentLimit(ARM_CURRENT_LIMIT)
+            .encoder
+                .positionConversionFactor(ENCODER_ROTATIONS_TO_RADIANS)
+                .velocityConversionFactor(ENCODER_ROTATIONS_TO_RADIANS / 60.0);
+        leftArmMotor.configure(leftArmMotorConfig,ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-        rollerMotor = SparkConfigurator.createSparkFlex(ROLLER_MOTOR_ID, MotorType.kBrushless, true,
-                (s) -> s.setIdleMode(IdleMode.kBrake),
-                (s) -> s.setSmartCurrentLimit(ROLLER_CURRENT_LIMIT));
+        rightArmMotor = new SparkFlex(SECONDARY_ARM_MOTOR_ID, MotorType.kBrushless);
+        rightArmMotorConfig
+            .inverted(true)
+            .idleMode(IdleMode.kBrake)
+            .smartCurrentLimit(ARM_CURRENT_LIMIT)
+            .follow(leftArmMotor, true);
+
+        rollerMotor = new SparkFlex(ROLLER_MOTOR_ID, MotorType.kBrushless);
+        rollerMotorConfig
+            .inverted(true)
+            .idleMode(IdleMode.kBrake)
+            .smartCurrentLimit(ROLLER_CURRENT_LIMIT);
 
         sysIdRoutine = new SysIdRoutine(
-                new SysIdRoutine.Config(Volts.of(1).per(Seconds.of(1)), Volts.of(3), null, null),
+                new SysIdRoutine.Config(Volts.of(1).per(Seconds), Volts.of(3), null, null),
                 new SysIdRoutine.Mechanism(
                         (Voltage volts) -> setVoltage(volts.magnitude()),
                         log -> {
@@ -318,12 +393,21 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
     public Command coastMotorsCommand() {
         return runOnce(() -> leftArmMotor.stopMotor())
                 .andThen(() -> {
-                    leftArmMotor.setIdleMode(IdleMode.kCoast);
-                    rightArmMotor.setIdleMode(IdleMode.kCoast);
+                    leftArmMotorConfig
+                        .idleMode(IdleMode.kCoast);
+                    leftArmMotor.configure(leftArmMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+                    rightArmMotorConfig
+                        .idleMode(IdleMode.kCoast);
+                    rightArmMotor.configure(rightArmMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+                    
                 })
                 .finallyDo((d) -> {
-                    leftArmMotor.setIdleMode(IdleMode.kBrake);
-                    rightArmMotor.setIdleMode(IdleMode.kBrake);
+                    leftArmMotorConfig
+                        .idleMode(IdleMode.kBrake);
+                    leftArmMotor.configure(leftArmMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+                    rightArmMotorConfig
+                        .idleMode(IdleMode.kBrake);
+                    rightArmMotor.configure(rightArmMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
                     pidController.reset(getPosition());
                 })
                 .ignoringDisable(true)
