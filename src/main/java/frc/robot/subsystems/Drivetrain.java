@@ -12,13 +12,15 @@ import com.ctre.phoenix6.Orchestra;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.hardware.Pigeon2;
-import com.pathplanner.lib.commands.FollowPathHolonomic;
+import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.path.GoalEndState;
+import com.pathplanner.lib.path.IdealStartingState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import com.pathplanner.lib.util.PIDConstants;
-import com.pathplanner.lib.util.ReplanningConfig;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.PIDConstants;
 import com.techhounds.houndutil.houndauto.AutoManager;
 import com.techhounds.houndutil.houndauto.Reflector;
 import com.techhounds.houndutil.houndlib.ChassisAccelerations;
@@ -52,11 +54,11 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.MutableMeasure;
-import edu.wpi.first.units.measure.Velocity;
+import edu.wpi.first.units.measure.MutAngle;
+import edu.wpi.first.units.measure.MutAngularVelocity;
+import edu.wpi.first.units.measure.MutDistance;
+import edu.wpi.first.units.measure.MutLinearVelocity;
+import edu.wpi.first.units.measure.MutVoltage;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -76,7 +78,7 @@ import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 
 import static frc.robot.Constants.Drivetrain.*;
 import static frc.robot.Constants.Teleop.*;
-import static edu.wpi.first.units.MutableMeasure.mutable;
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
@@ -143,15 +145,15 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     private SwerveDriveOdometry simOdometry;
     private SwerveModulePosition[] lastModulePositions = getModulePositions();
 
-    private final MutVoltage sysidDriveAppliedVoltageMeasure = mutable(Volts.of(0));
-    private final MutDistance sysidDrivePositionMeasure = mutable(Meters.of(0));
-    private final MutLinearVelocity sysidDriveVelocityMeasure = mutable(MetersPerSecond.of(0));
+    private final MutVoltage sysidDriveAppliedVoltageMeasure = Volts.mutable(0);
+    private final MutDistance sysidDrivePositionMeasure = Meters.mutable(0);
+    private final MutLinearVelocity sysidDriveVelocityMeasure = MetersPerSecond.mutable(0);
 
     private final SysIdRoutine sysIdDrive;
 
-    private final MutVoltage sysidSteerAppliedVoltageMeasure = mutable(Volts.of(0));
-    private final MutAngle sysidSteerPositionMeasure = mutable(Rotations.of(0));
-    private final MutAngularVelocity sysidSteerVelocityMeasure = mutable(RotationsPerSecond.of(0));
+    private final MutVoltage sysidSteerAppliedVoltageMeasure = Volts.mutable(0);
+    private final MutAngle sysidSteerPositionMeasure = Rotations.mutable(0);
+    private final MutAngularVelocity sysidSteerVelocityMeasure = RotationsPerSecond.mutable(0);
 
     private final SysIdRoutine sysIdSteer;
 
@@ -449,7 +451,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
                         modulePositions[i] = modules[i].getPosition();
                     }
                     double yawDegrees = BaseStatusSignal.getLatencyCompensatedValue(
-                            pigeon.getYaw(), pigeon.getAngularVelocityZWorld());
+                            pigeon.getYaw(), pigeon.getAngularVelocityZWorld()).abs(Degrees);
 
                     /* Keep track of previous and current pose to account for the carpet vector */
                     poseEstimator.update(Rotation2d.fromDegrees(yawDegrees), modulePositions);
@@ -504,7 +506,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
                     currentPositions[i].angle);
         }
 
-        pigeon.getSimState().setRawYaw(pigeon.getYaw().getValue() +
+        pigeon.getSimState().setRawYaw(pigeon.getYaw().getValueAsDouble() +
                 Units.radiansToDegrees(KINEMATICS.toTwist2d(deltas).dtheta));
 
         lastModulePositions = currentPositions;
@@ -531,7 +533,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
     @Override
     public Rotation2d getRotation() {
-        return Rotation2d.fromDegrees(pigeon.getYaw().getValue());
+        return Rotation2d.fromDegrees(pigeon.getYaw().getValueAsDouble());
     }
 
     @Override
@@ -886,17 +888,23 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
     @Override
     public Command followPathCommand(PathPlannerPath path) {
-        return new FollowPathHolonomic(
+        return new FollowPathCommand(
                 path,
                 this::getPose,
                 this::getChassisSpeeds,
-                (speeds) -> driveClosedLoop(speeds, DriveMode.ROBOT_RELATIVE),
-                new HolonomicPathFollowerConfig(
-                        new PIDConstants(PATH_FOLLOWING_TRANSLATION_kP, 0, 0),
-                        new PIDConstants(PATH_FOLLOWING_ROTATION_kP, 0, 0),
+                (speeds, feedforwards) -> driveClosedLoop(speeds, DriveMode.ROBOT_RELATIVE),
+                new PPHolonomicDriveController(
+                    new PIDConstants(PATH_FOLLOWING_TRANSLATION_kP, 0, 0),
+                    new PIDConstants(PATH_FOLLOWING_ROTATION_kP, 0, 0)
+                ),
+                new RobotConfig(
+                    MASS_KG, MOI,
+                    new ModuleConfig(
+                        WHEEL_RADIUS_METERS,
                         SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND,
-                        DRIVE_BASE_RADIUS_METERS,
-                        new ReplanningConfig()),
+                        WHEEL_COF, SWERVE_CONSTANTS.DRIVE_GEARBOX_REPR,
+                        SWERVE_CONSTANTS.DRIVE_CURRENT_LIMIT, 1),
+                SWERVE_MODULE_LOCATIONS),
                 () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
                 this).finallyDo(this::stop).withName("drivetrain.followPath");
     }
@@ -905,9 +913,10 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     public Command driveDeltaCommand(Transform2d delta, PathConstraints constraints) {
         return new DeferredCommand(() -> followPathCommand(
                 new PathPlannerPath(
-                        PathPlannerPath.bezierFromPoses(
+                        PathPlannerPath.waypointsFromPoses(
                                 getPose(), getPose().plus(delta)),
                         constraints,
+                        new IdealStartingState(0, getRotation()),
                         new GoalEndState(0, delta.getRotation().plus(getRotation())))),
                 Set.of()).withName("drivetrain.driveDelta");
     }

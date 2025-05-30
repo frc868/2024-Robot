@@ -168,6 +168,10 @@ public class Constants {
                 MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
                 MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED);
 
+        public static final double MASS_KG = Units.lbsToKilograms(125);
+        public static final double MOI = 6.0;
+        public static final double WHEEL_RADIUS_METERS = Units.inchesToMeters(2);
+        public static final double WHEEL_COF = 1.3;
     }
 
     public static final class Intake {
