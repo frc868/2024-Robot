@@ -7,7 +7,6 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.techhounds.houndutil.houndauto.Reflector;
-import com.techhounds.houndutil.houndlib.SparkConfigurator;
 import com.techhounds.houndutil.houndlib.subsystems.BaseShooter;
 import com.techhounds.houndutil.houndlog.annotations.Log;
 import com.techhounds.houndutil.houndlog.annotations.LoggedObject;
@@ -26,13 +25,10 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.MutAngularVelocity;
 import edu.wpi.first.units.measure.MutVoltage;
-import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.MutableMeasure;
-import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -69,8 +65,8 @@ public class Shooter extends SubsystemBase implements BaseShooter {
     private final SimpleMotorFeedforward rightFeedforwardController = new SimpleMotorFeedforward(right_kS, right_kV,
             right_kA);
 
-    private final FlywheelSim flywheelSim = new FlywheelSim(MOTOR_GEARBOX_REPR, GEARING,
-            MOMENT_OF_INERTIA_KG_METERS_SQUARED);
+    private final FlywheelSim flywheelSim = new FlywheelSim(LinearSystemId.createFlywheelSystem(MOTOR_GEARBOX_REPR, 
+    MOMENT_OF_INERTIA_KG_METERS_SQUARED, GEARING), MOTOR_GEARBOX_REPR);
 
     @Log(groups = "control")
     private double leftFeedforwardVoltage = 0.0;
@@ -90,6 +86,7 @@ public class Shooter extends SubsystemBase implements BaseShooter {
     private final SysIdRoutine sysIdRoutine;
 
     public Shooter() {
+        leftMotor = new SparkFlex(LEFT_MOTOR_ID, MotorType.kBrushless);
         leftMotorConfig
             .inverted(true)
             .idleMode(IdleMode.kCoast)
@@ -101,6 +98,7 @@ public class Shooter extends SubsystemBase implements BaseShooter {
                 .quadratureMeasurementPeriod(16);
         leftMotor.configure(leftMotorConfig,ResetMode.kResetSafeParameters,PersistMode.kPersistParameters);
 
+        rightMotor = new SparkFlex(RIGHT_MOTOR_ID, MotorType.kBrushless);
         rightMotorConfig
             .inverted(true)
             .idleMode(IdleMode.kCoast)

@@ -2,12 +2,14 @@ package frc.robot.subsystems;
 
 import java.util.function.Supplier;
 
-import com.revrobotics.CANSparkBase.IdleMode;
-import com.revrobotics.CANSparkFlex;
-import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import com.techhounds.houndutil.houndauto.Reflector;
 import com.techhounds.houndutil.houndlib.PositionTracker;
-import com.techhounds.houndutil.houndlib.SparkConfigurator;
 import com.techhounds.houndutil.houndlib.Utils;
 import com.techhounds.houndutil.houndlib.subsystems.BaseSingleJointedArm;
 import com.techhounds.houndutil.houndlog.annotations.Log;
@@ -21,10 +23,9 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.MutableMeasure;
-import edu.wpi.first.units.measure.Velocity;
+import edu.wpi.first.units.measure.MutDistance;
+import edu.wpi.first.units.measure.MutLinearVelocity;
+import edu.wpi.first.units.measure.MutVoltage;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -52,8 +53,8 @@ import static edu.wpi.first.units.Units.Volts;
 @LoggedObject
 public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<ShooterTiltPosition> {
     @Log
-    private final CANSparkFlex motor;
-
+    private final SparkFlex motor;
+    private SparkFlexConfig motorConfig = new SparkFlexConfig();
     @Log(groups = "control")
     private final ProfiledPIDController pidController = new ProfiledPIDController(kP, kI, kD, MOVEMENT_CONSTRAINTS);
 
@@ -83,10 +84,9 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
 
     private double simVelocity = 0.0;
 
-    private final MutVoltage sysidAppliedVoltageMeasure = MutableMeasure.mutable(Volts.of(0));
-    private final MutDistance sysidPositionMeasure = MutableMeasure.mutable(Meters.of(0));
-    private final MutLinearVelocity sysidVelocityMeasure = MutableMeasure
-            .mutable(MetersPerSecond.of(0));
+    private final MutVoltage sysidAppliedVoltageMeasure = Volts.mutable(0);
+    private final MutDistance sysidPositionMeasure = Meters.mutable(0);
+    private final MutLinearVelocity sysidVelocityMeasure = MetersPerSecond.mutable(0);
 
     private final SysIdRoutine sysIdRoutine;
 
@@ -100,12 +100,15 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
     private PositionTracker positionTracker;
 
     public ShooterTilt(PositionTracker positionTracker) {
-        motor = SparkConfigurator.createSparkFlex(MOTOR_ID,
-                MotorType.kBrushless, false,
-                (s) -> s.setIdleMode(IdleMode.kBrake),
-                (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
-                (s) -> s.getEncoder().setPositionConversionFactor(ENCODER_ROTATIONS_TO_METERS),
-                (s) -> s.getEncoder().setVelocityConversionFactor(ENCODER_ROTATIONS_TO_METERS / 60.0));
+        motor = new SparkFlex(MOTOR_ID, MotorType.kBrushless);
+        motorConfig
+            .inverted(false)
+            .idleMode(IdleMode.kBrake)
+            .smartCurrentLimit(CURRENT_LIMIT)
+            .encoder
+                .positionConversionFactor(ENCODER_ROTATIONS_TO_METERS)
+                .velocityConversionFactor(ENCODER_ROTATIONS_TO_METERS/60.0);
+        motor.configure(motorConfig,ResetMode.kResetSafeParameters,PersistMode.kPersistParameters);
 
         sysIdRoutine = new SysIdRoutine(
                 new SysIdRoutine.Config(),
@@ -334,9 +337,13 @@ public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<S
     @Override
     public Command coastMotorsCommand() {
         return runOnce(motor::stopMotor)
-                .andThen(() -> motor.setIdleMode(IdleMode.kCoast))
+                .andThen(() -> {
+                motorConfig.idleMode(IdleMode.kCoast);
+                motor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+            })
                 .finallyDo((d) -> {
-                    motor.setIdleMode(IdleMode.kBrake);
+                    motorConfig.idleMode(IdleMode.kBrake);
+                    motor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
                     pidController.reset(getPosition());
                 })
                 .ignoringDisable(true)
