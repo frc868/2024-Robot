@@ -1,18 +1,18 @@
 package frc.robot;
 
-import static frc.robot.Constants.Shooter.PASSING_RPS;
-import static frc.robot.Constants.Shooter.PODIUM_RPS;
-import static frc.robot.Constants.Shooter.SUBWOOFER_RPS;
+import static frc.robot.Constants.Shooter.PASSING_RPS; //TODO
+import static frc.robot.Constants.Shooter.PODIUM_RPS; //TODO
+import static frc.robot.Constants.Shooter.SUBWOOFER_RPS; //TODO
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
-import frc.robot.Constants.Climber.ClimberPosition;
-import frc.robot.Constants.Intake.IntakePosition;
-import frc.robot.Constants.NoteLift.NoteLiftPosition;
-import frc.robot.Constants.ShooterTilt.ShooterTiltPosition;
+import frc.robot.subsystems.Climber.Constants.ClimberPosition;
+import frc.robot.subsystems.Intake.Constants.IntakePosition;
+import frc.robot.subsystems.NoteLift.Constants.NoteLiftPosition;
+import frc.robot.Constants.ShooterTilt.ShooterTiltPosition; //TODO
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Intake;

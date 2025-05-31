@@ -2,11 +2,13 @@ package frc.robot.subsystems;
 
 import java.util.function.Supplier;
 
-import com.revrobotics.CANSparkFlex;
-import com.revrobotics.CANSparkBase.IdleMode;
-import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import com.techhounds.houndutil.houndlib.PositionTracker;
-import com.techhounds.houndutil.houndlib.SparkConfigurator;
 import com.techhounds.houndutil.houndlib.Utils;
 import com.techhounds.houndutil.houndlib.subsystems.BaseLinearMechanism;
 import com.techhounds.houndutil.houndlog.annotations.Log;
@@ -18,10 +20,12 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.MutableMeasure;
-import edu.wpi.first.units.measure.Velocity;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.MutDistance;
+import edu.wpi.first.units.measure.MutLinearVelocity;
+import edu.wpi.first.units.measure.MutVoltage;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
@@ -30,12 +34,11 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
-import frc.robot.Constants.NoteLift.NoteLiftPosition;
 import frc.robot.GlobalStates;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Volts;
-import static frc.robot.Constants.NoteLift.*;
+import static frc.robot.subsystems.NoteLift.Constants.*;
 
 /**
  * The note lift subsystem, used to score in the trap. Handles motion profiling
@@ -46,8 +49,58 @@ import static frc.robot.Constants.NoteLift.*;
  */
 @LoggedObject
 public class NoteLift extends SubsystemBase implements BaseLinearMechanism<NoteLiftPosition> {
+    public static final class Constants {
+        public static enum NoteLiftPosition {
+            BOTTOM(0),
+            INTAKE(0.16),
+            TRAVEL(0.4903106689453125),
+            CLIMB_PREP(0.55),
+            STOW(0.62),
+            TOP(0.66);
+
+            public final double value;
+
+            private NoteLiftPosition(double value) {
+                this.value = value;
+            }
+        }
+
+        public static final int MOTOR_ID = 16;
+
+        public static final DCMotor MOTOR_GEARBOX_REPR = DCMotor.getNeoVortex(1);
+        public static final double GEARING = 9;
+        public static final boolean INVERTED = true;
+        public static final double CARRIAGE_MASS_KG = Units.lbsToKilograms(3);
+        public static final double DRUM_RADIUS_METERS = Units.inchesToMeters(0.75);
+        public static final double WHEEL_CIRCUMFERENCE = 2.0 * Math.PI * DRUM_RADIUS_METERS;
+        public static final double ENCODER_ROTATIONS_TO_METERS = WHEEL_CIRCUMFERENCE / GEARING;
+
+        public static final double MIN_HEIGHT_METERS = 0;
+        public static final double MAX_HEIGHT_METERS = 0.69;
+
+        public static final int CURRENT_LIMIT = 50;
+
+        // 4/6/24
+        public static final double kP = 45;
+        public static final double kI = 0;
+        public static final double kD = 1;
+        public static final double kS = 0.28746;
+        public static final double kG = -0.335364;
+        public static final double kV = 8.142;
+        public static final double kA = 0.386364;
+        public static final double TOLERANCE = 0.01;
+
+        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0.7;
+        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0.7;
+        public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
+                MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
+
+        public static final Pose3d BASE_COMPONENT_POSE = new Pose3d(0.177, 0, 0.20, new Rotation3d(0, 0, 0));
+    }
+
     @Log
-    private CANSparkFlex motor;
+    private SparkFlex motor;
+    private SparkFlexConfig motorConfig = new SparkFlexConfig();
 
     @Log(groups = "control")
     private ProfiledPIDController pidController = new ProfiledPIDController(kP, kI, kD, MOVEMENT_CONSTRAINTS);
@@ -73,10 +126,9 @@ public class NoteLift extends SubsystemBase implements BaseLinearMechanism<NoteL
 
     private double simVelocity = 0.0;
 
-    private final MutVoltage sysidAppliedVoltageMeasure = MutableMeasure.mutable(Volts.of(0));
-    private final MutDistance sysidPositionMeasure = MutableMeasure.mutable(Meters.of(0));
-    private final MutLinearVelocity sysidVelocityMeasure = MutableMeasure
-            .mutable(MetersPerSecond.of(0));
+    private final MutVoltage sysidAppliedVoltageMeasure = Volts.mutable(0);
+    private final MutDistance sysidPositionMeasure = Meters.mutable(0);
+    private final MutLinearVelocity sysidVelocityMeasure = MetersPerSecond.mutable(0);
 
     private final SysIdRoutine sysIdRoutine;
 
@@ -86,12 +138,15 @@ public class NoteLift extends SubsystemBase implements BaseLinearMechanism<NoteL
     private PositionTracker positionTracker;
 
     public NoteLift(PositionTracker positionTracker) {
-        motor = SparkConfigurator.createSparkFlex(
-                MOTOR_ID, MotorType.kBrushless, true,
-                (s) -> s.setIdleMode(IdleMode.kBrake),
-                (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
-                (s) -> s.getEncoder().setPositionConversionFactor(ENCODER_ROTATIONS_TO_METERS),
-                (s) -> s.getEncoder().setVelocityConversionFactor(ENCODER_ROTATIONS_TO_METERS / 60.0));
+        motor = new SparkFlex(MOTOR_ID, MotorType.kBrushless);
+        
+        motorConfig
+            .inverted(INVERTED)
+            .idleMode(IdleMode.kBrake)
+            .smartCurrentLimit(CURRENT_LIMIT)
+            .encoder
+                .positionConversionFactor(ENCODER_ROTATIONS_TO_METERS)
+                .velocityConversionFactor(ENCODER_ROTATIONS_TO_METERS / 60.0);
 
         this.positionTracker = positionTracker;
 
@@ -244,9 +299,13 @@ public class NoteLift extends SubsystemBase implements BaseLinearMechanism<NoteL
     @Override
     public Command coastMotorsCommand() {
         return runOnce(motor::stopMotor)
-                .andThen(() -> motor.setIdleMode(IdleMode.kCoast))
+                .andThen(() -> {
+                    motorConfig.idleMode(IdleMode.kCoast);
+                    motor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+                })
                 .finallyDo((d) -> {
-                    motor.setIdleMode(IdleMode.kBrake);
+                    motorConfig.idleMode(IdleMode.kBrake);
+                    motor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
                     pidController.reset(getPosition());
                 }).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
                 .withName("noteLift.coastMotorsCommand");

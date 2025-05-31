@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
+import com.techhounds.houndutil.houndlib.leds.BaseLEDSection;
 import com.techhounds.houndutil.houndlog.annotations.LoggedObject;
 
 import edu.wpi.first.wpilibj.AddressableLED;
@@ -14,9 +15,7 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.LEDs.LEDSection;
-
-import static frc.robot.Constants.LEDs.*;
+import static frc.robot.subsystems.LEDs.Constants.*;
 import static com.techhounds.houndutil.houndlib.leds.LEDPatterns.*;
 
 /**
@@ -29,6 +28,70 @@ import static com.techhounds.houndutil.houndlib.leds.LEDPatterns.*;
  */
 @LoggedObject
 public class LEDs extends SubsystemBase {
+    public static final class Constants {
+        public static enum LEDSection implements BaseLEDSection {
+            SHOOTER_RIGHT(0, 26),
+            SHOOTER_RIGHT_EXT(0, 50, false),
+            SHOOTER_TOP(27, 74, true),
+            SHOOTER_TOP_RIGHT(51, 74, true),
+            SHOOTER_TOP_LEFT(27, 50),
+            SHOOTER_LEFT(75, 107, true),
+            SHOOTER_LEFT_EXT(51, 101, true),
+            SHOOTER(0, 107),
+            SHOOTER_RIGHT_BOTTOM(0, 12),
+            SHOOTER_RIGHT_TOP(13, 26),
+            SHOOTER_LEFT_BOTTOM(92, 107, true),
+            SHOOTER_LEFT_TOP(75, 91, true),
+
+            ELEVATOR_LEFT(108, 218),
+            ELEVATOR_LEFT_TOP(164, 218),
+            ELEVATOR_LEFT_BOTTOM(108, 163),
+            ELEVATOR_RIGHT(216, 326),
+            ELEVATOR_RIGHT_TOP(272, 326),
+            ELEVATOR_RIGHT_BOTTOM(216, 271),
+            ALL(0, 326, true);
+
+            private final int startIdx;
+            private final int endIdx;
+            private final boolean inverted;
+
+            private LEDSection(int startIdx, int endIdx, boolean inverted) {
+                this.startIdx = startIdx;
+                this.endIdx = endIdx;
+                this.inverted = inverted;
+            }
+
+            private LEDSection(int startIdx, int endIdx) {
+                this(startIdx, endIdx, false);
+            }
+
+            @Override
+            public int start() {
+                return startIdx;
+            }
+
+            @Override
+            public int end() {
+                return endIdx;
+            }
+
+            @Override
+            public boolean inverted() {
+                return inverted;
+            }
+
+            @Override
+            public int length() {
+                return endIdx - startIdx + 1;
+            }
+        }
+
+        public static final int PORT = 0;
+        public static final int LENGTH = 333;
+
+        public static final List<LEDState> DEFAULT_STATES = List.of(LEDState.BLUE_FIRE, LEDState.GOLD_WAVE);
+    }
+
     /** The LEDs. */
     private AddressableLED leds = new AddressableLED(9);
     private AddressableLEDBuffer buffer = new AddressableLEDBuffer(LENGTH);
