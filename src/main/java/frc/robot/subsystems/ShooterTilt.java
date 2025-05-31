@@ -14,6 +14,7 @@ import com.techhounds.houndutil.houndlib.Utils;
 import com.techhounds.houndutil.houndlib.subsystems.BaseSingleJointedArm;
 import com.techhounds.houndutil.houndlog.annotations.Log;
 import com.techhounds.houndutil.houndlog.annotations.LoggedObject;
+import com.techhounds.houndutil.houndlog.loggers.TunableDouble;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
@@ -23,6 +24,10 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.MutDistance;
 import edu.wpi.first.units.measure.MutLinearVelocity;
 import edu.wpi.first.units.measure.MutVoltage;
@@ -41,17 +46,205 @@ import frc.robot.Constants.ShooterTilt.ShooterTiltPosition;
 import frc.robot.FieldConstants;
 import frc.robot.GlobalStates;
 import static frc.robot.Constants.Shooter.MAX_SHOOTING_DISTANCE;
-import static frc.robot.Constants.ShooterTilt.*;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Volts;
-
+import static frc.robot.subsystems.ShooterTilt.Constants.*;
 /**
  * The shooter tilt subsystem, used to control the angle of the shooter via the
  * attached lead screw. Handles motion profiling and positioning of the screw.
  */
 @LoggedObject
 public class ShooterTilt extends SubsystemBase implements BaseSingleJointedArm<ShooterTiltPosition> {
+    public static final class Constants {
+        // 0.160 max movement
+        // 2/15/2024
+        public static enum ShooterTiltPosition {
+            BOTTOM(0.389842),
+            AMP_EJECT(0.601),
+            INTAKE(0.585),
+            CLIMB(1.176781),
+            SUBWOOFER(1.01572),
+            PASS(0.90),
+            PODIUM(0.651760);
+
+            public final double value;
+
+            private ShooterTiltPosition(double value) {
+                this.value = value;
+            }
+        }
+
+        public static final int MOTOR_ID = 14;
+
+        public static final DCMotor MOTOR_GEARBOX_REPR = DCMotor.getNeoVortex(1);
+        public static final double GEARING = 5.0;
+        public static final double MASS_KG = Units.lbsToKilograms(12);
+        // 1 rot = 12mm
+        public static final double ENCODER_ROTATIONS_TO_METERS = Units.inchesToMeters(0.5) / GEARING;
+
+        public static final double MIN_HEIGHT_METERS = 0.005;
+        public static final double MAX_HEIGHT_METERS = 0.14;
+
+        public static final double MIN_ANGLE_RADIANS = 0.389842;
+        public static final double MAX_ANGLE_RADIANS = 1.2;
+        public static final TunableDouble DEMO_ANGLE = new TunableDouble("subsystems/shooterTilt/DEMO_ANGLE",
+                1.01572);
+
+        public static final int CURRENT_LIMIT = 25;
+
+        // 3/28/24
+        public static final double kP = 400;
+        public static final double kI = 0;
+        public static final double kD = 2;
+        public static final double kS = 0.104904;
+        public static final double kG = 0.124356;
+        public static final double kV = 44.0148;
+        public static final double kA = 3.48876;
+        public static final double TOLERANCE = 0.02;
+
+        public static final double MAX_VELOCITY_METERS_PER_SECOND = 0.3;
+        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 0.32;
+        public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
+                MAX_VELOCITY_METERS_PER_SECOND, MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
+
+        public static final Pose3d BASE_SHOOTER_POSE = new Pose3d(-0.19, 0, 0.299, new Rotation3d(0, 0, 0));
+        public static final Pose3d BASE_OUTER_LEAD_SCREW_POSE = new Pose3d(-0.0915,
+                0, 0.125,
+                new Rotation3d(0, 0, 0));
+
+        public static final Transform3d OUTER_LEAD_SCREW_TO_INNER_LEAD_SCREW = new Transform3d(0.047, 0, 0.0127,
+                new Rotation3d());
+        public static final Transform3d LEAD_SCREW_PIVOT_TO_EXTENSION = new Transform3d(0, 0, 0.0127,
+                new Rotation3d());
+        public static final Transform3d SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT = new Transform3d(0.2572, 0,
+                -0.0984,
+                new Rotation3d());
+        public static final double INITIAL_LEAD_SCREW_LENGTH = 0.2519;
+
+        public static final Transform3d SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT = new Transform3d(0.09906, 0,
+                -0.1737,
+                new Rotation3d());
+
+        /**
+         * Gets the length of the lead screw given the angle of the shooter tilt.
+         * 
+         * @param angle the angle of the shooter tilt
+         * @return the length of the lead screw
+         */
+        public static final double getLinearActuatorLength(double angle) {
+            double shooterToBottomLeadScrewAngle = Math
+                    .atan(Math.abs(SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getX())
+                            / Math.abs(SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getZ()));
+            double shooterToTopLeadScrewAngle = Math
+                    .atan(Math.abs(SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT.getZ())
+                            / Math.abs(SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT.getX()));
+
+            double shooterInteriorAngle = angle - shooterToBottomLeadScrewAngle - shooterToTopLeadScrewAngle
+                    + Math.PI / 2.0;
+
+            double shooterPivotToBottomPivot = SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getTranslation()
+                    .getNorm(); // a
+            double shooterPivotToTopPivot = SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT.getTranslation()
+                    .getNorm(); // b
+
+            return Math.sqrt(
+                    Math.pow(shooterPivotToBottomPivot, 2)
+                            - (2 * shooterPivotToBottomPivot * shooterPivotToTopPivot
+                                    * Math.cos(shooterInteriorAngle))
+                            + Math.pow(shooterPivotToTopPivot, 2)
+                            - Math.pow(LEAD_SCREW_PIVOT_TO_EXTENSION.getZ(), 2))
+                    - INITIAL_LEAD_SCREW_LENGTH;
+        }
+
+        /**
+         * Gets the angle of the shooter tilt given the length of the lead screw.
+         * 
+         * <p>
+         * https://www.desmos.com/calculator/7ojeknrpiq
+         * 
+         * @param linearActuatorLength the length of the lead screw
+         * @return the angle of the shooter tilt
+         */
+        public static final double getShooterAngle(double linearActuatorLength) {
+            double fullLeadScrewLength = INITIAL_LEAD_SCREW_LENGTH + linearActuatorLength;
+
+            double shooterPivotToBottomPivot = SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getTranslation()
+                    .getNorm(); // a
+            double shooterPivotToTopPivot = SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT.getTranslation()
+                    .getNorm(); // b
+            double leadScrewHyp = Math
+                    .sqrt(Math.pow(LEAD_SCREW_PIVOT_TO_EXTENSION.getZ(), 2)
+                            + Math.pow(fullLeadScrewLength, 2)); // c
+
+            double shooterInteriorAngle = Math.acos(
+                    (Math.pow(shooterPivotToBottomPivot, 2)
+                            + Math.pow(shooterPivotToTopPivot, 2)
+                            - Math.pow(leadScrewHyp, 2))
+                            / (2 * shooterPivotToBottomPivot * shooterPivotToTopPivot));
+
+            double shooterToBottomLeadScrewAngle = Math
+                    .atan(Math.abs(SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getX())
+                            / Math.abs(SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getZ()));
+            double shooterToTopLeadScrewAngle = Math
+                    .atan(Math.abs(SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT.getZ())
+                            / Math.abs(SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT.getX()));
+
+            return shooterInteriorAngle + shooterToBottomLeadScrewAngle + shooterToTopLeadScrewAngle
+                    - Math.PI / 2.0;
+        }
+
+        /**
+         * Gets the angle of the lead screw from its rotation axis given its length.
+         * Used for simulation.
+         * 
+         * @param linearActuatorLength the length of the lead screw
+         * @return the angle of the lead screw
+         */
+        public static final double getLeadScrewAngle(double linearActuatorLength) {
+            double fullLeadScrewLength = INITIAL_LEAD_SCREW_LENGTH + linearActuatorLength;
+
+            double shooterPivotToBottomPivot = SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getTranslation()
+                    .getNorm(); // a
+            double shooterPivotToTopPivot = SHOOTER_PIVOT_TO_TOP_LEAD_SCREW_PIVOT.getTranslation()
+                    .getNorm(); // b
+            double leadScrewHyp = Math
+                    .sqrt(Math.pow(LEAD_SCREW_PIVOT_TO_EXTENSION.getZ(), 2)
+                            + Math.pow(fullLeadScrewLength, 2)); // c
+
+            double leadScrewInteriorAngle = Math.acos(
+                    (Math.pow(shooterPivotToBottomPivot, 2)
+                            + Math.pow(leadScrewHyp, 2)
+                            - Math.pow(shooterPivotToTopPivot, 2))
+                            / (2 * shooterPivotToBottomPivot * leadScrewHyp));
+
+            double bottomLeadScrewToShooterAngle = Math
+                    .atan(Math.abs(SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getZ())
+                            / Math.abs(SHOOTER_PIVOT_TO_BOTTOM_LEAD_SCREW_PIVOT.getX()));
+
+            return Math.PI - leadScrewInteriorAngle - bottomLeadScrewToShooterAngle;
+        }
+
+        /**
+         * Interpolator tht takes in the xy distance from the target and returns the
+         * setpoint tilt angle.
+         */
+        public static final InterpolatingDoubleTreeMap LEAD_SCREW_HEIGHT_INTERPOLATOR = new InterpolatingDoubleTreeMap();
+        static {
+            // 3/5/24
+            LEAD_SCREW_HEIGHT_INTERPOLATOR.put(1.1795122686667598, 0.10887146);
+            LEAD_SCREW_HEIGHT_INTERPOLATOR.put(1.7062360399365777, 0.08586998291);
+            LEAD_SCREW_HEIGHT_INTERPOLATOR.put(2.235756419155122, 0.06745673828);
+            LEAD_SCREW_HEIGHT_INTERPOLATOR.put(2.9124685062916904, 0.04472818315);
+            LEAD_SCREW_HEIGHT_INTERPOLATOR.put(3.419734229712845, 0.03299551314);
+            LEAD_SCREW_HEIGHT_INTERPOLATOR.put(3.948809911586509, 0.02273276727);
+            LEAD_SCREW_HEIGHT_INTERPOLATOR.put(4.239, 0.01725753836);
+            LEAD_SCREW_HEIGHT_INTERPOLATOR.put(4.597, 0.0133918667);
+            LEAD_SCREW_HEIGHT_INTERPOLATOR.put(5.1322, 0.009597811761);
+
+        }
+    
+    }
     @Log
     private final SparkFlex motor;
     private SparkFlexConfig motorConfig = new SparkFlexConfig();

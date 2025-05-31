@@ -10,12 +10,12 @@ import com.techhounds.houndutil.houndauto.Reflector;
 import com.techhounds.houndutil.houndlib.subsystems.BaseShooter;
 import com.techhounds.houndutil.houndlog.annotations.Log;
 import com.techhounds.houndutil.houndlog.annotations.LoggedObject;
+import com.techhounds.houndutil.houndlog.loggers.TunableDouble;
 
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
-import static frc.robot.Constants.Shooter.*;
-
+import static frc.robot.subsystems.Shooter.Constants.*;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.MathUtil;
@@ -25,7 +25,10 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.MutAngularVelocity;
 import edu.wpi.first.units.measure.MutVoltage;
@@ -47,6 +50,82 @@ import frc.robot.GlobalStates;
  */
 @LoggedObject
 public class Shooter extends SubsystemBase implements BaseShooter {
+    public static final class Constants {
+        public static final int LEFT_MOTOR_ID = 11;
+        public static final int RIGHT_MOTOR_ID = 12;
+
+        public static final DCMotor MOTOR_GEARBOX_REPR = DCMotor.getNeoVortex(2);
+        public static final double GEARING = 1.0;
+        public static final double WHEEL_AXLE_MASS = Units.lbsToKilograms(2.5);
+        public static final double WHEEL_RADIUS = Units.inchesToMeters(2);
+        // 2.5lb, 2in radius, 1/2mr^2
+        public static final double MOMENT_OF_INERTIA_KG_METERS_SQUARED = (1.0 / 2.0) * WHEEL_AXLE_MASS
+                * Math.pow(WHEEL_RADIUS, 2);
+        public static final int CURRENT_LIMIT = 70;
+
+        public static final double IDLE_RPS = 47;
+        public static final double PASSING_RPS = 47;
+        public static final double SUBWOOFER_RPS = 55;
+        public static final double PODIUM_RPS = 84;
+        public static final TunableDouble DEMO_RPS = new TunableDouble("subsystems/shooter/DEMO_RPS", 10);
+
+        // 3/3/24
+        public static final double left_kP = 0.1;
+        public static final double left_kI = 0;
+        public static final double left_kD = 0;
+        public static final double left_kS = 0.14652;
+        public static final double left_kV = 0.10797;
+        public static final double left_kA = 0.022635;
+
+        public static final double right_kP = 0.1;
+        public static final double right_kI = 0;
+        public static final double right_kD = 0;
+        public static final double right_kS = 0.12047;
+        public static final double right_kV = 0.10746;
+        public static final double right_kA = 0.021566;
+        public static final double TOLERANCE = 5;
+
+        public static final double GOAL_POSITION_ITERATIONS = 5;
+        public static final double ACCELERATION_COMPENSATION_FACTOR = 0.0;
+
+        // key: distance, value: speed
+        /**
+         * Interpolator tht takes in the xy distance from the target and returns the
+         * setpoint shooter speed.
+         */
+        public static final InterpolatingDoubleTreeMap SPEED_INTERPOLATOR = new InterpolatingDoubleTreeMap();
+        static {
+            // 3/5/24
+            SPEED_INTERPOLATOR.put(1.142, 45.0);
+            SPEED_INTERPOLATOR.put(1.511, 55.0);
+            SPEED_INTERPOLATOR.put(1.995, 78.0);
+            SPEED_INTERPOLATOR.put(2.2845, 84.0);
+            SPEED_INTERPOLATOR.put(2.593, 84.0);
+            SPEED_INTERPOLATOR.put(2.87, 84.0);
+            SPEED_INTERPOLATOR.put(3.128, 84.0);
+            SPEED_INTERPOLATOR.put(3.478, 84.0);
+            SPEED_INTERPOLATOR.put(3.834, 84.0);
+            SPEED_INTERPOLATOR.put(4.239, 84.0);
+            SPEED_INTERPOLATOR.put(4.597, 84.0);
+            SPEED_INTERPOLATOR.put(5.1322, 84.0);
+        }
+
+        public static final double MAX_SHOOTING_DISTANCE = 5.1322;
+
+        /**
+         * Get the speed of a note shot by the shooter given the distance from the goal.
+         * Used for on-the-fly shooting.
+         * 
+         * @param distance the xy distance from the goal
+         * @return the speed of the note
+         */
+        public static final double getProjectileSpeed(double distance) {
+            // found via analyzing slow-motion video of shots, shooter speed -> projectile
+            // velocity is linear
+            return SPEED_INTERPOLATOR.get(distance) * 0.1446;
+        }
+    }
+    
     @Log
     private final SparkFlex leftMotor;
     private SparkFlexConfig leftMotorConfig = new SparkFlexConfig();
