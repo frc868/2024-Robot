@@ -141,19 +141,19 @@ public class RobotContainer {
         positionTracker.addPositionSupplier("shooterTilt", shooterTilt::getAngle);
         positionTracker.addPositionSupplier("climber", climber::getPosition);
 
-        DataLogManager.logNetworkTables(true);
-        DriverStation.startDataLog(DataLogManager.getLog());
-        DataLogManager.start();
+        // DataLogManager.logNetworkTables(true);
+        // DriverStation.startDataLog(DataLogManager.getLog());
+        // DataLogManager.start();
         // URCL.start();
-        SignalLogger.start();
+        // SignalLogger.start();
 
-        LoggingManager.getInstance().registerObject(this);
-        LoggingManager.getInstance().registerClass(LoggingManager.class, "houndlog", new ArrayList<>());
-        LoggingManager.getInstance().addLogger(DEMO_RPS);
-        LoggingManager.getInstance().addLogger(DEMO_SPEED);
-        LoggingManager.getInstance().addLogger(DEMO_ANGLE);
-        LoggingManager.getInstance()
-                .addGroup(new LogGroup("robotController", LogProfiles.logRobotController()));
+        // LoggingManager.getInstance().registerObject(this);
+        // LoggingManager.getInstance().registerClass(LoggingManager.class, "houndlog", new ArrayList<>());
+        // LoggingManager.getInstance().addLogger(DEMO_RPS);
+        // LoggingManager.getInstance().addLogger(DEMO_SPEED);
+        // LoggingManager.getInstance().addLogger(DEMO_ANGLE);
+        // LoggingManager.getInstance()
+                // .addGroup(new LogGroup("robotController", LogProfiles.logRobotController()));
         LiveWindow.disableAllTelemetry(); // livewindow is basically deprecated. using houndlog instead.
 
         if (RobotBase.isSimulation()) {
