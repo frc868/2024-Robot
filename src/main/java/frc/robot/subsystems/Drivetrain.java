@@ -79,7 +79,6 @@ import frc.robot.FieldConstants;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 
 import static frc.robot.subsystems.Drivetrain.Constants.*;
-import frc.robot.Constants.Shooter.*;
 import static frc.robot.Constants.Teleop.*;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;

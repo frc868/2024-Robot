@@ -1,7 +1,6 @@
 package frc.robot;
 
 import com.ctre.phoenix6.SignalLogger;
-import com.techhounds.houndutil.houndauto.AutoManager;
 import com.techhounds.houndutil.houndauto.Reflector;
 import com.techhounds.houndutil.houndlib.PositionTracker;
 import com.techhounds.houndutil.houndlib.ShootOnTheFlyCalculator;
@@ -162,7 +161,6 @@ public class RobotContainer {
             DriverStation.silenceJoystickConnectionWarning(true);
         }
         configureButtonBindings();
-        configureAuto();
 
         new Trigger(DriverStation::isEnabled)
                 .onTrue(Commands.parallel(
@@ -210,16 +208,7 @@ public class RobotContainer {
         NTCommands.configureNTCommands(drivetrain, intake, shooter, shooterTilt, climber, leds);
     }
 
-    private void configureAuto() {
-        AutoManager.getInstance().addRoutine(Autos.autoCBA(drivetrain, intake, shooter, shooterTilt));
-        AutoManager.getInstance().addRoutine(Autos.autoWaitCBA(drivetrain, intake, shooter, shooterTilt));
-        AutoManager.getInstance().addRoutine(Autos.auto123(drivetrain, intake, shooter, shooterTilt));
-        AutoManager.getInstance().addRoutine(Autos.auto231(drivetrain, intake, shooter, shooterTilt));
-        AutoManager.getInstance().addRoutine(Autos.auto345(drivetrain, intake, shooter, shooterTilt));
-        AutoManager.getInstance().addRoutine(Autos.auto543(drivetrain, intake, shooter, shooterTilt));
-        AutoManager.getInstance().addRoutine(Autos.auto435(drivetrain, intake, shooter, shooterTilt));
-        AutoManager.getInstance().addRoutine(Autos.autoCBA12(drivetrain, intake, shooter, shooterTilt));
-    }
+    
 
     @Log
     private Pose3d[] getComponentPoses() {
