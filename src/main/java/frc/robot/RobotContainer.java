@@ -31,9 +31,9 @@ import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterTilt;
 import frc.robot.subsystems.Vision;
 import frc.robot.subsystems.LEDs.LEDState;
-import static frc.robot.Constants.Drivetrain.DEMO_SPEED; //TODO
-import static frc.robot.Constants.Shooter.DEMO_RPS; //TODO
-import static frc.robot.Constants.ShooterTilt.DEMO_ANGLE; //TODO
+import static frc.robot.subsystems.Drivetrain.Constants.DEMO_SPEED;
+import static frc.robot.subsystems.Shooter.Constants.*;
+import static frc.robot.subsystems.ShooterTilt.Constants.DEMO_ANGLE;
 
 import java.util.ArrayList;
 import java.util.function.Supplier;
@@ -104,8 +104,8 @@ public class RobotContainer {
         return ShootOnTheFlyCalculator.calculateEffectiveTargetLocation(
                 drivetrain.getPose(), FieldConstants.SPEAKER_TARGET,
                 drivetrain.getFieldRelativeSpeeds(), drivetrain.getFieldRelativeAccelerations(),
-                (d) -> Constants.Shooter.getProjectileSpeed(d),
-                Constants.Shooter.GOAL_POSITION_ITERATIONS, Constants.Shooter.ACCELERATION_COMPENSATION_FACTOR);
+                (d) -> getProjectileSpeed(d),
+                GOAL_POSITION_ITERATIONS, ACCELERATION_COMPENSATION_FACTOR);
     };
     @Log
     private final Supplier<Double> shotTime = () -> {
@@ -113,10 +113,10 @@ public class RobotContainer {
                 ShootOnTheFlyCalculator.calculateEffectiveTargetLocation(
                         drivetrain.getPose(), FieldConstants.SPEAKER_TARGET,
                         drivetrain.getFieldRelativeSpeeds(), drivetrain.getFieldRelativeAccelerations(),
-                        (d) -> Constants.Shooter.getProjectileSpeed(d),
-                        Constants.Shooter.GOAL_POSITION_ITERATIONS,
-                        Constants.Shooter.ACCELERATION_COMPENSATION_FACTOR),
-                (d) -> Constants.Shooter.getProjectileSpeed(d));
+                        (d) -> getProjectileSpeed(d),
+                        GOAL_POSITION_ITERATIONS,
+                        ACCELERATION_COMPENSATION_FACTOR),
+                (d) -> getProjectileSpeed(d));
     };
 
     @Log

@@ -74,12 +74,12 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.Constants.Drivetrain.MusicTrack;
 import frc.robot.FieldConstants;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 
 import static frc.robot.subsystems.Drivetrain.Constants.*;
-import static frc.robot.Constants.Teleop.*;
+import static frc.robot.subsystems.Shooter.Constants.*;
+import static frc.robot.Controls.Constants.Teleop.*;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -1307,8 +1307,8 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
         return ShootOnTheFlyCalculator.calculateEffectiveTargetLocation(
                 getPose(), FieldConstants.SPEAKER_TARGET,
                 getFieldRelativeSpeeds(), getFieldRelativeAccelerations(),
-                (d) -> frc.robot.Constants.Shooter.getProjectileSpeed(d),
-                frc.robot.Constants.Shooter.GOAL_POSITION_ITERATIONS, frc.robot.Constants.Shooter.ACCELERATION_COMPENSATION_FACTOR); // TODO chance to constants in Shooter.java once moved
+                (d) -> getProjectileSpeed(d),
+                GOAL_POSITION_ITERATIONS, ACCELERATION_COMPENSATION_FACTOR);
     }
 
     public boolean getInitialized() {

@@ -1,9 +1,9 @@
 package frc.robot;
 
-import static frc.robot.Constants.Drivetrain.DEMO_SPEED; //TODO
-import static frc.robot.Constants.Shooter.DEMO_RPS; //TODO
-import static frc.robot.Constants.Shooter.PODIUM_RPS; //TODO
-import static frc.robot.Constants.ShooterTilt.DEMO_ANGLE; //TODO
+import static frc.robot.subsystems.Drivetrain.Constants.DEMO_SPEED;
+import static frc.robot.subsystems.Shooter.Constants.DEMO_RPS;
+import static frc.robot.subsystems.Shooter.Constants.PODIUM_RPS;
+import static frc.robot.subsystems.ShooterTilt.Constants.DEMO_ANGLE;
 
 import com.techhounds.houndutil.houndlib.oi.CommandVirpilJoystick;
 
@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.subsystems.Climber.Constants.ClimberPosition;
 import frc.robot.subsystems.Intake.Constants.IntakePosition;
-import frc.robot.Constants.ShooterTilt.ShooterTiltPosition; //TODO
+import frc.robot.subsystems.ShooterTilt.Constants.ShooterTiltPosition;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Intake;
@@ -27,6 +27,33 @@ import frc.robot.subsystems.LEDs.LEDState;
  * robot.
  */
 public class Controls {
+    public static final class Constants {
+        /** The type of controller to use for the driver controller. */
+    enum ControllerType {
+        XboxController,
+        FlightStick
+    }
+
+    /** The current control type in use. */
+    public static final ControllerType CONTROLLER_TYPE = ControllerType.FlightStick;
+
+    /** The period at which the robot code updates. */
+    public static final double PERIOD = 0.020;
+
+        public static final class Teleop {
+            /**
+             * A value inputted into the rate limiter (the joystick input) can move from 0
+             * to 1 in 1/RATE_LIMIT seconds.
+             * 
+             * A rate limit of 3, for example, means that 0->1 in 1/3 sec.
+             * Larger numbers mean less of a rate limit.
+             */
+            public static final double JOYSTICK_INPUT_RATE_LIMIT = 15.0;
+            public static final double JOYSTICK_INPUT_DEADBAND = 0.05;
+            public static final double JOYSTICK_CURVE_EXP = 2;
+            public static final double JOYSTICK_ROT_CURVE_EXP = 1;
+        }
+    }
     /**
      * Configures driver controls on a Virpil Controls Alpha-R joystick.
      * 
