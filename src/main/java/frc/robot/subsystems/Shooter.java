@@ -67,7 +67,7 @@ public class Shooter extends SubsystemBase implements BaseShooter {
         public static final double PASSING_RPS = 47;
         public static final double SUBWOOFER_RPS = 55;
         public static final double PODIUM_RPS = 84;
-        public static final TunableDouble DEMO_RPS = new TunableDouble("subsystems/shooter/DEMO_RPS", 10);
+        public static final TunableDouble DEMO_RPS = new TunableDouble("subsystems/shooter/DEMO_RPS", 40);
 
         // 3/3/24
         public static final double left_kP = 0.1;
