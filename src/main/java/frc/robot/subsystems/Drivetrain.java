@@ -582,7 +582,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
                         modulePositions[i] = modules[i].getPosition();
                     }
                     double yawDegrees = BaseStatusSignal.getLatencyCompensatedValue(
-                            pigeon.getYaw(), pigeon.getAngularVelocityZWorld()).abs(Degrees);
+                            pigeon.getYaw(), pigeon.getAngularVelocityZWorld()).in(Degrees);
 
                     /* Keep track of previous and current pose to account for the carpet vector */
                     poseEstimator.update(Rotation2d.fromDegrees(yawDegrees), modulePositions);
@@ -637,7 +637,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
                     currentPositions[i].angle);
         }
 
-        pigeon.getSimState().setRawYaw(pigeon.getYaw().getValueAsDouble() +
+        pigeon.getSimState().setRawYaw(pigeon.getYaw().getValue().in(Degrees) +
                 Units.radiansToDegrees(KINEMATICS.toTwist2d(deltas).dtheta));
 
         lastModulePositions = currentPositions;
@@ -664,7 +664,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
     @Override
     public Rotation2d getRotation() {
-        return Rotation2d.fromDegrees(pigeon.getYaw().getValueAsDouble());
+        return Rotation2d.fromDegrees(pigeon.getYaw().getValue().in(Degrees));
     }
 
     @Override
@@ -1023,7 +1023,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
                 path,
                 this::getPose,
                 this::getChassisSpeeds,
-                (speeds, feedforwards) -> driveClosedLoop(speeds, DriveMode.ROBOT_RELATIVE),
+                (speeds, feedforwards) -> driveClosedLoop(speeds, DriveMode.FIELD_ORIENTED),
                 new PPHolonomicDriveController(
                     new PIDConstants(PATH_FOLLOWING_TRANSLATION_kP, 0, 0),
                     new PIDConstants(PATH_FOLLOWING_ROTATION_kP, 0, 0)
