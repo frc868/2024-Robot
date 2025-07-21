@@ -78,57 +78,57 @@ public class Controls {
         new Trigger(() -> (Math.abs(joystick.getTwist()) > 0.05))
                 .whileTrue(drivetrain.disableControlledRotateCommand());
 
-        joystick.stickButton().onTrue(drivetrain.resetGyroCommand());
+        // joystick.stickButton().onTrue(drivetrain.resetGyroCommand());
 
-        joystick.centerBottomHatUp()
-                .whileTrue(drivetrain.controlledRotateCommand(() -> Math.toRadians(0)));
-        joystick.centerBottomHatLeft()
-                .whileTrue(drivetrain.controlledRotateCommand(() -> Math.toRadians(270)));
-        joystick.centerBottomHatDown()
-                .whileTrue(drivetrain.controlledRotateCommand(() -> Math.toRadians(180)));
-        joystick.centerBottomHatRight()
-                .whileTrue(drivetrain.controlledRotateCommand(() -> Math.toRadians(90)));
+        // joystick.centerBottomHatUp()
+        //         .whileTrue(drivetrain.controlledRotateCommand(() -> Math.toRadians(0)));
+        // joystick.centerBottomHatLeft()
+        //         .whileTrue(drivetrain.controlledRotateCommand(() -> Math.toRadians(270)));
+        // joystick.centerBottomHatDown()
+        //         .whileTrue(drivetrain.controlledRotateCommand(() -> Math.toRadians(180)));
+        // joystick.centerBottomHatRight()
+        //         .whileTrue(drivetrain.controlledRotateCommand(() -> Math.toRadians(90)));
 
-        joystick.blackThumbButton()
-                .whileTrue(intake.intakeNoteCommand()
-                        .alongWith(shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.INTAKE).asProxy()))
-                .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
-        joystick.centerTopHatButton().whileTrue(
-                Commands.parallel(
-                        intake.intakeFromSourceCommand(),
-                        leds.requestStateCommand(LEDState.FLASHING_AQUA)))
-                .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
+        // joystick.blackThumbButton()
+        //         .whileTrue(intake.intakeNoteCommand()
+        //                 .alongWith(shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.INTAKE).asProxy()))
+        //         .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
+        // joystick.centerTopHatButton().whileTrue(
+        //         Commands.parallel(
+        //                 intake.intakeFromSourceCommand(),
+        //                 leds.requestStateCommand(LEDState.FLASHING_AQUA)))
+        //         .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
 
-        joystick.centerTopHatUp().whileTrue(
-                climber.moveUpCommand()
-                        .deadlineWith(shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.PODIUM)));
-        joystick.centerTopHatDown().whileTrue(
-                climber.moveDownCommand()
-                        .deadlineWith(shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.PODIUM)));
+        // joystick.centerTopHatUp().whileTrue(
+        //         climber.moveUpCommand()
+        //                 .deadlineWith(shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.PODIUM)));
+        // joystick.centerTopHatDown().whileTrue(
+        //         climber.moveDownCommand()
+        //                 .deadlineWith(shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.PODIUM)));
 
-        joystick.redButton().whileTrue(RobotCommands.ampPrepIntakeCommand(intake, shooterTilt))
-                .onFalse(intake.moveToPositionCommand(() -> IntakePosition.AMP));
+        // joystick.redButton().whileTrue(RobotCommands.ampPrepIntakeCommand(intake, shooterTilt))
+        //         .onFalse(intake.moveToPositionCommand(() -> IntakePosition.AMP));
 
-        joystick.pinkieButton().whileTrue(intake.ampScoreRollersCommand())
-                .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
+        // joystick.pinkieButton().whileTrue(intake.ampScoreRollersCommand())
+        //         .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
 
-        joystick.triggerSoftPress().and(joystick.flipTriggerIn().negate()).whileTrue(
-                Commands.parallel(
-                        shooterTilt.moveToArbitraryPositionCommand(() -> DEMO_ANGLE.get()).asProxy(),
-                        shooter.spinAtVelocityCommand(() -> DEMO_RPS.get()).asProxy()));
-        joystick.triggerHardPress().and(joystick.flipTriggerIn().negate()).whileTrue(intake.runRollersCommand());
+        // joystick.triggerSoftPress().and(joystick.flipTriggerIn().negate()).whileTrue(
+        //         Commands.parallel(
+        //                 shooterTilt.moveToArbitraryPositionCommand(() -> DEMO_ANGLE.get()).asProxy(),
+        //                 shooter.spinAtVelocityCommand(() -> DEMO_RPS.get()).asProxy()));
+        // joystick.triggerHardPress().and(joystick.flipTriggerIn().negate()).whileTrue(intake.runRollersCommand());
 
-        joystick.flipTriggerIn().and(joystick.triggerSoftPress()).whileTrue(
-                RobotCommands.targetPassCommand(drivetrain, shooter, shooterTilt));
-        joystick.flipTriggerIn().and(joystick.triggerHardPress()).whileTrue(intake.runRollersCommand());
+        // joystick.flipTriggerIn().and(joystick.triggerSoftPress()).whileTrue(
+        //         RobotCommands.targetPassCommand(drivetrain, shooter, shooterTilt));
+        // joystick.flipTriggerIn().and(joystick.triggerHardPress()).whileTrue(intake.runRollersCommand());
 
-        joystick.topRightHatUp()
-                .onTrue(GlobalStates.PODIUM_ONLY.enableCommand().andThen(GlobalStates.SUBWOOFER_ONLY.disableCommand()));
-        joystick.topRightHatDown()
-                .onTrue(GlobalStates.SUBWOOFER_ONLY.enableCommand().andThen(GlobalStates.PODIUM_ONLY.disableCommand()));
-        joystick.topRightHatButton()
-                .onTrue(GlobalStates.SUBWOOFER_ONLY.disableCommand()
-                        .andThen(GlobalStates.PODIUM_ONLY.disableCommand()));
+        // joystick.topRightHatUp()
+        //         .onTrue(GlobalStates.PODIUM_ONLY.enableCommand().andThen(GlobalStates.SUBWOOFER_ONLY.disableCommand()));
+        // joystick.topRightHatDown()
+        //         .onTrue(GlobalStates.SUBWOOFER_ONLY.enableCommand().andThen(GlobalStates.PODIUM_ONLY.disableCommand()));
+        // joystick.topRightHatButton()
+        //         .onTrue(GlobalStates.SUBWOOFER_ONLY.disableCommand()
+        //                 .andThen(GlobalStates.PODIUM_ONLY.disableCommand()));
 
     }
 
