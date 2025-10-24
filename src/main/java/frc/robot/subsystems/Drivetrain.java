@@ -125,7 +125,7 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
 
         public static final int PIGEON_ID = 0;
 
-        public static final TunableDouble DEMO_SPEED = new TunableDouble("subsystems/drivetrain/DEMO_SPEED", .50);
+        public static final TunableDouble DEMO_SPEED = new TunableDouble("subsystems/drivetrain/DEMO_SPEED", .80);
 
         public static final boolean DRIVE_MOTORS_INVERTED = false;
         public static final boolean STEER_MOTORS_INVERTED = true;

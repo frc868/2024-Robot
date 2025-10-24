@@ -78,7 +78,7 @@ public class Controls {
         new Trigger(() -> (Math.abs(joystick.getTwist()) > 0.05))
                 .whileTrue(drivetrain.disableControlledRotateCommand());
 
-        // joystick.stickButton().onTrue(drivetrain.resetGyroCommand());
+        joystick.stickButton().onTrue(drivetrain.resetGyroCommand());
 
         // joystick.centerBottomHatUp()
         //         .whileTrue(drivetrain.controlledRotateCommand(() -> Math.toRadians(0)));
@@ -89,10 +89,10 @@ public class Controls {
         // joystick.centerBottomHatRight()
         //         .whileTrue(drivetrain.controlledRotateCommand(() -> Math.toRadians(90)));
 
-        // joystick.blackThumbButton()
-        //         .whileTrue(intake.intakeNoteCommand()
-        //                 .alongWith(shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.INTAKE).asProxy()))
-        //         .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
+        joystick.blackThumbButton()
+                .whileTrue(intake.intakeNoteCommand()
+                        .alongWith(shooterTilt.moveToPositionCommand(() -> ShooterTiltPosition.INTAKE).asProxy()))
+                .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
         // joystick.centerTopHatButton().whileTrue(
         //         Commands.parallel(
         //                 intake.intakeFromSourceCommand(),
@@ -112,10 +112,10 @@ public class Controls {
         // joystick.pinkieButton().whileTrue(intake.ampScoreRollersCommand())
         //         .onFalse(intake.moveToPositionCommand(() -> IntakePosition.STOW));
 
-        // joystick.triggerSoftPress().and(joystick.flipTriggerIn().negate()).whileTrue(
-        //         Commands.parallel(
-        //                 shooterTilt.moveToArbitraryPositionCommand(() -> DEMO_ANGLE.get()).asProxy(),
-        //                 shooter.spinAtVelocityCommand(() -> DEMO_RPS.get()).asProxy()));
+        joystick.triggerSoftPress().and(joystick.flipTriggerIn().negate()).whileTrue(
+                Commands.parallel(
+                        shooterTilt.moveToArbitraryPositionCommand(() -> DEMO_ANGLE.get()).asProxy(),
+                        shooter.spinAtVelocityCommand(() -> DEMO_RPS.get()).asProxy()));
         // joystick.triggerHardPress().and(joystick.flipTriggerIn().negate()).whileTrue(intake.runRollersCommand());
 
         // joystick.flipTriggerIn().and(joystick.triggerSoftPress()).whileTrue(
