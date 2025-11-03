@@ -39,6 +39,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.GlobalStates;
+import frc.robot.subsystems.Intake.Constants.IntakePosition;
+
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
@@ -61,7 +63,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
         public static enum IntakePosition {
             GROUND(-0.617905),
             AMP(1.18),
-            STOW(0.984),
+            STOW(1.73),
             SOURCE(1.44),
             TOP(1.691);
 
@@ -93,7 +95,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
         public static final double MAX_ANGLE_RADIANS = 1.691;
 
         public static final double ENCODER_ROTATIONS_TO_RADIANS = 2 * Math.PI / GEARING;
-        public static final int ARM_CURRENT_LIMIT = 30;
+        public static final int ARM_CURRENT_LIMIT = 40;
         public static final int ROLLER_CURRENT_LIMIT = 65;
 
         // 3/28/24
@@ -215,7 +217,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
         leftArmMotorConfig
             .inverted(INVERTED)
             .idleMode(IdleMode.kBrake)
-            .smartCurrentLimit(ARM_CURRENT_LIMIT)
+            .smartCurrentLimit(30)
             .encoder
                 .positionConversionFactor(ENCODER_ROTATIONS_TO_RADIANS)
                 .velocityConversionFactor(ENCODER_ROTATIONS_TO_RADIANS / 60.0);
@@ -223,10 +225,9 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
 
         rightArmMotor = new SparkFlex(SECONDARY_ARM_MOTOR_ID, MotorType.kBrushless);
         rightArmMotorConfig
-            .inverted(INVERTED)
+            .inverted(false)
             .idleMode(IdleMode.kBrake)
-            .smartCurrentLimit(ARM_CURRENT_LIMIT)
-            .follow(leftArmMotor, INVERTED);
+            .smartCurrentLimit(40);
 
         rollerMotor = new SparkFlex(ROLLER_MOTOR_ID, MotorType.kBrushless);
         rollerMotorConfig
@@ -328,6 +329,7 @@ public class Intake extends SubsystemBase implements BaseSingleJointedArm<Intake
             voltage = 0.0;
         }
         leftArmMotor.setVoltage(voltage);
+        rightArmMotor.setVoltage(voltage);
     }
 
     public void setRollerVoltage(double voltage) {
